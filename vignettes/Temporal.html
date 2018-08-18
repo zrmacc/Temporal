@@ -204,7 +204,7 @@ M =<span class="st"> </span><span class="kw">fitParaSurv</span>(<span class="dt"
 <p><span class="math display">\[
 f(t) = \alpha\lambda(\lambda t)^{\alpha-1}e^{-(\lambda t)^{\alpha}},\ t&gt;0
 \]</span></p>
-<p>In the following, <span class="math inline">\(n=10^{3}\)</span> Weibull event times are simulated, with shape <span class="math inline">\(\alpha=2\)</span>, rate <span class="math inline">\(\lambda=2\)</span>, and expected censoring proportion <span class="math inline">\(20\)</span>%. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;&quot;</code>.</p>
+<p>In the following, <span class="math inline">\(n=10^{3}\)</span> Weibull event times are simulated, with shape <span class="math inline">\(\alpha=2\)</span>, rate <span class="math inline">\(\lambda=2\)</span>, and expected censoring proportion <span class="math inline">\(20\)</span>%. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;weibull&quot;</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Generate Weibull time to event data</span>
 D =<span class="st"> </span><span class="kw">rWeibull</span>(<span class="dt">n=</span><span class="fl">1e3</span>,<span class="dt">a=</span><span class="dv">2</span>,<span class="dt">l=</span><span class="dv">2</span>,<span class="dt">p=</span><span class="fl">0.2</span>);
 <span class="co"># Estimate rate</span>

@@ -177,7 +177,7 @@ $$
 f(t) = \alpha\lambda(\lambda t)^{\alpha-1}e^{-(\lambda t)^{\alpha}},\ t>0
 $$
 
-In the following, $n=10^{3}$ Weibull event times are simulated, with shape $\alpha=2$, rate $\lambda=2$, and expected censoring proportion $20$%. Generative parameters are recovered using `fitParaSurv` with `dist=""`. 
+In the following, $n=10^{3}$ Weibull event times are simulated, with shape $\alpha=2$, rate $\lambda=2$, and expected censoring proportion $20$%. Generative parameters are recovered using `fitParaSurv` with `dist="weibull"`. 
 
 
 ```r

@@ -259,7 +259,7 @@ show(M);</code></pre>
 <p><span class="math display">\[
 f(t) = \alpha\lambda(\lambda t)^{\alpha-1}e^{-(\lambda t)^{\alpha}},\ t&gt;0
 \]</span></p>
-<p>In the following, <span class="math inline">\(n=10^{3}\)</span> Weibull event times are simulated, with shape <span class="math inline">\(\alpha=2\)</span>, rate <span class="math inline">\(\lambda=2\)</span>, and expected censoring proportion <span class="math inline">\(20\)</span>%. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;&quot;</code>.</p>
+<p>In the following, <span class="math inline">\(n=10^{3}\)</span> Weibull event times are simulated, with shape <span class="math inline">\(\alpha=2\)</span>, rate <span class="math inline">\(\lambda=2\)</span>, and expected censoring proportion <span class="math inline">\(20\)</span>%. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;weibull&quot;</code>.</p>
 <pre class="r"><code># Generate Weibull time to event data
 D = rWeibull(n=1e3,a=2,l=2,p=0.2);
 # Estimate rate
