@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Zachary McCaw" />
+
+<meta name="date" content="2018-08-18" />
+
+<title>Parametric Survival Analysis</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Parametric Survival Analysis</h1>
+<h4 class="author"><em>Zachary McCaw</em></h4>
+<h4 class="date"><em>2018-08-18</em></h4>
+
+
+
+<div id="contents" class="section level1">
+<h1>Contents</h1>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#simulation">Simulation</a></li>
+<li><a href="#estimation">Estimation</a></li>
+<li><a href="#group-contrasts">Group Contrasts</a></li>
+</ul>
+</div>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p>This package performs estimation and inference on parametric survival curves. Supported distributions include the exponential, gamma, log-logistic, log-normal, and Weibull. Data are expected in time-to-event format, with a status indicator to accommodate non-informative right censoring. The function <code>fitParaSurv</code> provides maximum likelihood point estimates (MLEs) and confidence intervals (CIs) for the distribution of interest. Estimates are presented for model parameters, and for characteristics of the event time distribution (the mean, median, and variance). The function <code>compParaSurv</code> compares the fitted survival distributions of two treatment groups. The groups are contrasted using the difference and ratio of means and medians. For each contrast, point estimates and CIs are presented. <em>p</em>-values are calculated assessing the null hypothesis of no difference between the treatment groups.</p>
+</div>
+<div id="setting" class="section level2">
+<h2>Setting</h2>
+<p>Suppose the data consist of pairs <span class="math inline">\((U_{i},\delta_{i})\)</span>, where the observation time <span class="math inline">\(U_{i} = \min(T_{i},C_{i})\)</span> is the minimum of the event time <span class="math inline">\(T_{i}\)</span> and a non-informative censoring time <span class="math inline">\(C_{i}\)</span>. The status <span class="math inline">\(\delta_{i}=I[T_{i}\leq C_{i}]\)</span> is an indicator that an event was observed. The event times <span class="math inline">\(T_{i}\)</span> are assumed to follow a survival distribution <span class="math inline">\(S_{T}\)</span> parameterized by <span class="math inline">\(\theta\)</span>. The distribution of censoring times <span class="math inline">\(C_{i}\)</span> is left unspecified. Estimation of <span class="math inline">\(\theta\)</span> proceeds by maximizing the right-censored log likelihood <span class="math inline">\(\ell(\theta) = \sum_{i=1}^{n}\delta_{i}\ln h_{i} + \ln S_{i}\)</span>. Here <span class="math inline">\(S_{i}\)</span> and <span class="math inline">\(h_{i}\)</span> denote the survival and hazard contributions of the <span class="math inline">\(i\)</span>th subject. The asymptotic covariance of the MLE <span class="math inline">\(\hat{\theta}\)</span> is estimated using the (inverse) observed information. Standard errors for functions of the MLE are derived from the <span class="math inline">\(\Delta\)</span>-method.</p>
+</div>
+</div>
+<div id="estimation" class="section level1">
+<h1>Estimation</h1>
+<div id="fit" class="section level2">
+<h2>Overview</h2>
+<p>The function <code>fitParaSurv</code> requires observation times <code>time</code> and the status indicator <code>status</code> as input. <code>status</code> is coded as 1 if an event was observed, and as 0 if censored. The distribution of interest is specified using <code>dist</code>, which defaults to Weibull. The output is an object of class <code>fit</code>. The slot <code>fit@Parameters</code> contains the parameter estimates and CIs. The slot <code>fit@Information</code> contains the observed sample information matrix. The slot <code>fit@Outcome</code> contains characteristics of the fitted event time distribution. Functions are presented below for simulating event times from the gamma, log-logistic, log-normal, and Weibull distributions. If an expected censoring proportion <code>p</code> is provided, the event time are subject to non-informative random right censoring.</p>
+</div>
+<div id="exponential" class="section level2">
+<h2>Exponential</h2>
+<p>The exponential distribution is parameterized in terms of the rate <span class="math inline">\(\lambda\)</span>. The density is:</p>
+<p><span class="math display">\[
+f(t) = \lambda e^{-\lambda t},\ t&gt;0
+\]</span></p>
+<p>Exponential event times may be simulated using the <code>rWeibull</code> function with the shape parameter <span class="math inline">\(\alpha=1\)</span>. In the following, <span class="math inline">\(n=10^{3}\)</span> exponential event times are simulated, with rate <span class="math inline">\(\lambda=2\)</span> and expected censoring proportion <span class="math inline">\(20\%\)</span>. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;exp&quot;</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Generate exponential time to event data</span>
+D =<span class="st"> </span><span class="kw">rWeibull</span>(<span class="dt">n=</span><span class="fl">1e3</span>,<span class="dt">a=</span><span class="dv">1</span>,<span class="dt">l=</span><span class="dv">2</span>,<span class="dt">p=</span><span class="fl">0.2</span>);
+<span class="co"># Estimate rate</span>
+M =<span class="st"> </span><span class="kw">fitParaSurv</span>(<span class="dt">time=</span>D$time,<span class="dt">status=</span>D$status,<span class="dt">dist=</span><span class="st">&quot;exp&quot;</span>);
+<span class="kw">show</span>(M);</code></pre></div>
+<pre><code>## Fitted Exponential Distribution. 
+## Estimated Parameters:
+##   Aspect Estimate     SE    L    U
+## 1   Rate     1.92 0.0687 1.78 2.05
+## 
+## Distribution Properties:
+##     Aspect Estimate     SE     L     U
+## 1     Mean    0.522 0.0187 0.485 0.558
+## 2   Median    0.361 0.0129 0.336 0.387
+## 3 Variance    0.272 0.0195 0.234 0.310</code></pre>
+</div>
+<div id="gamma" class="section level2">
+<h2>Gamma</h2>
+<p>The gamma distribution is parameterized in terms of the shape <span class="math inline">\(\alpha\)</span> and rate <span class="math inline">\(\lambda\)</span>. The density is:</p>
+<p><span class="math display">\[
+f(t) = \frac{\lambda}{\Gamma(\alpha)}(\lambda t)^{\alpha-1}e^{-\lambda t},\ t&gt;0
+\]</span></p>
+<p>In the following, <span class="math inline">\(n=10^{3}\)</span> gamma event times are simulated, with shape <span class="math inline">\(\alpha=2\)</span>, rate <span class="math inline">\(\lambda=2\)</span>, and expected censoring proportion <span class="math inline">\(20\%\)</span>. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;gamma&quot;</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Generate gamma time to event data</span>
+D =<span class="st"> </span><span class="kw">rGamma</span>(<span class="dt">n=</span><span class="fl">1e3</span>,<span class="dt">a=</span><span class="dv">2</span>,<span class="dt">l=</span><span class="dv">2</span>,<span class="dt">p=</span><span class="fl">0.2</span>);
+<span class="co"># Estimate rate</span>
+M =<span class="st"> </span><span class="kw">fitParaSurv</span>(<span class="dt">time=</span>D$time,<span class="dt">status=</span>D$status,<span class="dt">dist=</span><span class="st">&quot;gamma&quot;</span>);
+<span class="kw">show</span>(M);</code></pre></div>
+<pre><code>## 4 update(s) performed before tolerance limit. 
+## Fitted Gamma Distribution. 
+## Estimated Parameters:
+##   Aspect Estimate     SE    L    U
+## 1  Shape     1.94 0.0869 1.77 2.11
+## 2   Rate     1.93 0.1050 1.73 2.14
+## 
+## Distribution Properties:
+##     Aspect Estimate     SE     L     U
+## 1     Mean    1.000 0.0254 0.952 1.050
+## 2   Median    0.835 0.0215 0.793 0.878
+## 3 Variance    0.518 0.0372 0.445 0.591</code></pre>
+</div>
+<div id="log-logistic" class="section level2">
+<h2>Log-Logistic</h2>
+<p>The log-logistic distribution is parameterized in terms of the shape <span class="math inline">\(\alpha\)</span> and rate <span class="math inline">\(\lambda\)</span>. The density is:</p>
+<p><span class="math display">\[
+f(t) = \frac{\alpha\lambda(\lambda t)^{\alpha-1}}{[1+(\lambda t)^{\alpha}]^{2}},\ t&gt;0
+\]</span></p>
+<p>In the following, <span class="math inline">\(n=10^{3}\)</span> log-logistic event times are simulated, with shape <span class="math inline">\(\alpha=4\)</span>, rate <span class="math inline">\(\lambda=2\)</span>, and expected censoring proportion <span class="math inline">\(20\%\)</span>. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;log-logistic&quot;</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Generate log-logistic time to event data</span>
+D =<span class="st"> </span><span class="kw">rLogLogistic</span>(<span class="dt">n=</span><span class="fl">1e3</span>,<span class="dt">a=</span><span class="dv">4</span>,<span class="dt">l=</span><span class="dv">2</span>,<span class="dt">p=</span><span class="fl">0.2</span>);
+<span class="co"># Estimate rate</span>
+M =<span class="st"> </span><span class="kw">fitParaSurv</span>(<span class="dt">time=</span>D$time,<span class="dt">status=</span>D$status,<span class="dt">dist=</span><span class="st">&quot;log-logistic&quot;</span>);
+<span class="kw">show</span>(M);</code></pre></div>
+<pre><code>## 3 update(s) performed before tolerance limit. 
+## Fitted Log-Logistic Distribution. 
+## Estimated Parameters:
+##   Aspect Estimate     SE    L    U
+## 1  Shape     4.24 0.1240 4.00 4.48
+## 2   Rate     2.00 0.0266 1.95 2.05
+## 
+## Distribution Properties:
+##     Aspect Estimate      SE      L      U
+## 1     Mean   0.5490 0.00808 0.5330 0.5650
+## 2   Median   0.5000 0.00665 0.4870 0.5130
+## 3 Variance   0.0706 0.00648 0.0579 0.0833</code></pre>
+</div>
+<div id="log-normal" class="section level2">
+<h2>Log-Normal</h2>
+<p>The log-normal distribution is parameterized in terms of the location <span class="math inline">\(\mu\)</span> and scale <span class="math inline">\(\sigma\)</span>. The density is:</p>
+<p><span class="math display">\[
+f(t) = \frac{1}{t\sigma\sqrt{2\pi}}e^{-\frac{(\ln t-\mu)^2}{2\sigma^2}},\ t&gt;0
+\]</span></p>
+<p>In the following, <span class="math inline">\(n=10^{3}\)</span> log-normal event times are simulated, with location <span class="math inline">\(\mu=1\)</span>, scale <span class="math inline">\(\sigma=2\)</span>, and expected censoring proportion <span class="math inline">\(20\%\)</span>. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;log-normal&quot;</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Generate log-normal time to event data</span>
+D =<span class="st"> </span><span class="kw">rLogNormal</span>(<span class="dt">n=</span><span class="fl">1e3</span>,<span class="dt">m=</span><span class="dv">1</span>,<span class="dt">s=</span><span class="dv">2</span>,<span class="dt">p=</span><span class="fl">0.2</span>)
+<span class="co"># Estimate rate</span>
+M =<span class="st"> </span><span class="kw">fitParaSurv</span>(<span class="dt">time=</span>D$time,<span class="dt">status=</span>D$status,<span class="dt">dist=</span><span class="st">&quot;log-normal&quot;</span>);
+<span class="kw">show</span>(M);</code></pre></div>
+<pre><code>## 4 update(s) performed before tolerance limit. 
+## Fitted Log-Normal Distribution. 
+## Estimated Parameters:
+##     Aspect Estimate     SE     L    U
+## 1 Location    0.954 0.0663 0.824 1.08
+## 2    Scale    2.010 0.0509 1.910 2.11
+## 
+## Distribution Properties:
+##     Aspect Estimate      SE        L        U
+## 1     Mean     19.7    2.54 1.48e+01    24.70
+## 2   Median      2.6    1.31 2.73e-02     5.16
+## 3 Variance  22200.0 9970.00 2.65e+03 41700.00</code></pre>
+</div>
+<div id="weibull" class="section level2">
+<h2>Weibull</h2>
+<p>The Weibull distribution is parameterized in terms of the shape <span class="math inline">\(\alpha\)</span> and rate <span class="math inline">\(\lambda\)</span>. The density is:</p>
+<p><span class="math display">\[
+f(t) = \alpha\lambda(\lambda t)^{\alpha-1}e^{-(\lambda t)^{\alpha}},\ t&gt;0
+\]</span></p>
+<p>In the following, <span class="math inline">\(n=10^{3}\)</span> Weibull event times are simulated, with shape <span class="math inline">\(\alpha=2\)</span>, rate <span class="math inline">\(\lambda=2\)</span>, and expected censoring proportion <span class="math inline">\(20\%\)</span>. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;&quot;</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Generate Weibull time to event data</span>
+D =<span class="st"> </span><span class="kw">rWeibull</span>(<span class="dt">n=</span><span class="fl">1e3</span>,<span class="dt">a=</span><span class="dv">2</span>,<span class="dt">l=</span><span class="dv">2</span>,<span class="dt">p=</span><span class="fl">0.2</span>);
+<span class="co"># Estimate rate</span>
+M =<span class="st"> </span><span class="kw">fitParaSurv</span>(<span class="dt">time=</span>D$time,<span class="dt">status=</span>D$status,<span class="dt">dist=</span><span class="st">&quot;weibull&quot;</span>);
+<span class="kw">show</span>(M);</code></pre></div>
+<pre><code>## Fitted Weibull Distribution. 
+## Estimated Parameters:
+##   Aspect Estimate     SE    L    U
+## 1  Shape     1.91 0.0531 1.81 2.02
+## 2   Rate     2.01 0.0374 1.93 2.08
+## 
+## Distribution Properties:
+##     Aspect Estimate      SE      L      U
+## 1     Mean   0.4420 0.00815 0.4260 0.4580
+## 2   Median   0.4110 0.00828 0.3950 0.4280
+## 3 Variance   0.0578 0.00341 0.0511 0.0645</code></pre>
+</div>
+</div>
+<div id="group-contrasts" class="section level1">
+<h1>Group Contrasts</h1>
+<div id="overview-1" class="section level2">
+<h2>Overview</h2>
+<p>The function <code>compParaSurv</code> takes observation time <code>time</code>, the status indicator <code>status</code>, and the treatment group <code>arm</code> as inputs. <code>arm</code> is coded as 1 for the target group, and 0 for the reference group. The distributions for the target and reference groups are selected using <code>dist1</code> and <code>dist0</code>, respectively. By default, the Weibull is adopted for both groups. The output is an object of class <code>contrast</code>. The slots <code>contrast@Model1</code> and <code>contrast@Model2</code> contain the fitted models for the target and reference groups. See <a href="#fit">fit</a> for a description of class <code>fit</code> objects. The slot <code>contrast@Contrast</code> contains the estimated contrasts, CIs, and <em>p</em>-values.</p>
+</div>
+<div id="examples" class="section level2">
+<h2>Examples</h2>
+<div id="comparison-of-distinct-gammas" class="section level3">
+<h3>Comparison of Distinct Gammas</h3>
+<p>In the first example, the target group consists of <span class="math inline">\(10^{2}\)</span> observations from the gamma distribution, with shape <span class="math inline">\(\alpha=2\)</span> and rate <span class="math inline">\(\lambda=1\)</span>. The reference group consists of <span class="math inline">\(10^{2}\)</span> observations from the gamma distribution, with the same shape (<span class="math inline">\(\alpha=2\)</span>) but rate <span class="math inline">\(\lambda=2\)</span>. In each case the expected censoring proportion is <span class="math inline">\(20\%\)</span>. The true difference of mean survival times is <span class="math inline">\(0.5\)</span>, and the true ratio is <span class="math inline">\(2.0\)</span>. The true difference of median survival times is <span class="math inline">\(0.42\)</span>, and the true ratio is <span class="math inline">\(2\)</span>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Target group</span>
+D1 =<span class="st"> </span><span class="kw">rGamma</span>(<span class="dt">n=</span><span class="fl">1e2</span>,<span class="dt">a=</span><span class="dv">2</span>,<span class="dt">l=</span><span class="dv">2</span>,<span class="dt">p=</span><span class="fl">0.2</span>);
+D1$arm =<span class="st"> </span><span class="dv">1</span>;
+<span class="co"># Reference group </span>
+D0 =<span class="st"> </span><span class="kw">rGamma</span>(<span class="dt">n=</span><span class="fl">1e2</span>,<span class="dt">a=</span><span class="dv">2</span>,<span class="dt">l=</span><span class="dv">4</span>,<span class="dt">p=</span><span class="fl">0.2</span>);
+D0$arm =<span class="st"> </span><span class="dv">0</span>;
+<span class="co"># Overall data </span>
+D =<span class="st"> </span><span class="kw">rbind</span>(D1,D0);
+<span class="co"># Comparison</span>
+E =<span class="st"> </span><span class="kw">compParaSurv</span>(<span class="dt">time=</span>D$time,<span class="dt">status=</span>D$status,<span class="dt">arm=</span>D$arm,<span class="dt">dist1=</span><span class="st">&quot;gamma&quot;</span>,<span class="dt">dist0=</span><span class="st">&quot;gamma&quot;</span>);
+<span class="kw">cat</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>);
+<span class="kw">show</span>(E);</code></pre></div>
+<pre><code>## 4 update(s) performed before tolerance limit. 
+## 5 update(s) performed before tolerance limit. 
+## 
+## Contrast of Fitted Gamma Distributions. 
+## 
+## Fitted Characteristics for Group 1:
+##     Aspect Estimate     SE     L     U
+## 1     Mean    0.926 0.0808 0.768 1.080
+## 2   Median    0.763 0.0666 0.633 0.894
+## 3 Variance    0.471 0.1160 0.244 0.698
+## 
+## Fitted Characteristics for Group 0:
+##     Aspect Estimate     SE     L     U
+## 1     Mean    0.535 0.0390 0.459 0.612
+## 2   Median    0.466 0.0342 0.399 0.533
+## 3 Variance    0.114 0.0252 0.065 0.164
+## 
+## Contrasts:
+##      Contrast Point     SE     L     U        p
+## 1 Mean1-Mean0 0.391 0.0897 0.215 0.567 1.32e-05
+## 2   Med1-Med0 0.297 0.0748 0.150 0.444 7.23e-05
+## 3 Mean1/Mean0 1.730 0.1970 1.380 2.160 1.41e-06
+## 4   Med1/Med0 1.640 0.1870 1.310 2.050 1.53e-05</code></pre>
+</div>
+<div id="comparison-of-equivalent-weibulls" class="section level3">
+<h3>Comparison of Equivalent Weibulls</h3>
+<p>In this example, both the target and reference groups each consist of <span class="math inline">\(10^{2}\)</span> observations from the Weibull distribution with shape <span class="math inline">\(\alpha=2\)</span> and rate <span class="math inline">\(\lambda=2\)</span>. However, the target group is subject to <span class="math inline">\(50\%\)</span> censoring, while the reference group is uncensored. The true difference in means and medians is <span class="math inline">\(0.0\)</span>. The true ratio of means and medians is <span class="math inline">\(1.0\)</span>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Target group</span>
+D1 =<span class="st"> </span><span class="kw">rWeibull</span>(<span class="dt">n=</span><span class="fl">1e2</span>,<span class="dt">a=</span><span class="dv">2</span>,<span class="dt">l=</span><span class="dv">2</span>,<span class="dt">p=</span><span class="fl">0.5</span>);
+D1$arm =<span class="st"> </span><span class="dv">1</span>;
+<span class="co"># Reference group</span>
+D0 =<span class="st"> </span><span class="kw">rWeibull</span>(<span class="dt">n=</span><span class="fl">1e2</span>,<span class="dt">a=</span><span class="dv">2</span>,<span class="dt">l=</span><span class="dv">2</span>,<span class="dt">p=</span><span class="fl">0.0</span>);
+D0$arm =<span class="st"> </span><span class="dv">0</span>;
+<span class="co"># Overall data</span>
+D =<span class="st"> </span><span class="kw">rbind</span>(D1,D0);
+<span class="co"># Comparison</span>
+E =<span class="st"> </span><span class="kw">compParaSurv</span>(<span class="dt">time=</span>D$time,<span class="dt">status=</span>D$status,<span class="dt">arm=</span>D$arm,<span class="dt">dist1=</span><span class="st">&quot;weibull&quot;</span>,<span class="dt">dist0=</span><span class="st">&quot;weibull&quot;</span>);
+<span class="kw">cat</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>);
+<span class="kw">show</span>(E);</code></pre></div>
+<pre><code>## 
+## Contrast of Fitted Weibull Distributions. 
+## 
+## Fitted Characteristics for Group 1:
+##     Aspect Estimate     SE      L      U
+## 1     Mean   0.4310 0.0328 0.3670 0.4950
+## 2   Median   0.3990 0.0295 0.3410 0.4570
+## 3 Variance   0.0571 0.0153 0.0271 0.0872
+## 
+## Fitted Characteristics for Group 0:
+##     Aspect Estimate      SE      L      U
+## 1     Mean   0.4000 0.02210 0.3570 0.4430
+## 2   Median   0.3690 0.02340 0.3230 0.4150
+## 3 Variance   0.0505 0.00784 0.0351 0.0659
+## 
+## Contrasts:
+##      Contrast Point     SE       L     U     p
+## 1 Mean1-Mean0 0.031 0.0395 -0.0464 0.108 0.432
+## 2   Med1-Med0 0.030 0.0376 -0.0437 0.104 0.425
+## 3 Mean1/Mean0 1.080 0.1010  0.8960 1.300 0.426
+## 4   Med1/Med0 1.080 0.1050  0.8940 1.310 0.422</code></pre>
+</div>
+<div id="log-logistic-v.-gamma-same-means-different-medians" class="section level3">
+<h3>Log-Logistic v. Gamma, Same Means, Different Medians</h3>
+<p>In this example, the target group consists of <span class="math inline">\(10^{2}\)</span> observations from the log-logistic distribution with shape <span class="math inline">\(\alpha=4\)</span> and rate <span class="math inline">\(\lambda=\pi/(2\sqrt{2})\)</span>. The reference group consists of <span class="math inline">\(10^{2}\)</span> observations from the gamma distribution with shape <span class="math inline">\(\alpha=1/2\)</span> and rate <span class="math inline">\(\lambda=1/2\)</span>. In each case the expected censoring proportion is <span class="math inline">\(20\%\)</span>. The true difference of mean survival times is <span class="math inline">\(0.0\)</span>, and the true ratio is <span class="math inline">\(1.0\)</span>. The true difference of median survival times is <span class="math inline">\(0.45\)</span>, and the true ratio is <span class="math inline">\(1.98\)</span>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Target group</span>
+D1 =<span class="st"> </span><span class="kw">rLogLogistic</span>(<span class="dt">n=</span><span class="fl">1e2</span>,<span class="dt">a=</span><span class="dv">4</span>,<span class="dt">l=</span>pi/(<span class="dv">2</span>*<span class="kw">sqrt</span>(<span class="dv">2</span>)),<span class="dt">p=</span><span class="fl">0.2</span>);
+D1$arm =<span class="st"> </span><span class="dv">1</span>;
+<span class="co"># Reference group</span>
+D0 =<span class="st"> </span><span class="kw">rGamma</span>(<span class="dt">n=</span><span class="fl">1e2</span>,<span class="dt">a=</span>(<span class="dv">1</span>/<span class="dv">2</span>),<span class="dt">l=</span>(<span class="dv">1</span>/<span class="dv">2</span>),<span class="dt">p=</span><span class="fl">0.2</span>);
+D0$arm =<span class="st"> </span><span class="dv">0</span>;
+<span class="co"># Overall data</span>
+D =<span class="st"> </span><span class="kw">rbind</span>(D1,D0);
+<span class="co"># Comparison</span>
+E =<span class="st"> </span><span class="kw">compParaSurv</span>(<span class="dt">time=</span>D$time,<span class="dt">status=</span>D$status,<span class="dt">arm=</span>D$arm,<span class="dt">dist1=</span><span class="st">&quot;log-logistic&quot;</span>,<span class="dt">dist0=</span><span class="st">&quot;gamma&quot;</span>);
+<span class="kw">cat</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>);
+<span class="kw">show</span>(E);</code></pre></div>
+<pre><code>## 5 update(s) performed before tolerance limit. 
+## 3 update(s) performed before tolerance limit. 
+## 
+## Contrast of Fitted Log-Logistic v. Gamma 
+## 
+## Fitted Characteristics for Group 1:
+##     Aspect Estimate     SE     L     U
+## 1     Mean    1.030 0.0543 0.928 1.140
+## 2   Median    0.930 0.0428 0.846 1.010
+## 3 Variance    0.297 0.0956 0.110 0.485
+## 
+## Fitted Characteristics for Group 0:
+##     Aspect Estimate     SE     L     U
+## 1     Mean    0.950 0.1480 0.660 1.240
+## 2   Median    0.459 0.0796 0.303 0.615
+## 3 Variance    1.680 0.5910 0.527 2.840
+## 
+## Contrasts:
+##      Contrast  Point     SE      L     U        p
+## 1 Mean1-Mean0 0.0842 0.1580 -0.225 0.393 5.93e-01
+## 2   Med1-Med0 0.4710 0.0904  0.294 0.648 1.85e-07
+## 3 Mean1/Mean0 1.0900 0.1790  0.789 1.500 6.06e-01
+## 4   Med1/Med0 2.0300 0.3640  1.430 2.880 8.27e-05</code></pre>
+</div>
+<div id="log-normal-v.-exponential-different-means-same-medians" class="section level3">
+<h3>Log-Normal v. Exponential, Different Means, Same Medians</h3>
+<p>In this example, the target group consists of <span class="math inline">\(10^{2}\)</span> observations from the log-normal distribution with location <span class="math inline">\(\mu=0\)</span> and scale <span class="math inline">\(\sigma=\sqrt{2\ln2}\)</span>. The reference group consists of <span class="math inline">\(10^{2}\)</span> observations from the exponential distribution with rate <span class="math inline">\(\lambda=1\)</span>. In each case the expected censoring proportion is <span class="math inline">\(20\%\)</span>. The true difference of mean survival times is <span class="math inline">\(1.0\)</span>, and the true ratio is <span class="math inline">\(2.0\)</span>. The true difference of median survival times is <span class="math inline">\(0.0\)</span>, and the true ratio is <span class="math inline">\(1.0\)</span>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Target group</span>
+D1 =<span class="st"> </span><span class="kw">rLogNormal</span>(<span class="dt">n=</span><span class="fl">1e2</span>,<span class="dt">m=</span><span class="dv">0</span>,<span class="dt">s=</span><span class="kw">sqrt</span>(<span class="dv">2</span>*<span class="kw">log</span>(<span class="dv">2</span>)),<span class="dt">p=</span><span class="fl">0.2</span>);
+D1$arm =<span class="st"> </span><span class="dv">1</span>;
+<span class="co"># Reference group</span>
+D0 =<span class="st"> </span><span class="kw">rWeibull</span>(<span class="dt">n=</span><span class="fl">1e2</span>,<span class="dt">a=</span><span class="dv">1</span>,<span class="dt">l=</span><span class="dv">1</span>,<span class="dt">p=</span><span class="fl">0.2</span>);
+D0$arm =<span class="st"> </span><span class="dv">0</span>;
+<span class="co"># Overall data</span>
+D =<span class="st"> </span><span class="kw">rbind</span>(D1,D0);
+<span class="co"># Comparison</span>
+E =<span class="st"> </span><span class="kw">compParaSurv</span>(<span class="dt">time=</span>D$time,<span class="dt">status=</span>D$status,<span class="dt">arm=</span>D$arm,<span class="dt">dist1=</span><span class="st">&quot;log-normal&quot;</span>,<span class="dt">dist0=</span><span class="st">&quot;exp&quot;</span>);
+<span class="kw">cat</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>);
+<span class="kw">show</span>(E);</code></pre></div>
+<pre><code>## 3 update(s) performed before tolerance limit. 
+## 
+## Contrast of Fitted Log-Normal v. Exponential 
+## 
+## Fitted Characteristics for Group 1:
+##     Aspect Estimate    SE      L     U
+## 1     Mean    1.580 0.239  1.110  2.04
+## 2   Median    0.899 0.175  0.557  1.24
+## 3 Variance    5.160 2.700 -0.136 10.50
+## 
+## Fitted Characteristics for Group 0:
+##     Aspect Estimate     SE     L     U
+## 1     Mean    1.010 0.1080 0.801 1.220
+## 2   Median    0.702 0.0748 0.555 0.848
+## 3 Variance    1.020 0.2180 0.596 1.450
+## 
+## Contrasts:
+##      Contrast Point    SE       L    U      p
+## 1 Mean1-Mean0 0.565 0.262  0.0516 1.08 0.0310
+## 2   Med1-Med0 0.198 0.190 -0.1750 0.57 0.2980
+## 3 Mean1/Mean0 1.560 0.288  1.0800 2.24 0.0166
+## 4   Med1/Med0 1.280 0.284  0.8300 1.98 0.2630</code></pre>
+</div>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

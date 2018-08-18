@@ -1,0 +1,23 @@
+Package: Temporal
+Title: Parametric Time to Event Analysis
+Version: 0.1.0
+Authors@R: person("Zachary", "McCaw", email = "zmccaw@g.harvard.edu", role = c("aut", "cre"))
+Description: Provides functions for estimation and inference on parametric time to event distributions, possibly subject to non-informative right censoring. 
+Depends: R (>= 3.4.3)
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+LinkingTo:
+	Rcpp,
+	RcppEigen
+Imports:
+	expint,
+	methods,
+	numDeriv,
+	plyr, 
+	Rcpp,
+	stats
+RoxygenNote: 6.0.1
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr

@@ -1,0 +1,213 @@
+---
+title: "Parametric Survival Analysis"
+author: "Zachary McCaw"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Temporal}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=2*3, fig.height=2*2, fig.align="center", fig.path='Figs/',echo=T, warning=F, message=F, cache=F, results='hold');
+library(Temporal);
+set.seed(101);
+```
+
+# Contents
+
+* [Introduction](#introduction)
+* [Simulation](#simulation)
+* [Estimation](#estimation)
+* [Group Contrasts](#group-contrasts)
+
+# Introduction
+
+## Overview
+
+This package performs estimation and inference on parametric survival curves. Supported distributions include the exponential, gamma, log-logistic, log-normal, and Weibull. Data are expected in time-to-event format, with a status indicator to accommodate non-informative right censoring. The function `fitParaSurv` provides maximum likelihood point estimates (MLEs) and confidence intervals (CIs) for the distribution of interest. Estimates are presented for model parameters, and for characteristics of the event time distribution (the mean, median, and variance). The function `compParaSurv` compares the fitted survival distributions of two treatment groups. The groups are contrasted using the difference and ratio of means and medians. For each contrast, point estimates and CIs are presented. *p*-values are calculated assessing the null hypothesis of no difference between the treatment groups. 
+
+## Setting
+
+Suppose the data consist of pairs $(U_{i},\delta_{i})$, where the observation time $U_{i} = \min(T_{i},C_{i})$ is the minimum of the event time $T_{i}$ and a non-informative censoring time $C_{i}$. The status $\delta_{i}=I[T_{i}\leq C_{i}]$ is an indicator that an event was observed. The event times $T_{i}$ are assumed to follow a survival distribution $S_{T}$ parameterized by $\theta$. The distribution of censoring times $C_{i}$ is left unspecified. Estimation of $\theta$ proceeds by maximizing the right-censored log likelihood $\ell(\theta) = \sum_{i=1}^{n}\delta_{i}\ln h_{i} + \ln S_{i}$. Here $S_{i}$ and $h_{i}$ denote the survival and hazard contributions of the $i$th subject. The asymptotic covariance of the MLE $\hat{\theta}$ is estimated using the (inverse) observed information. Standard errors for functions of the MLE are derived from the $\Delta$-method.
+
+# Estimation
+
+## Overview {#fit}
+
+The function `fitParaSurv` requires observation times `time` and the status indicator `status` as input. `status` is coded as 1 if an event was observed, and as 0 if censored. The distribution of interest is specified using `dist`, which defaults to Weibull. The output is an object of class `fit`. The slot `fit@Parameters` contains the parameter estimates and CIs. The slot `fit@Information` contains the observed sample information matrix. The slot `fit@Outcome` contains characteristics of the fitted event time distribution. Functions are presented below for simulating event times from the gamma, log-logistic, log-normal, and Weibull distributions. If an expected censoring proportion `p` is provided, the event time are subject to non-informative random right censoring. 
+
+## Exponential
+
+The exponential distribution is parameterized in terms of the rate $\lambda$. The density is:
+
+$$
+f(t) = \lambda e^{-\lambda t},\ t>0
+$$
+
+Exponential event times may be simulated using the `rWeibull` function with the shape parameter $\alpha=1$. In the following, $n=10^{3}$ exponential event times are simulated, with rate $\lambda=2$ and expected censoring proportion $20\%$. Generative parameters are recovered using `fitParaSurv` with `dist="exp"`. 
+
+```{r}
+# Generate exponential time to event data
+D = rWeibull(n=1e3,a=1,l=2,p=0.2);
+# Estimate rate
+M = fitParaSurv(time=D$time,status=D$status,dist="exp");
+show(M);
+```
+
+## Gamma 
+
+The gamma distribution is parameterized in terms of the shape $\alpha$ and rate $\lambda$. The density is:
+
+$$
+f(t) = \frac{\lambda}{\Gamma(\alpha)}(\lambda t)^{\alpha-1}e^{-\lambda t},\ t>0
+$$
+
+In the following, $n=10^{3}$ gamma event times are simulated, with shape $\alpha=2$, rate $\lambda=2$, and expected censoring proportion $20\%$. Generative parameters are recovered using `fitParaSurv` with `dist="gamma"`. 
+
+```{r}
+# Generate gamma time to event data
+D = rGamma(n=1e3,a=2,l=2,p=0.2);
+# Estimate rate
+M = fitParaSurv(time=D$time,status=D$status,dist="gamma");
+show(M);
+```
+
+## Log-Logistic
+
+The log-logistic distribution is parameterized in terms of the shape $\alpha$ and rate $\lambda$. The density is:
+
+$$
+f(t) = \frac{\alpha\lambda(\lambda t)^{\alpha-1}}{[1+(\lambda t)^{\alpha}]^{2}},\ t>0
+$$
+
+In the following, $n=10^{3}$ log-logistic event times are simulated, with shape $\alpha=4$, rate $\lambda=2$, and expected censoring proportion $20\%$. Generative parameters are recovered using `fitParaSurv` with `dist="log-logistic"`. 
+
+```{r}
+# Generate log-logistic time to event data
+D = rLogLogistic(n=1e3,a=4,l=2,p=0.2);
+# Estimate rate
+M = fitParaSurv(time=D$time,status=D$status,dist="log-logistic");
+show(M);
+```
+
+## Log-Normal
+
+The log-normal distribution is parameterized in terms of the location $\mu$ and scale $\sigma$. The density is:
+
+$$
+f(t) = \frac{1}{t\sigma\sqrt{2\pi}}e^{-\frac{(\ln t-\mu)^2}{2\sigma^2}},\ t>0
+$$
+
+In the following, $n=10^{3}$ log-normal event times are simulated, with location $\mu=1$, scale $\sigma=2$, and expected censoring proportion $20\%$. Generative parameters are recovered using `fitParaSurv` with `dist="log-normal"`. 
+
+```{r}
+# Generate log-normal time to event data
+D = rLogNormal(n=1e3,m=1,s=2,p=0.2)
+# Estimate rate
+M = fitParaSurv(time=D$time,status=D$status,dist="log-normal");
+show(M);
+```
+
+## Weibull
+
+The Weibull distribution is parameterized in terms of the shape $\alpha$ and rate $\lambda$. The density is:
+
+$$
+f(t) = \alpha\lambda(\lambda t)^{\alpha-1}e^{-(\lambda t)^{\alpha}},\ t>0
+$$
+
+In the following, $n=10^{3}$ Weibull event times are simulated, with shape $\alpha=2$, rate $\lambda=2$, and expected censoring proportion $20\%$. Generative parameters are recovered using `fitParaSurv` with `dist=""`. 
+
+```{r}
+# Generate Weibull time to event data
+D = rWeibull(n=1e3,a=2,l=2,p=0.2);
+# Estimate rate
+M = fitParaSurv(time=D$time,status=D$status,dist="weibull");
+show(M);
+```
+
+# Group Contrasts
+
+## Overview
+
+The function `compParaSurv` takes observation time `time`, the status indicator `status`, and the treatment group `arm` as inputs. `arm` is coded as 1 for the target group, and 0 for the reference group. The distributions for the target and reference groups are selected using `dist1` and `dist0`, respectively. By default, the Weibull is adopted for both groups. The output is an object of class `contrast`. The slots `contrast@Model1` and `contrast@Model2` contain the fitted models for the target and reference groups. See [fit](#fit) for a description of class `fit` objects. The slot `contrast@Contrast` contains the estimated contrasts, CIs, and *p*-values. 
+
+## Examples
+
+### Comparison of Distinct Gammas
+
+In the first example, the target group consists of $10^{2}$ observations from the gamma distribution, with shape $\alpha=2$ and rate $\lambda=1$. The reference group consists of $10^{2}$ observations from the gamma distribution, with the same shape ($\alpha=2$) but rate $\lambda=2$. In each case the expected censoring proportion is $20\%$. The true difference of mean survival times is $0.5$, and the true ratio is $2.0$. The true difference of median survival times is $0.42$, and the true ratio is $2$. 
+
+```{r}
+# Target group
+D1 = rGamma(n=1e2,a=2,l=2,p=0.2);
+D1$arm = 1;
+# Reference group 
+D0 = rGamma(n=1e2,a=2,l=4,p=0.2);
+D0$arm = 0;
+# Overall data 
+D = rbind(D1,D0);
+# Comparison
+E = compParaSurv(time=D$time,status=D$status,arm=D$arm,dist1="gamma",dist0="gamma");
+cat("\n");
+show(E);
+```
+
+### Comparison of Equivalent Weibulls
+
+In this example, both the target and reference groups each consist of $10^{2}$ observations from the Weibull distribution with shape $\alpha=2$ and rate $\lambda=2$. However, the target group is subject to $50\%$ censoring, while the reference group is uncensored. The true difference in means and medians is $0.0$. The true ratio of means and medians is $1.0$. 
+
+```{r}
+# Target group
+D1 = rWeibull(n=1e2,a=2,l=2,p=0.5);
+D1$arm = 1;
+# Reference group
+D0 = rWeibull(n=1e2,a=2,l=2,p=0.0);
+D0$arm = 0;
+# Overall data
+D = rbind(D1,D0);
+# Comparison
+E = compParaSurv(time=D$time,status=D$status,arm=D$arm,dist1="weibull",dist0="weibull");
+cat("\n");
+show(E);
+```
+
+### Log-Logistic v. Gamma, Same Means, Different Medians
+
+In this example, the target group consists of $10^{2}$ observations from the log-logistic distribution with shape $\alpha=4$ and rate $\lambda=\pi/(2\sqrt{2})$. The reference group consists of $10^{2}$ observations from the gamma distribution with shape $\alpha=1/2$ and rate $\lambda=1/2$. In each case the expected censoring proportion is $20\%$. The true difference of mean survival times is $0.0$, and the true ratio is $1.0$. The true difference of median survival times is $0.45$, and the true ratio is $1.98$. 
+
+```{r}
+# Target group
+D1 = rLogLogistic(n=1e2,a=4,l=pi/(2*sqrt(2)),p=0.2);
+D1$arm = 1;
+# Reference group
+D0 = rGamma(n=1e2,a=(1/2),l=(1/2),p=0.2);
+D0$arm = 0;
+# Overall data
+D = rbind(D1,D0);
+# Comparison
+E = compParaSurv(time=D$time,status=D$status,arm=D$arm,dist1="log-logistic",dist0="gamma");
+cat("\n");
+show(E);
+```
+
+### Log-Normal v. Exponential, Different Means, Same Medians
+
+In this example, the target group consists of $10^{2}$ observations from the log-normal distribution with location $\mu=0$ and scale $\sigma=\sqrt{2\ln2}$. The reference group consists of $10^{2}$ observations from the exponential distribution with rate $\lambda=1$. In each case the expected censoring proportion is $20\%$. The true difference of mean survival times is $1.0$, and the true ratio is $2.0$. The true difference of median survival times is $0.0$, and the true ratio is $1.0$. 
+
+```{r}
+# Target group
+D1 = rLogNormal(n=1e2,m=0,s=sqrt(2*log(2)),p=0.2);
+D1$arm = 1;
+# Reference group
+D0 = rWeibull(n=1e2,a=1,l=1,p=0.2);
+D0$arm = 0;
+# Overall data
+D = rbind(D1,D0);
+# Comparison
+E = compParaSurv(time=D$time,status=D$status,arm=D$arm,dist1="log-normal",dist0="exp");
+cat("\n");
+show(E);
+```
