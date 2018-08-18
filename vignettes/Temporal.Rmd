@@ -46,7 +46,7 @@ $$
 f(t) = \lambda e^{-\lambda t},\ t>0
 $$
 
-Exponential event times may be simulated using the `rWeibull` function with the shape parameter $\alpha=1$. In the following, $n=10^{3}$ exponential event times are simulated, with rate $\lambda=2$ and expected censoring proportion $20\%$. Generative parameters are recovered using `fitParaSurv` with `dist="exp"`. 
+Exponential event times may be simulated using the `rWeibull` function with the shape parameter $\alpha=1$. In the following, $n=10^{3}$ exponential event times are simulated, with rate $\lambda=2$ and expected censoring proportion $20$%. Generative parameters are recovered using `fitParaSurv` with `dist="exp"`. 
 
 ```{r}
 # Generate exponential time to event data
@@ -64,7 +64,7 @@ $$
 f(t) = \frac{\lambda}{\Gamma(\alpha)}(\lambda t)^{\alpha-1}e^{-\lambda t},\ t>0
 $$
 
-In the following, $n=10^{3}$ gamma event times are simulated, with shape $\alpha=2$, rate $\lambda=2$, and expected censoring proportion $20\%$. Generative parameters are recovered using `fitParaSurv` with `dist="gamma"`. 
+In the following, $n=10^{3}$ gamma event times are simulated, with shape $\alpha=2$, rate $\lambda=2$, and expected censoring proportion $20$%. Generative parameters are recovered using `fitParaSurv` with `dist="gamma"`. 
 
 ```{r}
 # Generate gamma time to event data
@@ -82,7 +82,7 @@ $$
 f(t) = \frac{\alpha\lambda(\lambda t)^{\alpha-1}}{[1+(\lambda t)^{\alpha}]^{2}},\ t>0
 $$
 
-In the following, $n=10^{3}$ log-logistic event times are simulated, with shape $\alpha=4$, rate $\lambda=2$, and expected censoring proportion $20\%$. Generative parameters are recovered using `fitParaSurv` with `dist="log-logistic"`. 
+In the following, $n=10^{3}$ log-logistic event times are simulated, with shape $\alpha=4$, rate $\lambda=2$, and expected censoring proportion $20$%. Generative parameters are recovered using `fitParaSurv` with `dist="log-logistic"`. 
 
 ```{r}
 # Generate log-logistic time to event data
@@ -100,7 +100,7 @@ $$
 f(t) = \frac{1}{t\sigma\sqrt{2\pi}}e^{-\frac{(\ln t-\mu)^2}{2\sigma^2}},\ t>0
 $$
 
-In the following, $n=10^{3}$ log-normal event times are simulated, with location $\mu=1$, scale $\sigma=2$, and expected censoring proportion $20\%$. Generative parameters are recovered using `fitParaSurv` with `dist="log-normal"`. 
+In the following, $n=10^{3}$ log-normal event times are simulated, with location $\mu=1$, scale $\sigma=2$, and expected censoring proportion $20$%. Generative parameters are recovered using `fitParaSurv` with `dist="log-normal"`. 
 
 ```{r}
 # Generate log-normal time to event data
@@ -118,7 +118,7 @@ $$
 f(t) = \alpha\lambda(\lambda t)^{\alpha-1}e^{-(\lambda t)^{\alpha}},\ t>0
 $$
 
-In the following, $n=10^{3}$ Weibull event times are simulated, with shape $\alpha=2$, rate $\lambda=2$, and expected censoring proportion $20\%$. Generative parameters are recovered using `fitParaSurv` with `dist=""`. 
+In the following, $n=10^{3}$ Weibull event times are simulated, with shape $\alpha=2$, rate $\lambda=2$, and expected censoring proportion $20$%. Generative parameters are recovered using `fitParaSurv` with `dist=""`. 
 
 ```{r}
 # Generate Weibull time to event data
@@ -138,7 +138,7 @@ The function `compParaSurv` takes observation time `time`, the status indicator 
 
 ### Comparison of Distinct Gammas
 
-In the first example, the target group consists of $10^{2}$ observations from the gamma distribution, with shape $\alpha=2$ and rate $\lambda=1$. The reference group consists of $10^{2}$ observations from the gamma distribution, with the same shape ($\alpha=2$) but rate $\lambda=2$. In each case the expected censoring proportion is $20\%$. The true difference of mean survival times is $0.5$, and the true ratio is $2.0$. The true difference of median survival times is $0.42$, and the true ratio is $2$. 
+In the first example, the target group consists of $10^{2}$ observations from the gamma distribution, with shape $\alpha=2$ and rate $\lambda=1$. The reference group consists of $10^{2}$ observations from the gamma distribution, with the same shape ($\alpha=2$) but rate $\lambda=2$. In each case the expected censoring proportion is $20$%. The true difference of mean survival times is $0.5$, and the true ratio is $2.0$. The true difference of median survival times is $0.42$, and the true ratio is $2$. 
 
 ```{r}
 # Target group
@@ -157,7 +157,7 @@ show(E);
 
 ### Comparison of Equivalent Weibulls
 
-In this example, both the target and reference groups each consist of $10^{2}$ observations from the Weibull distribution with shape $\alpha=2$ and rate $\lambda=2$. However, the target group is subject to $50\%$ censoring, while the reference group is uncensored. The true difference in means and medians is $0.0$. The true ratio of means and medians is $1.0$. 
+In this example, both the target and reference groups each consist of $10^{2}$ observations from the Weibull distribution with shape $\alpha=2$ and rate $\lambda=2$. However, the target group is subject to $50$% censoring, while the reference group is uncensored. The true difference in means and medians is $0.0$. The true ratio of means and medians is $1.0$. 
 
 ```{r}
 # Target group
@@ -176,7 +176,7 @@ show(E);
 
 ### Log-Logistic v. Gamma, Same Means, Different Medians
 
-In this example, the target group consists of $10^{2}$ observations from the log-logistic distribution with shape $\alpha=4$ and rate $\lambda=\pi/(2\sqrt{2})$. The reference group consists of $10^{2}$ observations from the gamma distribution with shape $\alpha=1/2$ and rate $\lambda=1/2$. In each case the expected censoring proportion is $20\%$. The true difference of mean survival times is $0.0$, and the true ratio is $1.0$. The true difference of median survival times is $0.45$, and the true ratio is $1.98$. 
+In this example, the target group consists of $10^{2}$ observations from the log-logistic distribution with shape $\alpha=4$ and rate $\lambda=\pi/(2\sqrt{2})$. The reference group consists of $10^{2}$ observations from the gamma distribution with shape $\alpha=1/2$ and rate $\lambda=1/2$. In each case the expected censoring proportion is $20$%. The true difference of mean survival times is $0.0$, and the true ratio is $1.0$. The true difference of median survival times is $0.45$, and the true ratio is $1.98$. 
 
 ```{r}
 # Target group
@@ -195,7 +195,7 @@ show(E);
 
 ### Log-Normal v. Exponential, Different Means, Same Medians
 
-In this example, the target group consists of $10^{2}$ observations from the log-normal distribution with location $\mu=0$ and scale $\sigma=\sqrt{2\ln2}$. The reference group consists of $10^{2}$ observations from the exponential distribution with rate $\lambda=1$. In each case the expected censoring proportion is $20\%$. The true difference of mean survival times is $1.0$, and the true ratio is $2.0$. The true difference of median survival times is $0.0$, and the true ratio is $1.0$. 
+In this example, the target group consists of $10^{2}$ observations from the log-normal distribution with location $\mu=0$ and scale $\sigma=\sqrt{2\ln2}$. The reference group consists of $10^{2}$ observations from the exponential distribution with rate $\lambda=1$. In each case the expected censoring proportion is $20$%. The true difference of mean survival times is $1.0$, and the true ratio is $2.0$. The true difference of median survival times is $0.0$, and the true ratio is $1.0$. 
 
 ```{r}
 # Target group

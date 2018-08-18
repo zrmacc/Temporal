@@ -161,7 +161,7 @@ $(document).ready(function () {
 <p><span class="math display">\[
 f(t) = \lambda e^{-\lambda t},\ t&gt;0
 \]</span></p>
-<p>Exponential event times may be simulated using the <code>rWeibull</code> function with the shape parameter <span class="math inline">\(\alpha=1\)</span>. In the following, <span class="math inline">\(n=10^{3}\)</span> exponential event times are simulated, with rate <span class="math inline">\(\lambda=2\)</span> and expected censoring proportion <span class="math inline">\(20\%\)</span>. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;exp&quot;</code>.</p>
+<p>Exponential event times may be simulated using the <code>rWeibull</code> function with the shape parameter <span class="math inline">\(\alpha=1\)</span>. In the following, <span class="math inline">\(n=10^{3}\)</span> exponential event times are simulated, with rate <span class="math inline">\(\lambda=2\)</span> and expected censoring proportion <span class="math inline">\(20\)</span>%. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;exp&quot;</code>.</p>
 <pre class="r"><code># Generate exponential time to event data
 D = rWeibull(n=1e3,a=1,l=2,p=0.2);
 # Estimate rate
@@ -184,7 +184,7 @@ show(M);</code></pre>
 <p><span class="math display">\[
 f(t) = \frac{\lambda}{\Gamma(\alpha)}(\lambda t)^{\alpha-1}e^{-\lambda t},\ t&gt;0
 \]</span></p>
-<p>In the following, <span class="math inline">\(n=10^{3}\)</span> gamma event times are simulated, with shape <span class="math inline">\(\alpha=2\)</span>, rate <span class="math inline">\(\lambda=2\)</span>, and expected censoring proportion <span class="math inline">\(20\%\)</span>. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;gamma&quot;</code>.</p>
+<p>In the following, <span class="math inline">\(n=10^{3}\)</span> gamma event times are simulated, with shape <span class="math inline">\(\alpha=2\)</span>, rate <span class="math inline">\(\lambda=2\)</span>, and expected censoring proportion <span class="math inline">\(20\)</span>%. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;gamma&quot;</code>.</p>
 <pre class="r"><code># Generate gamma time to event data
 D = rGamma(n=1e3,a=2,l=2,p=0.2);
 # Estimate rate
@@ -209,7 +209,7 @@ show(M);</code></pre>
 <p><span class="math display">\[
 f(t) = \frac{\alpha\lambda(\lambda t)^{\alpha-1}}{[1+(\lambda t)^{\alpha}]^{2}},\ t&gt;0
 \]</span></p>
-<p>In the following, <span class="math inline">\(n=10^{3}\)</span> log-logistic event times are simulated, with shape <span class="math inline">\(\alpha=4\)</span>, rate <span class="math inline">\(\lambda=2\)</span>, and expected censoring proportion <span class="math inline">\(20\%\)</span>. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;log-logistic&quot;</code>.</p>
+<p>In the following, <span class="math inline">\(n=10^{3}\)</span> log-logistic event times are simulated, with shape <span class="math inline">\(\alpha=4\)</span>, rate <span class="math inline">\(\lambda=2\)</span>, and expected censoring proportion <span class="math inline">\(20\)</span>%. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;log-logistic&quot;</code>.</p>
 <pre class="r"><code># Generate log-logistic time to event data
 D = rLogLogistic(n=1e3,a=4,l=2,p=0.2);
 # Estimate rate
@@ -234,7 +234,7 @@ show(M);</code></pre>
 <p><span class="math display">\[
 f(t) = \frac{1}{t\sigma\sqrt{2\pi}}e^{-\frac{(\ln t-\mu)^2}{2\sigma^2}},\ t&gt;0
 \]</span></p>
-<p>In the following, <span class="math inline">\(n=10^{3}\)</span> log-normal event times are simulated, with location <span class="math inline">\(\mu=1\)</span>, scale <span class="math inline">\(\sigma=2\)</span>, and expected censoring proportion <span class="math inline">\(20\%\)</span>. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;log-normal&quot;</code>.</p>
+<p>In the following, <span class="math inline">\(n=10^{3}\)</span> log-normal event times are simulated, with location <span class="math inline">\(\mu=1\)</span>, scale <span class="math inline">\(\sigma=2\)</span>, and expected censoring proportion <span class="math inline">\(20\)</span>%. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;log-normal&quot;</code>.</p>
 <pre class="r"><code># Generate log-normal time to event data
 D = rLogNormal(n=1e3,m=1,s=2,p=0.2)
 # Estimate rate
@@ -259,7 +259,7 @@ show(M);</code></pre>
 <p><span class="math display">\[
 f(t) = \alpha\lambda(\lambda t)^{\alpha-1}e^{-(\lambda t)^{\alpha}},\ t&gt;0
 \]</span></p>
-<p>In the following, <span class="math inline">\(n=10^{3}\)</span> Weibull event times are simulated, with shape <span class="math inline">\(\alpha=2\)</span>, rate <span class="math inline">\(\lambda=2\)</span>, and expected censoring proportion <span class="math inline">\(20\%\)</span>. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;&quot;</code>.</p>
+<p>In the following, <span class="math inline">\(n=10^{3}\)</span> Weibull event times are simulated, with shape <span class="math inline">\(\alpha=2\)</span>, rate <span class="math inline">\(\lambda=2\)</span>, and expected censoring proportion <span class="math inline">\(20\)</span>%. Generative parameters are recovered using <code>fitParaSurv</code> with <code>dist=&quot;&quot;</code>.</p>
 <pre class="r"><code># Generate Weibull time to event data
 D = rWeibull(n=1e3,a=2,l=2,p=0.2);
 # Estimate rate
@@ -288,7 +288,7 @@ show(M);</code></pre>
 <h2>Examples</h2>
 <div id="comparison-of-distinct-gammas" class="section level3">
 <h3>Comparison of Distinct Gammas</h3>
-<p>In the first example, the target group consists of <span class="math inline">\(10^{2}\)</span> observations from the gamma distribution, with shape <span class="math inline">\(\alpha=2\)</span> and rate <span class="math inline">\(\lambda=1\)</span>. The reference group consists of <span class="math inline">\(10^{2}\)</span> observations from the gamma distribution, with the same shape (<span class="math inline">\(\alpha=2\)</span>) but rate <span class="math inline">\(\lambda=2\)</span>. In each case the expected censoring proportion is <span class="math inline">\(20\%\)</span>. The true difference of mean survival times is <span class="math inline">\(0.5\)</span>, and the true ratio is <span class="math inline">\(2.0\)</span>. The true difference of median survival times is <span class="math inline">\(0.42\)</span>, and the true ratio is <span class="math inline">\(2\)</span>.</p>
+<p>In the first example, the target group consists of <span class="math inline">\(10^{2}\)</span> observations from the gamma distribution, with shape <span class="math inline">\(\alpha=2\)</span> and rate <span class="math inline">\(\lambda=1\)</span>. The reference group consists of <span class="math inline">\(10^{2}\)</span> observations from the gamma distribution, with the same shape (<span class="math inline">\(\alpha=2\)</span>) but rate <span class="math inline">\(\lambda=2\)</span>. In each case the expected censoring proportion is <span class="math inline">\(20\)</span>%. The true difference of mean survival times is <span class="math inline">\(0.5\)</span>, and the true ratio is <span class="math inline">\(2.0\)</span>. The true difference of median survival times is <span class="math inline">\(0.42\)</span>, and the true ratio is <span class="math inline">\(2\)</span>.</p>
 <pre class="r"><code># Target group
 D1 = rGamma(n=1e2,a=2,l=2,p=0.2);
 D1$arm = 1;
@@ -327,7 +327,7 @@ show(E);</code></pre>
 </div>
 <div id="comparison-of-equivalent-weibulls" class="section level3">
 <h3>Comparison of Equivalent Weibulls</h3>
-<p>In this example, both the target and reference groups each consist of <span class="math inline">\(10^{2}\)</span> observations from the Weibull distribution with shape <span class="math inline">\(\alpha=2\)</span> and rate <span class="math inline">\(\lambda=2\)</span>. However, the target group is subject to <span class="math inline">\(50\%\)</span> censoring, while the reference group is uncensored. The true difference in means and medians is <span class="math inline">\(0.0\)</span>. The true ratio of means and medians is <span class="math inline">\(1.0\)</span>.</p>
+<p>In this example, both the target and reference groups each consist of <span class="math inline">\(10^{2}\)</span> observations from the Weibull distribution with shape <span class="math inline">\(\alpha=2\)</span> and rate <span class="math inline">\(\lambda=2\)</span>. However, the target group is subject to <span class="math inline">\(50\)</span>% censoring, while the reference group is uncensored. The true difference in means and medians is <span class="math inline">\(0.0\)</span>. The true ratio of means and medians is <span class="math inline">\(1.0\)</span>.</p>
 <pre class="r"><code># Target group
 D1 = rWeibull(n=1e2,a=2,l=2,p=0.5);
 D1$arm = 1;
@@ -364,7 +364,7 @@ show(E);</code></pre>
 </div>
 <div id="log-logistic-v.-gamma-same-means-different-medians" class="section level3">
 <h3>Log-Logistic v. Gamma, Same Means, Different Medians</h3>
-<p>In this example, the target group consists of <span class="math inline">\(10^{2}\)</span> observations from the log-logistic distribution with shape <span class="math inline">\(\alpha=4\)</span> and rate <span class="math inline">\(\lambda=\pi/(2\sqrt{2})\)</span>. The reference group consists of <span class="math inline">\(10^{2}\)</span> observations from the gamma distribution with shape <span class="math inline">\(\alpha=1/2\)</span> and rate <span class="math inline">\(\lambda=1/2\)</span>. In each case the expected censoring proportion is <span class="math inline">\(20\%\)</span>. The true difference of mean survival times is <span class="math inline">\(0.0\)</span>, and the true ratio is <span class="math inline">\(1.0\)</span>. The true difference of median survival times is <span class="math inline">\(0.45\)</span>, and the true ratio is <span class="math inline">\(1.98\)</span>.</p>
+<p>In this example, the target group consists of <span class="math inline">\(10^{2}\)</span> observations from the log-logistic distribution with shape <span class="math inline">\(\alpha=4\)</span> and rate <span class="math inline">\(\lambda=\pi/(2\sqrt{2})\)</span>. The reference group consists of <span class="math inline">\(10^{2}\)</span> observations from the gamma distribution with shape <span class="math inline">\(\alpha=1/2\)</span> and rate <span class="math inline">\(\lambda=1/2\)</span>. In each case the expected censoring proportion is <span class="math inline">\(20\)</span>%. The true difference of mean survival times is <span class="math inline">\(0.0\)</span>, and the true ratio is <span class="math inline">\(1.0\)</span>. The true difference of median survival times is <span class="math inline">\(0.45\)</span>, and the true ratio is <span class="math inline">\(1.98\)</span>.</p>
 <pre class="r"><code># Target group
 D1 = rLogLogistic(n=1e2,a=4,l=pi/(2*sqrt(2)),p=0.2);
 D1$arm = 1;
@@ -403,7 +403,7 @@ show(E);</code></pre>
 </div>
 <div id="log-normal-v.-exponential-different-means-same-medians" class="section level3">
 <h3>Log-Normal v. Exponential, Different Means, Same Medians</h3>
-<p>In this example, the target group consists of <span class="math inline">\(10^{2}\)</span> observations from the log-normal distribution with location <span class="math inline">\(\mu=0\)</span> and scale <span class="math inline">\(\sigma=\sqrt{2\ln2}\)</span>. The reference group consists of <span class="math inline">\(10^{2}\)</span> observations from the exponential distribution with rate <span class="math inline">\(\lambda=1\)</span>. In each case the expected censoring proportion is <span class="math inline">\(20\%\)</span>. The true difference of mean survival times is <span class="math inline">\(1.0\)</span>, and the true ratio is <span class="math inline">\(2.0\)</span>. The true difference of median survival times is <span class="math inline">\(0.0\)</span>, and the true ratio is <span class="math inline">\(1.0\)</span>.</p>
+<p>In this example, the target group consists of <span class="math inline">\(10^{2}\)</span> observations from the log-normal distribution with location <span class="math inline">\(\mu=0\)</span> and scale <span class="math inline">\(\sigma=\sqrt{2\ln2}\)</span>. The reference group consists of <span class="math inline">\(10^{2}\)</span> observations from the exponential distribution with rate <span class="math inline">\(\lambda=1\)</span>. In each case the expected censoring proportion is <span class="math inline">\(20\)</span>%. The true difference of mean survival times is <span class="math inline">\(1.0\)</span>, and the true ratio is <span class="math inline">\(2.0\)</span>. The true difference of median survival times is <span class="math inline">\(0.0\)</span>, and the true ratio is <span class="math inline">\(1.0\)</span>.</p>
 <pre class="r"><code># Target group
 D1 = rLogNormal(n=1e2,m=0,s=sqrt(2*log(2)),p=0.2);
 D1$arm = 1;
