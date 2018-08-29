@@ -1,253 +1,120 @@
 # Purpose: Functions related to derivatives of the incomplete gamma
-# Updated: 180815
+# Updated: 180828
 
 ########################
-# Derivatives in Alpha
+# Derivatives of Incomplete Gamma
 ########################
 
-#' First Derivative in Alpha
-#'
-#' Evaluates the first derivative of the incomplete gamma function
-#' with respect to the shape parameter.
-#'
-#' @param a Shape
-#' @param x Lower limit of integration
-#' @param h Step size
-#' @param method Select "fd" for finite difference, "ni" for numeric
-#'   integration.
+#' Derivatives of the Incomplete Gamma Function
+#' 
+#' Evaluates derivatives of the upper incomplete gamma function, defined as:
+#' \deqn{\Gamma(\alpha,s) = \int_{s}^{\infty}u^{\alpha-1}e^{-u}du}
+#' 
+#' @param a Value of \eqn{\alpha} at which to evaluate.
+#' @param s Value of \eqn{s} at which to evaluate.
+#' @param Dirn Direction in which to differentiate. Select from among "a", "s",
+#'   and "as".
+#' @param Order Order of the derivative, if the direction is either "a", or "s".
+#'   Select from among 1 and 2.
+#' @export
+#' @importFrom stats integrate
+
+dIncGamma = function(a,s,Dirn="a",Order=1){
+  # Input check
+  if(a<=0){stop("a>0 is required.")};
+  if(s<=0){stop("s>0 is required.")};
+  Dirns = c("a","s","as");
+  if(!(Dirn %in% Dirns)){stop("Select dirn from among: c('a','s','as').")};
+  if(!(Order %in% c(1,2))){stop("Select order from among: c(1,2).")};
+  
+  # Derivatives in a
+  if(Dirn=="a"){
+    # First order
+    if(Order==1){
+      # Integrand
+      g = function(u){u^(a-1)*log(u)*exp(-u)};
+    } else {
+      # Integrand
+      g = function(u){u^(a-1)*(log(u))^2*exp(-u)};
+    }
+    # Final derivative
+    d = integrate(f=g,lower=s,upper=Inf);
+    d = d$value;
+  } else if(Dirn=="s"){
+    # Derivatives in s
+    # First order
+    if(Order==1){
+      d = -s^(a-1)*exp(-s);
+    } else {
+      d = s^(a-2)*exp(-s)*(s-(a-1));
+    }
+    # Final derivative
+  } else {
+   # Mixed partial
+    d = -s^(a-1)*log(s)*exp(-s);
+  }
+  return(d);
+}
+
+########################
+# Derivatives of Log Incomplete Gamma
+########################
+
+#' Derivatives of the Log Incomplete Gamma Function
+#' 
+#' Evaluates derivatives of the upper log incomplete gamma function, defined as:
+#' \deqn{\ln\Gamma(\alpha,s) = \int_{s}^{\infty}u^{\alpha-1}e^{-u}du}
+#' 
+#' @param a Value of \eqn{\alpha} at which to evaluate.
+#' @param s Value of \eqn{s} at which to evaluate.
+#' @param Dirn Direction in which to differentiate. Select from among "a", "s",
+#'   and "as".
+#' @param Order Order of the derivative, if the direction is either "a", or "s".
+#'   Select from among 1 and 2.
+#' @export
 #' @importFrom expint gammainc
 #' @importFrom stats integrate
 
-D1aIncGamma = function(a,x,h=1e-4,method="fd"){
+dLogIncGamma = function(a,s,Dirn="a",Order=1){
   # Input check
-  if(a-2*h<0){stop("Shape-2*h should exceed zero.")};
-  if(x<0){stop("Lower limit of integration should be positive.")};
-  if(!(method %in% c("fd","ni"))){stop("Select 'fd' for finite difference, 'ni' for numerical integration.")};
-  # Finite difference
-  if(method=="fd"){
-    # Evaluation points
-    u = a + c(-2*h,-1*h,h,2*h);
-    # Evaluations
-    v = gammainc(a=u,x=x);
-    # Approximate derivative
-    d = as.numeric(v %*% c(1,-8,8,-1))/(12*h);
-    return(d)
+  if(a<=0){stop("a>0 is required.")};
+  if(s<=0){stop("s>0 is required.")};
+  Dirns = c("a","s","as");
+  if(!(Dirn %in% Dirns)){stop("Select dirn from among: c('a','s','as').")};
+  if(!(Order %in% c(1,2))){stop("Select order from among: c(1,2).")};
+  
+  # Incomplete gamma evaluation
+  G = gammainc(a=a,x=s);
+  
+  # Derivatives in a
+  if(Dirn=="a"){
+    # First order
+    if(Order==1){
+      d = dIncGamma(a=a,s=s,Dirn="a",Order=1)/G;
+    } else {
+      # Second order
+      a2 = dIncGamma(a=a,s=s,Dirn="a",Order=2);
+      a1 = dIncGamma(a=a,s=s,Dirn="a",Order=1);
+      d = (a2*G-a1*a1)/(G*G);
+    }
+  } else if(Dirn=="s"){
+    # Derivatives in s
+    # First order
+    if(Order==1){
+      d = dIncGamma(a=a,s=s,Dirn="s",Order=1)/G;
+    } else {
+      # Second order
+      s2 = dIncGamma(a=a,s=s,Dirn="s",Order=2);
+      s1 = dIncGamma(a=a,s=s,Dirn="s",Order=1);
+      d = (s2*G-s1*s1)/(G*G);
+    }
+    # Final derivative
+  } else {
+    # Mixed partial
+    m = dIncGamma(a=a,s=s,Dirn="as");
+    a1 = dIncGamma(a=a,s=s,Dirn="a",Order=1);
+    s1 = dIncGamma(a=a,s=s,Dirn="s",Order=1);
+    d = (m*G-a1*s1)/(G*G);
   }
-  if(method=="ni"){
-    # Integrand
-    g = function(u){u^(a-1)*log(u)*exp(-u)};
-    d = integrate(f=g,lower=x,upper=Inf);
-    return(d$value);
-  }
-}
-
-#' Second Derivative in Alpha
-#'
-#' Evaluates the second derivative of the incomplete gamma function
-#' with respect to the shape parameter.
-#'
-#' @param a Shape
-#' @param x Lower limit of integration
-#' @param h Step size
-#' @param method Select "fd" for finite difference, "ni" for numeric
-#'   integration.
-#' @importFrom expint gammainc
-#' @importFrom stats integrate
-
-D2aIncGamma = function(a,x,h=1e-4,method="ni"){
-  # Input check
-  if(a-2*h<0){stop("Shape-2*h should exceed zero.")};
-  if(x<0){stop("Lower limit of integration should be positive.")};
-  if(!(method %in% c("fd","ni"))){stop("Select 'fd' for finite difference, 'ni' for numerical integration.")};
-  # Finite difference
-  if(method=="fd"){
-    # Evaluation points
-    u = a + c(-2*h,-1*h,h,2*h);
-    d1 = function(a){D1aIncGamma(a=a,x=x,h=h)};
-    d1 = Vectorize(d1);
-    # Evaluations
-    v = d1(u);
-    # Approximate derivative
-    d2 = as.numeric(v %*% c(1,-8,8,-1))/(12*h);
-    return(d2)
-  }
-  # Numerical integration
-  if(method=="ni"){
-    # Integrand
-    g = function(u){u^(a-1)*(log(u))^2*exp(-u)};
-    d2 = integrate(f=g,lower=x,upper=Inf);
-    return(d2$value);
-  }
-}
-
-#' First Logarithmic Derivative in Alpha
-#'
-#' Evaluates the first derivative of the log incomplete gamma function
-#' with respect to the shape parameter.
-#'
-#' @param a Shape
-#' @param x Lower limit of integration
-#' @param h Step size
-#' @param method Select "fd" for finite difference, "ni" for numeric
-#'   integration.
-#' @importFrom expint gammainc
-
-D1aLogIncGamma = function(a,x,h=1e-4,method="fd"){
-  # Input check
-  if(a-2*h<0){stop("Shape-2*h should exceed zero.")};
-  if(x<0){stop("Lower limit of integration should be positive.")};
-  if(!(method %in% c("fd","ni"))){stop("Select 'fd' for finite difference, 'ni' for numerical integration.")};
-  # Numerator
-  num = D1aIncGamma(a=a,x=x,h=h,method=method);
-  # Denominator
-  denom = gammainc(a=a,x=x);
-  # Output
-  Out = (num/denom);
-  return(Out);
-}
-
-#' Second Logarithmic Derivative in Alpha
-#'
-#' Evaluates the second derivative of the log incomplete gamma function
-#' with respect to the shape parameter.
-#'
-#' @param a Shape
-#' @param x Lower limit of integration
-#' @param h Step size
-#' @param method Select "fd" for finite difference, "ni" for numeric
-#'   integration.
-#' @importFrom expint gammainc
-
-D2aLogIncGamma = function(a,x,h=1e-4,method="fd"){
-  # Input check
-  if(a-2*h<0){stop("Shape-2*h should exceed zero.")};
-  if(x<0){stop("Lower limit of integration should be positive.")};
-  if(!(method %in% c("fd","ni"))){stop("Select 'fd' for finite difference, 'ni' for numerical integration.")};
-  # Incomplete gamma
-  e = gammainc(a=a,x=x);
-  # Numerator
-  num = D2aIncGamma(a=a,x=x,h=h,method=method)*e-(D1aIncGamma(a=a,x=x,h=h,method=method))^2;
-  # Denominator
-  denom = e^2;
-  # Output
-  Out = (num/denom);
-  return(Out);
-}
-
-########################
-# Derivatives in Lambda
-########################
-
-#' First Derivative in Lambda
-#'
-#' Evaluates the first derivative of the incomplete gamma function
-#' with respect to the rate parameter.
-#'
-#' @param a Shape.
-#' @param l Rate.
-#' @param u Time.
-
-D1lIncGamma = function(a,l,u){
-  # Output
-  Out = -1*(l^(a-1))*(u^a)*exp(-l*u);
-  return(Out);
-}
-
-#' Second Derivative in Lambda
-#'
-#' Evaluates the second derivative of the incomplete gamma function
-#' with respect to the rate parameter.
-#'
-#' @param a Shape.
-#' @param l Rate.
-#' @param u Time.
-
-D2lIncGamma = function(a,l,u){
-  # Output
-  Out = -1*(a-1)*(l^(a-2))*(u^a)*exp(-l*u)+(l^(a-1))*(u^(a+1))*exp(-l*u);
-  return(Out);
-}
-
-#' First Logarithmic Derivative in Lambda
-#'
-#' Evaluates the first derivative of the log incomplete gamma function
-#' with respect to the rate parameter.
-#'
-#' @param a Shape.
-#' @param l Rate.
-#' @param u Time.
-#' @importFrom expint gammainc
-
-D1lLogIncGamma = function(a,l,u){
-  # Numerator
-  num = -1*(l^(a-1))*(u^a)*exp(-l*u);
-  # Denominor
-  denom = gammainc(a,l*u);
-  # Output
-  Out = (num/denom);
-  return(Out);
-}
-
-#' Second Logarithmic Derivative in Lambda
-#'
-#' Evaluates the second derivative of the log incomplete gamma function
-#' with respect to the rate parameter.
-#'
-#' @param a Shape.
-#' @param l Rate.
-#' @param u Time.
-#' @importFrom expint gammainc
-
-D2lLogIncGamma = function(a,l,u){
-  # Incomplete gamma
-  e = gammainc(a,l*u);
-  # Numerator
-  num = (D2lIncGamma(a=a,l=l,u=u)*e)-(D1lIncGamma(a=a,l=l,u=u))^2;
-  # Denominor
-  denom = e^2;
-  # Output
-  Out = (num/denom);
-  return(Out);
-}
-
-########################
-# Mixed Derivatives
-########################
-
-#' Mixed Derivative
-#'
-#' Evaluates the mixed partial of the incomplete gamma
-#' function with respect to the shape and rate parameters.
-#'
-#' @param a Shape.
-#' @param l Rate.
-#' @param u Time.
-
-D2mixIncGamma = function(a,l,u){
-  # Output
-  Out = -log(l*u)*(l^(a-1))*(u^a)*exp(-l*u);
-  return(Out);
-}
-
-#' Mixed Logarithmic Derivative
-#'
-#' Evaluates the mixed partial of the log incomplete gamma
-#' function with respect to the shape and rate parameters.
-#'
-#' @param a Shape.
-#' @param l Rate.
-#' @param u Time.
-#' @param h Step size.
-#' @importFrom expint gammainc
-
-D2mixLogIncGamma = function(a,l,u,h=1e-4){
-  # Incomplete gamma
-  e = gammainc(a,l*u);
-  # Numerator
-  num = (D2mixIncGamma(a=a,l=l,u=u)*e-D1aIncGamma(a=a,x=l*u,h=h)*D1lIncGamma(a=a,l=l,u=u));
-  # Denominor
-  denom = e^2;
-  # Output
-  Out = (num/denom);
-  return(Out);
+  return(d);
 }

@@ -168,6 +168,8 @@ fit.Exp = function(time,status,alpha=0.05){
 #' }
 
 fit.Gamma = function(time,status,alpha=0.05,eps=1e-6,maxit=10){
+  # Vectorize
+  dLogIncGamma = Vectorize(dLogIncGamma,vectorize.args="s");
   # Events
   n = length(time);
   nobs = sum(status);
@@ -177,9 +179,6 @@ fit.Gamma = function(time,status,alpha=0.05,eps=1e-6,maxit=10){
   # Flag presence of censored events
   flag = (length(tCen)>0);
   ## Function to calculate observed information
-  D2aLogIncGamma = Vectorize(D2aLogIncGamma,vectorize.args="x");
-  D2lLogIncGamma = Vectorize(D2lLogIncGamma,vectorize.args="u");
-  D2mixLogIncGamma = Vectorize(D2mixLogIncGamma,vectorize.args="u");
   obsInfo = function(a,l){
     # Information for alpha
     Jaa = n*trigamma(a);
@@ -189,9 +188,9 @@ fit.Gamma = function(time,status,alpha=0.05,eps=1e-6,maxit=10){
     Jla = -(nobs/l);
     # Add corrections for censoring
     if(flag){
-      Jaa = Jaa-sum(D2aLogIncGamma(a=a,x=l*tCen));
-      Jll = Jll-sum(D2lLogIncGamma(a=a,l=l,u=tCen));
-      Jla = Jla-sum(D2mixLogIncGamma(a=a,l=l,u=tCen));
+      Jaa = Jaa-sum(dLogIncGamma(a=a,s=l*tCen,Dirn="a",Order=2));
+      Jll = Jll-sum(dLogIncGamma(a=a,s=l*tCen,Dirn="s",Order=2)*(tCen^2));
+      Jla = Jla-sum(dLogIncGamma(a=a,s=l*tCen,Dirn="as")*tCen);
     }
     # Output
     Out = matrix(c(Jaa,Jla,Jla,Jll),nrow=2);
@@ -200,22 +199,20 @@ fit.Gamma = function(time,status,alpha=0.05,eps=1e-6,maxit=10){
   ## Function to calculate score
   Sa = sum(log(tObs));
   Sl = sum(tObs);
-  D1aLogIncGamma = Vectorize(D1aLogIncGamma,vectorize.args="x");
-  D1lLogIncGamma = Vectorize(D1lLogIncGamma,vectorize.args="u");
   Score = function(a,l){
     # Score for alpha
-    Ua = nobs*log(l)+Sa-n*digamma(a)
+    Ua = nobs*log(l)+Sa-n*digamma(a);
     # Score for lambda
-    Ul = nobs*a/l-Sl
+    Ul = nobs*a/l-Sl;
     # Add corrections for censoring
     if(flag){
-      Ua = Ua+sum(D1aLogIncGamma(a=a,x=l*tCen));;
-      Ul = Ul+sum(D1lLogIncGamma(a=a,l=l,u=tCen));
+      Ua = Ua+sum(dLogIncGamma(a=a,s=l*tCen,Dirn="a",Order=1));
+      Ul = Ul+sum(dLogIncGamma(a=a,s=l*tCen,Dirn="s",Order=1)*tCen);
     }
     # Output
     Out = c(Ua,Ul);
     return(Out);
-  }
+  };
   ## Objective function
   Q = function(a,l){
     # Log likelihood
@@ -255,13 +252,16 @@ fit.Gamma = function(time,status,alpha=0.05,eps=1e-6,maxit=10){
       theta0 = theta1;
     } else {
       delta = theta1$ll-theta0$ll;
-      if(delta>eps){
+      if(delta>0){
         theta0 = theta1;
-      } else {
+      };
+      if(delta<eps){
         break;
       }
     }
-  }; # End NR
+  }; 
+  
+  # End NR
   ## Report
   if(i<maxit){
     cat(paste0(i-1," update(s) performed before tolerance limit."),"\n");
@@ -400,13 +400,14 @@ fit.LogLogistic = function(time,status,alpha=0.05,eps=1e-6,maxit=10){
       theta0 = theta1;
     } else {
       delta = theta1$ll-theta0$ll;
-      if(delta>eps){
+      if(delta>0){
         theta0 = theta1;
-      } else {
+      };
+      if(delta<eps){
         break;
       }
     }
-  }; # End NR
+  }; 
   ## Report
   if(i<maxit){
     cat(paste0(i-1," update(s) performed before tolerance limit."),"\n");
@@ -501,11 +502,11 @@ fit.LogNormal = function(time,status,alpha=0.05,eps=1e-6,maxit=10){
     zObs = (log(tObs)-m)/s;
     zCen = (log(tCen)-m)/s;
     # Information for mu
-    Jmm = nobs/(s^2)-1/(s^2)*sum(D2LogNormSurv(zCen));
+    Jmm = nobs/(s^2)-1/(s^2)*sum(dLogNormSurv(zCen,Order=2));
     # Information for sigma
-    Jss = -nobs/(s^2)+3/(s^2)*sum(zObs^2)-2/(s^2)*sum(D1LogNormSurv(zCen)*zCen)-1/(s^2)*sum(D2LogNormSurv(zCen)*(zCen)^2);
+    Jss = -nobs/(s^2)+3/(s^2)*sum(zObs^2)-2/(s^2)*sum(dLogNormSurv(zCen)*zCen)-1/(s^2)*sum(dLogNormSurv(zCen,Order=2)*(zCen)^2);
     # Cross information
-    Jms = 2/(s^2)*sum(zObs)-1/(s^2)*sum(D1LogNormSurv(zCen))-1/(s^2)*sum(D2LogNormSurv(zCen)*zCen);
+    Jms = 2/(s^2)*sum(zObs)-1/(s^2)*sum(dLogNormSurv(zCen))-1/(s^2)*sum(dLogNormSurv(zCen,Order=2)*zCen);
     # Output
     Out = matrix(c(Jmm,Jms,Jms,Jss),nrow=2);
     return(Out);
@@ -516,9 +517,9 @@ fit.LogNormal = function(time,status,alpha=0.05,eps=1e-6,maxit=10){
     zObs = (log(tObs)-m)/s;
     zCen = (log(tCen)-m)/s;
     # Score for mu
-    Um = (1/s)*sum(zObs)-(1/s)*sum(D1LogNormSurv(zCen));
+    Um = (1/s)*sum(zObs)-(1/s)*sum(dLogNormSurv(zCen));
     # Score for sigma
-    Us = -1*(nobs/s)+(1/s)*sum(zObs^2)-(1/s)*sum(D1LogNormSurv(zCen)*zCen);
+    Us = -1*(nobs/s)+(1/s)*sum(zObs^2)-(1/s)*sum(dLogNormSurv(zCen)*zCen);
     # Output
     Out = c(Um,Us);
     return(Out);
@@ -559,13 +560,14 @@ fit.LogNormal = function(time,status,alpha=0.05,eps=1e-6,maxit=10){
       theta0 = theta1;
     } else {
       delta = theta1$ll-theta0$ll;
-      if(delta>eps){
+      if(delta>0){
         theta0 = theta1;
-      } else {
+      };
+      if(delta<eps){
         break;
       }
     }
-  }; # End NR
+  }; 
   ## Report
   if(i<maxit){
     cat(paste0(i-1," update(s) performed before tolerance limit."),"\n");

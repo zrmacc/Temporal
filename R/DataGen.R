@@ -25,8 +25,8 @@
 
 rGamma = function(n,a=1,l=1,p=0){
   # Input checks
-  if(a<0){stop("Positive shape parameter is required.")};
-  if(l<0){stop("Positive rate parameter is required.")};
+  if(a<=0){stop("Positive shape parameter is required.")};
+  if(l<=0){stop("Positive rate parameter is required.")};
   if(min(p)<0|max(p)>=1){stop("Expected censoring proportion should fall in [0,1).")};
   # Draw gammas
   time = rgamma(n=n,shape=a,rate=l);
@@ -36,9 +36,65 @@ rGamma = function(n,a=1,l=1,p=0){
   } else {
     # Censoring rate
     q = (1-p)^(1/a);
-    b = (1-q)/q*l;
+    b = l*((1-q)/q);
     # Censoring times
     cen = rgamma(n=n,shape=1,rate=b);
+    # Observations
+    U = cbind(time,cen);
+    Umin = aaply(.data=U,.margins=1,.fun=min);
+    # Status
+    aux = function(x){1*(x[1]<=x[2])};
+    d = aaply(.data=U,.margins=1,.fun=aux);
+    # Output
+    Out = data.frame("time"=Umin,"status"=d);
+    return(Out);
+  }
+}
+
+########################
+# Generalized Gamma
+########################
+
+#' Random Generation from the Generalized Gamma Distribution
+#' 
+#' Generates generalized gamma random deviates with shape parameters 
+#' \eqn{(\alpha,\beta)}, and rate paramter \eqn{\lambda}. See 
+#' \code{\link{fit.GenGamma}} for the parameterization. If a censoring 
+#' proportion \eqn{p} is provided, the deviates are subject to non-informative 
+#' random right censoring.
+#' 
+#' @param n Sample size.
+#' @param a First shape parameter, \eqn{\alpha}.
+#' @param b Second shape parameter, \eqn{\beta}. For the standard gamma
+#'   distribution, set \eqn{\beta=1}.
+#' @param l Rate.
+#' @param p Expected censoring proportion.
+#' @importFrom plyr aaply
+#' @export
+#' @return A data.frame with two columns, the observation time and status
+#'   indicator.
+#' @examples
+#' D = rGenGamma(n=1e3,a=2,b=2,l=2,p=0.2);
+
+rGenGamma = function(n,a=1,b=1,l=1,p=0){
+  # Input checks
+  if((a<=0)|(b<=0)){stop("Positive shape parameters are required.")};
+  if(l<=0){stop("Positive rate parameter is required.")};
+  if(min(p)<0|max(p)>=1){stop("Expected censoring proportion should fall in [0,1).")};
+  # Draw gammas
+  time = rgamma(n=n,shape=a,rate=(l^b));
+  # Transform to general gammas
+  time = (time)^(1/b);
+  
+  # Return time if no censoring
+  if(p==0){
+    return(data.frame("time"=time,"status"=rep(1,n)));
+  } else {
+    # Censoring rate
+    q = (1-p)^(1/a);
+    lc = l*((1-q)/q)^(1/b);
+    # Censoring times
+    cen = rWeibull(n=n,a=b,l=lc)$time;
     # Observations
     U = cbind(time,cen);
     Umin = aaply(.data=U,.margins=1,.fun=min);
