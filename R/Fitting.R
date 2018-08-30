@@ -149,7 +149,7 @@ fit.Exp = function(time,status,alpha=0.05){
 #' Estimates parameters for gamma event times subject to non-informative
 #' right censoring. The gamma distribution is parameterized in terms
 #' of the shape \eqn{\alpha} and rate \eqn{\lambda}:
-#' \deqn{f(t) = \frac{\lambda^{\alpha}}{\Gamma(\alpha)} t^{\alpha-1}e^{-\lambda t}, t>0}
+#' \deqn{f(t) = \frac{\lambda{\Gamma(\alpha)} (\lambda t)^{\alpha-1}e^{-\lambda t}, t>0}
 #'
 #' @param time Observation times.
 #' @param status Status indicator, coded as 1 if an event was observed, 0 if censored.
@@ -164,7 +164,7 @@ fit.Exp = function(time,status,alpha=0.05){
 #' \describe{
 #'  \item{Parameters}{The estimated shape \eqn{\alpha} and rate \eqn{\lambda}.}
 #'  \item{Information}{The observed information matrix.}
-#'  \item{Outcome}{The fitted mean and variance.}
+#'  \item{Outcome}{The fitted mean, median, and variance.}
 #' }
 
 fit.Gamma = function(time,status,alpha=0.05,eps=1e-6,maxit=10){
@@ -216,10 +216,10 @@ fit.Gamma = function(time,status,alpha=0.05,eps=1e-6,maxit=10){
   ## Objective function
   Q = function(a,l){
     # Log likelihood
-    Out = nobs*a*log(l)+a*Sa-l*Sl-n*log(gamma(a));
+    Out = nobs*a*log(l)+a*Sa-l*Sl-n*lgamma(a);
     # Add corrections for censoring
     if(flag){
-      Out = Out+sum(gammainc(a,l*tCen));
+      Out = Out+sum(log(gammainc(a,l*tCen)));
     }
     return(Out);
   }
@@ -304,6 +304,8 @@ fit.Gamma = function(time,status,alpha=0.05,eps=1e-6,maxit=10){
   Out = new(Class="fit",Distribution="Gamma",Parameters=P,Information=J,Outcome=Y);
   return(Out);
 }
+
+
 
 ########################
 # Log-Logistic Distribution
