@@ -22,12 +22,6 @@ An object of class \code{fit} containing the following:
 \describe{
  \item{Parameters}{The estimated shape \eqn{\alpha} and rate \eqn{\lambda}.}
  \item{Information}{The observed information matrix.}
- \item{Outcome}{The fitted mean and variance.}
+ \item{Outcome}{The fitted mean, median, and variance.}
 }
-}
-\description{
-Estimates parameters for gamma event times subject to non-informative
-right censoring. The gamma distribution is parameterized in terms
-of the shape \eqn{\alpha} and rate \eqn{\lambda}:
-\deqn{f(t) = \frac{\lambda^{\alpha}}{\Gamma(\alpha)} t^{\alpha-1}e^{-\lambda t}, t>0}
 }
