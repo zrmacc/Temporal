@@ -2,7 +2,7 @@
 % Please edit documentation in R/Weibull.R
 \name{fit.Weibull}
 \alias{fit.Weibull}
-\title{Weibull Parameter Estimation}
+\title{Weibull Distribution Parameter Estimation}
 \usage{
 fit.Weibull(time, status, sig = 0.05, init = NULL)
 }
@@ -13,7 +13,7 @@ fit.Weibull(time, status, sig = 0.05, init = NULL)
 
 \item{sig}{Significance level, for CIs.}
 
-\item{init}{List of initial parameter values, including the shape parameter "a".}
+\item{init}{List containing an initial value for the shape parameter "a".}
 }
 \value{
 An object of class \code{fit} containing the following:
@@ -28,4 +28,15 @@ Estimates parameters for Weibull event times subject to non-informative
 right censoring. The Weibull distribution is parameterized in terms
 of the shape \eqn{\alpha} and rate \eqn{\lambda}:
 \deqn{f(t) = \alpha\lambda^{\alpha}t^{\alpha-1}e^{-(\lambda t)^{\alpha}}, t>0}
+}
+\examples{
+# Simulate
+D = rWeibull(n=1e3,a=2,l=2);
+# Estimate
+M = fitParaSurv(time=D$time,status=D$status,dist="weibull");
+}
+\seealso{
+\itemize{
+  \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+}
 }

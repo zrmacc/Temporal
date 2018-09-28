@@ -28,15 +28,17 @@ naming convention.}
 \item{report}{Report fitting progress?}
 }
 \value{
-An object of class \code{fit} containing the following: \describe{
-  \item{Parameters}{The estimated rate \eqn{\lambda}.} \item{Information}{The
-  observed information.} \item{Outcome}{The fitted mean, median, and
-  variance.} }
+An object of class \code{fit} containing the following:
+\describe{
+  \item{Parameters}{The estimated shape and rate parameters.}
+  \item{Information}{The observed information matrix.}
+  \item{Outcome}{The fitted mean, median, and variance.}
+}
 }
 \description{
-Estimates parameters for parametric event times subject to non-informative
-right censoring. Available distributions include: exponential, gamma,
-log-logistic, log-normal, and Weibull.
+Estimates parametric survival distributions using event times subject to
+non-informative right censoring. Available distributions include:
+exponential, gamma, generalized gamma, log-logistic, log-normal, and Weibull.
 }
 \examples{
 # Generate cenored gamma data
@@ -48,4 +50,15 @@ M = fitParaSurv(time=D$time,status=D$status,dist="gamma");
 D = rWeibull(n=1e3,a=2,l=2,p=0.2);
 # Fit weibull distribution
 M = fitParaSurv(time=D$time,status=D$status,dist="weibull");
+}
+\seealso{
+\itemize{
+  \item{}{Between group comparison of survival experience \code{\link{compParaSurv}}}
+  \item{}{Exponential distribution \code{\link{fit.Exp}}}
+  \item{}{Gamma distribution \code{\link{fit.Gamma}}}
+  \item{}{Generalized gamma distribution \code{\link{fit.GenGamma}}}
+  \item{}{Log-logistic distribution \code{\link{fit.LogLogistic}}}
+  \item{}{Log-normal distribution \code{\link{fit.LogNormal}}}
+  \item{}{Weibull distribution \code{\link{fit.Weibull}}}
+}
 }

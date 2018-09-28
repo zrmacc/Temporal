@@ -9,14 +9,14 @@ init.GenGamma(tobs, L = 0.01, U = 10)
 \arguments{
 \item{tobs}{Observed event times.}
 
-\item{L}{Lower bound on \eqn{\alpha}.}
+\item{L}{Lower bound on shape parameter \eqn{\alpha}.}
 
-\item{U}{Upper bound on \eqn{\alpha}.}
+\item{U}{Upper bound on shape parameter \eqn{\alpha}.}
 }
 \value{
 List containing the estimated shape and rate parameters on log scale.
 }
 \description{
 Initializes the parameters for the generalized gamma distribution using
-method of moments.
+moment estimators.
 }

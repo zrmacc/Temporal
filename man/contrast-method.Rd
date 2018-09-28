@@ -3,13 +3,13 @@
 \docType{methods}
 \name{show,contrast-method}
 \alias{show,contrast-method}
-\title{Show for Contrasts}
+\title{Show Method for a Contrast of Survival Distributions.}
 \usage{
 \S4method{show}{contrast}(object)
 }
 \arguments{
-\item{object}{A \code{contrast} object.}
+\item{object}{An object of class \code{contrast}.}
 }
 \description{
-Show for Contrasts
+Show Method for a Contrast of Survival Distributions.
 }

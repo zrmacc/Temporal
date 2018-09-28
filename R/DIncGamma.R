@@ -12,14 +12,25 @@
 #' Evaluates derivatives of the upper incomplete gamma function, defined as:
 #' \deqn{\Gamma(\alpha,s) = \int_{s}^{\infty}u^{\alpha-1}e^{-u}du}
 #'
-#' @param a Value of \eqn{\alpha} at which to evaluate.
-#' @param s Value of \eqn{s} at which to evaluate.
+#' @param a Value of the shape \eqn{\alpha} at which to evaluate.
+#' @param s Value of the lower limit \eqn{s} at which to evaluate.
 #' @param Dirn Direction in which to differentiate. Select from among "a", "s",
 #'   and "as".
 #' @param Order Order of the derivative, if the direction is either "a", or "s".
 #'   Select from among 1 and 2.
-#' @export
+#'
+#' @return Scalar value of the partial derivative in the direction of interest.
+#'
 #' @importFrom stats integrate
+#' @export
+#'
+#' @examples
+#' # First partial in shape at (a=1,s=1)
+#' dIncGamma(a=1,s=1,Dirn="a",Order=1);
+#' # Second partial in lower limit at (a=1,s=1)
+#' dIncGamma(a=1,s=1,Dirn="s",Order=2);
+#' # Mixed partial at (a=1,s=1);
+#' dIncGamma(a=1,s=1,Dirn="as");
 
 dIncGamma = function(a,s,Dirn="a",Order=1){
   # Input check
@@ -64,18 +75,29 @@ dIncGamma = function(a,s,Dirn="a",Order=1){
 
 #' Derivatives of the Log Incomplete Gamma Function
 #'
-#' Evaluates derivatives of the upper log incomplete gamma function, defined as:
-#' \deqn{\ln\Gamma(\alpha,s) = \int_{s}^{\infty}u^{\alpha-1}e^{-u}du}
+#' Evaluates derivatives of the log of the upper log incomplete gamma function,
+#' defined as: \deqn{\ln\Gamma(\alpha,s) = \int_{s}^{\infty}u^{\alpha-1}e^{-u}du}
 #'
-#' @param a Value of \eqn{\alpha} at which to evaluate.
-#' @param s Value of \eqn{s} at which to evaluate.
+#' @param a Value of the shape \eqn{\alpha} at which to evaluate.
+#' @param s Value of lower limit \eqn{s} at which to evaluate.
 #' @param Dirn Direction in which to differentiate. Select from among "a", "s",
 #'   and "as".
 #' @param Order Order of the derivative, if the direction is either "a", or "s".
 #'   Select from among 1 and 2.
-#' @export
+#'
+#' @return Scalar value of the partial derivative in the direction of interest.
+#'
 #' @importFrom expint gammainc
 #' @importFrom stats integrate
+#' @export
+#'
+#' @examples
+#' # First partial in shape at (a=1,s=1)
+#' dLogIncGamma(a=1,s=1,Dirn="a",Order=1);
+#' # Second partial in lower limit at (a=1,s=1)
+#' dLogIncGamma(a=1,s=1,Dirn="s",Order=2);
+#' # Mixed partial at (a=1,s=1);
+#' dLogIncGamma(a=1,s=1,Dirn="as");
 
 dLogIncGamma = function(a,s,Dirn="a",Order=1){
   # Input check

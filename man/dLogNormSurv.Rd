@@ -2,16 +2,19 @@
 % Please edit documentation in R/DNormSurv.R
 \name{dLogNormSurv}
 \alias{dLogNormSurv}
-\title{Logarithmic Derivatives of the Normal Surviavl Function}
+\title{Logarithmic Derivatives of the Normal Survival Function}
 \usage{
 dLogNormSurv(s, Order = 1)
 }
 \arguments{
-\item{s}{Value of \eqn{s} at which to evaluate.}
+\item{s}{Value of the lower limit \eqn{s} at which to evaluate.}
 
 \item{Order}{Order of the derivative, select from among 1 and 2.}
 }
+\value{
+Scalar value of the derivative.
+}
 \description{
-#' Evaluates logarithimic derivatives of the normal survival, defined as:
+Evaluates logarithmic derivatives of the normal survival, defined as:
 \deqn{\ln\Phi(s)=\ln\int_{s}^{\infty}\frac{e^{-(u^2)/2}}{\sqrt{2\pi}}du}
 }

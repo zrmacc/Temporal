@@ -17,6 +17,11 @@ estDiff(t1, s1, t0, s0, sig = 0.05)
 
 \item{sig}{Significance level}
 }
+\value{
+Data.frame containing estimated difference, its standard error, lower and
+  upper confidence bounds, and a p-value assessing the null hypothesis of no
+  difference.
+}
 \description{
 Calculate CIs and p-value for the difference of estimated parameters
 }

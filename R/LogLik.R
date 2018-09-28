@@ -1,9 +1,9 @@
 # Purpose: Log likelihood evaluation function
 # Updated: 180926
 
-#' Log Likelihood
+#' Survival Distribution Log Likelihood
 #'
-#' Evaluation of log-likelihood for parametric survival distribution.
+#' Evaluation of the log-likelihood for parametric survival distribution.
 #'
 #' @param time Observation times.
 #' @param status Status indicator, coded as 1 if an event was observed, 0 if censored.
@@ -14,6 +14,15 @@
 #' @return Scalar value of the log likelihood.
 #'
 #' @importFrom expint gammainc
+#'
+#' @examples
+#' \dontrun{
+#' # Simulate
+#' D = rWeibull(n=1e3,a=2,l=2,p=0.2);
+#' # Log likelihood
+#' ll = survLogLik(time=D$time,status=D$status,
+#' dist="weibull",theta=list("a"=2,"l"=2),log.scale=F);
+#' }
 
 survLogLik = function(time,status,dist,theta,log.scale=T){
   # Events

@@ -2,7 +2,7 @@
 # Exponential Distribution
 ########################
 
-#' Exponential Parameter Estimation
+#' Exponential Distribution Parameter Estimation
 #'
 #' Estimates parameters for exponential event times subject to non-informative
 #' right censoring. The exponential distribution is parameterized in terms
@@ -11,13 +11,26 @@
 #' @param time Observation times.
 #' @param status Status indicator, coded as 1 if an event was observed, 0 if censored.
 #' @param sig Significance level, for CIs.
-#' @importFrom methods new
+#'
 #' @return An object of class \code{fit} containing the following:
 #' \describe{
 #'  \item{Parameters}{The estimated model parameters.}
 #'  \item{Information}{The observed information matrix.}
 #'  \item{Outcome}{The fitted mean, median, and variance of the time to event distribution.}
 #' }
+#'
+#' @importFrom methods new
+#'
+#' @seealso
+#' \itemize{
+#'   \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+#' }
+#'
+#' @examples
+#' # Simulate
+#' D = rWeibull(n=1e3,a=1,l=2);
+#' # Estimate
+#' M = fitParaSurv(time=D$time,status=D$status,dist="exp");
 
 fit.Exp = function(time,status,sig=0.05){
   # Events

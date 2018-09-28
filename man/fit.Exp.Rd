@@ -2,7 +2,7 @@
 % Please edit documentation in R/Exponential.R
 \name{fit.Exp}
 \alias{fit.Exp}
-\title{Exponential Parameter Estimation}
+\title{Exponential Distribution Parameter Estimation}
 \usage{
 fit.Exp(time, status, sig = 0.05)
 }
@@ -25,4 +25,15 @@ An object of class \code{fit} containing the following:
 Estimates parameters for exponential event times subject to non-informative
 right censoring. The exponential distribution is parameterized in terms
 of the rate \eqn{\lambda}: \deqn{f(t) = \lambda e^{-\lambda t}, t>0}
+}
+\examples{
+# Simulate
+D = rWeibull(n=1e3,a=1,l=2);
+# Estimate
+M = fitParaSurv(time=D$time,status=D$status,dist="exp");
+}
+\seealso{
+\itemize{
+  \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+}
 }

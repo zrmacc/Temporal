@@ -7,9 +7,9 @@
 
 #' Fit Parametric Survival Distribution
 #'
-#' Estimates parameters for parametric event times subject to non-informative
-#' right censoring. Available distributions include: exponential, gamma,
-#' log-logistic, log-normal, and Weibull.
+#' Estimates parametric survival distributions using event times subject to
+#' non-informative right censoring. Available distributions include:
+#' exponential, gamma, generalized gamma, log-logistic, log-normal, and Weibull.
 #'
 #' @param time Observation times.
 #' @param status Status indicator, coded as 1 if an event was observed, 0 if
@@ -22,11 +22,27 @@
 #' @param eps Tolerance for Newton-Raphson iterations.
 #' @param maxit Maximum number of NR iterations.
 #' @param report Report fitting progress?
+#'
 #' @export
-#' @return An object of class \code{fit} containing the following: \describe{
-#'   \item{Parameters}{The estimated rate \eqn{\lambda}.} \item{Information}{The
-#'   observed information.} \item{Outcome}{The fitted mean, median, and
-#'   variance.} }
+#'
+#' @return An object of class \code{fit} containing the following:
+#' \describe{
+#'   \item{Parameters}{The estimated shape and rate parameters.}
+#'   \item{Information}{The observed information matrix.}
+#'   \item{Outcome}{The fitted mean, median, and variance.}
+#' }
+#'
+#' @seealso
+#' \itemize{
+#'   \item{}{Between group comparison of survival experience \code{\link{compParaSurv}}}
+#'   \item{}{Exponential distribution \code{\link{fit.Exp}}}
+#'   \item{}{Gamma distribution \code{\link{fit.Gamma}}}
+#'   \item{}{Generalized gamma distribution \code{\link{fit.GenGamma}}}
+#'   \item{}{Log-logistic distribution \code{\link{fit.LogLogistic}}}
+#'   \item{}{Log-normal distribution \code{\link{fit.LogNormal}}}
+#'   \item{}{Weibull distribution \code{\link{fit.Weibull}}}
+#' }
+#'
 #' @examples
 #' # Generate cenored gamma data
 #' D = rGamma(n=1e3,a=2,l=2,p=0.2);

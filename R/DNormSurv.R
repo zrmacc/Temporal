@@ -1,13 +1,15 @@
 # Purpose: Derivatives of the log normal cdf
 # Updated: 180829
 
-#' Logarithmic Derivatives of the Normal Surviavl Function
+#' Logarithmic Derivatives of the Normal Survival Function
 #'
-#' #' Evaluates logarithimic derivatives of the normal survival, defined as:
+#' Evaluates logarithmic derivatives of the normal survival, defined as:
 #' \deqn{\ln\Phi(s)=\ln\int_{s}^{\infty}\frac{e^{-(u^2)/2}}{\sqrt{2\pi}}du}
 #'
-#' @param s Value of \eqn{s} at which to evaluate.
+#' @param s Value of the lower limit \eqn{s} at which to evaluate.
 #' @param Order Order of the derivative, select from among 1 and 2.
+#'
+#' @return Scalar value of the derivative.
 #'
 #' @importFrom stats dnorm pnorm
 

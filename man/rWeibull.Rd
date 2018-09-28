@@ -2,7 +2,7 @@
 % Please edit documentation in R/DataGen.R
 \name{rWeibull}
 \alias{rWeibull}
-\title{Random Generation from the Weibull Distribution}
+\title{Simulation from the Weibull Distribution}
 \usage{
 rWeibull(n, a = 1, l = 1, p = 0)
 }
@@ -16,14 +16,16 @@ rWeibull(n, a = 1, l = 1, p = 0)
 \item{p}{Expected censoring proportion.}
 }
 \value{
-A data.frame with two columns, the observation time and status indicator.
+A data.frame including the observation times and status indicators.
 }
 \description{
-Generates Weibull random deviates with shape parameter \eqn{\alpha} and rate
-paramter \eqn{\lambda}. See \code{\link{fit.Weibull}} for the parameterization. If
+Generates Weibull event times with shape parameter \eqn{\alpha} and rate
+parameter \eqn{\lambda}. See \code{\link{fit.Weibull}} for the parameterization. If
 a censoring proportion \eqn{p} is provided, the deviates are subject to
 non-informative random right censoring.
 }
 \examples{
+# Weibull event times with shape 2 and rate 2
+# Expected censoring proportion of 20\%
 D = rWeibull(n=1e3,a=2,l=2,p=0.2);
 }

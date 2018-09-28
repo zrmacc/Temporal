@@ -1,11 +1,11 @@
-#' Model Fit
+#' Fitted Survival Distribution
 #'
 #' Defines the object class returned by fitting functions.
 #'
 #' @slot Distribution Fitted distribution.
 #' @slot Parameters Parameters.
 #' @slot Information Information components.
-#' @slot Outcome Properties of fitted distribution.
+#' @slot Outcome Properties of the fitted distribution.
 #' @name fit-class
 #' @rdname fit-class
 #' @exportClass fit
@@ -16,11 +16,11 @@ setClass(Class="fit",representation=representation(Distribution="character",Para
 # Print Method
 ########################
 
-#' Print for Fitted Survival Models
+#' Print Method for Fitted Survival Distributions
 #'
 #' Print method for objects of class \code{fit}.
 #'
-#' @param x A \code{fit} object.
+#' @param x An object of class \code{fit}.
 #' @param ... Unused.
 #' @export
 
@@ -52,8 +52,9 @@ print.fit = function(x,...){
 # Show Method
 ########################
 
-#' Show for Fitted Survival Models
-#' @param object A \code{fit} object.
+#' Show Method for Fitted Survival Distributions
+#'
+#' @param object An object of class \code{fit}.
 #' @rdname fit-method
 #' @importFrom methods show
 
@@ -63,15 +64,15 @@ setMethod(f="show",signature=c(object="fit"),definition=function(object){print.f
 # Model Contrast
 ########################
 
-#' Model Contrast
+#' Contrast of Survival Distributions.
 #'
-#' Defines the object class returned by fitting functions.
+#' Defines the object class returned by the comparison function.
 #'
 #' @slot Dist1 Distribution fit to the target group.
 #' @slot Dist0 Distribution fit to the reference group.
 #' @slot Model1 Fitted model for the target group.
-#' @slot Model0 Fitted model for the reference group. 
-#' @slot Contrast Model contrasts. 
+#' @slot Model0 Fitted model for the reference group.
+#' @slot Contrast Model contrasts.
 #' @name contrast-class
 #' @rdname contrast-class
 #' @exportClass contrast
@@ -82,9 +83,9 @@ setClass(Class="contrast",representation=representation(Dist1="character",Dist0=
 # Print Method
 ########################
 
-#' Print for Contrasts
+#' Print Method for a Contrast of Survival Distributions.
 #'
-#' Print method for objects of class \code{contrast}.
+#' Print method for an object of class \code{contrast}.
 #'
 #' @param x A \code{contrast} object.
 #' @param ... Unused.
@@ -130,8 +131,9 @@ print.contrast = function(x,...){
 # Show Method
 ########################
 
-#' Show for Contrasts
-#' @param object A \code{contrast} object.
+#' Show Method for a Contrast of Survival Distributions.
+#'
+#' @param object An object of class \code{contrast}.
 #' @rdname contrast-method
 #' @importFrom methods show
 

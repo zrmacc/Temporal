@@ -2,7 +2,7 @@
 % Please edit documentation in R/Gamma.R
 \name{fit.Gamma}
 \alias{fit.Gamma}
-\title{Gamma Parameter Estimation}
+\title{Gamma Distribution Parameter Estimation}
 \usage{
 fit.Gamma(time, status, sig = 0.05, init = NULL, eps = 1e-06,
   maxit = 10, report = F)
@@ -37,4 +37,15 @@ Estimates parameters for gamma event times subject to non-informative
 right censoring. The gamma distribution is parameterized in terms
 of the shape \eqn{\alpha} and rate \eqn{\lambda}:
 \deqn{f(t) = \frac{\lambda{\Gamma(\alpha)} (\lambda t)^{\alpha-1}e^{-\lambda t}, t>0}}
+}
+\examples{
+# Simulate
+D = rGamma(n=1e3,a=2,l=2);
+# Estimate
+M = fitParaSurv(time=D$time,status=D$status,dist="gamma");
+}
+\seealso{
+\itemize{
+  \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+}
 }

@@ -8,7 +8,7 @@
 # Log-Normal Distribution
 ########################
 
-#' Log-Normal Parameter Estimation
+#' Log-Normal Distribution Parameter Estimation
 #'
 #' Estimates parameters for log-normal event times subject to non-informative
 #' right censoring. The log-normal distribution is parameterized in terms
@@ -34,6 +34,17 @@
 #'  \item{Information}{The observed information matrix.}
 #'  \item{Outcome}{The fitted mean, median, and variance.}
 #' }
+#'
+#' @seealso
+#' \itemize{
+#'   \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+#' }
+#'
+#' @examples
+#' # Simulate
+#' D = rLogNormal(n=1e3,m=0,s=1);
+#' # Estimate
+#' M = fitParaSurv(time=D$time,status=D$status,dist="log-normal");
 
 fit.LogNormal = function(time,status,sig=0.05,init=NULL,eps=1e-6,maxit=10,report=F){
   # Input check

@@ -12,11 +12,11 @@
 #' Initialization for Generalized Gamma
 #'
 #' Initializes the parameters for the generalized gamma distribution using
-#' method of moments.
+#' moment estimators.
 #'
 #' @param tobs Observed event times.
-#' @param L Lower bound on \eqn{\alpha}.
-#' @param U Upper bound on \eqn{\alpha}.
+#' @param L Lower bound on shape parameter \eqn{\alpha}.
+#' @param U Upper bound on shape parameter \eqn{\alpha}.
 #'
 #' @return List containing the estimated shape and rate parameters on log scale.
 #'
@@ -78,7 +78,7 @@ init.GenGamma = function(tobs,L=0.01,U=10){
 # Generalized Gamma Distribution
 ########################
 
-#' Generalized Gamma Parameter Estimation
+#' Generalized Gamma Distribution Parameter Estimation
 #'
 #' Estimates parameters for generalized gamma event times subject to non-informative
 #' right censoring. The gamma distribution is parameterized in terms
@@ -105,6 +105,18 @@ init.GenGamma = function(tobs,L=0.01,U=10){
 #'  \item{Information}{The observed information matrix.}
 #'  \item{Outcome}{The fitted mean, median, and variance.}
 #' }
+#'
+#' @seealso
+#' \itemize{
+#'   \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+#' }
+#'
+#' @examples
+#' set.seed(100);
+#' # Simulate
+#' D = rGenGamma(n=1e4,a=2,b=2,l=2);
+#' # Estimate
+#' M = fitParaSurv(time=D$time,status=D$status,dist="gengamma");
 
 fit.GenGamma = function(time,status,sig=0.05,init=NULL,eps=1e-6,maxit=10,report=F){
   # Input check

@@ -9,7 +9,7 @@
 # Gamma Distribution
 ########################
 
-#' Gamma Parameter Estimation
+#' Gamma Distribution Parameter Estimation
 #'
 #' Estimates parameters for gamma event times subject to non-informative
 #' right censoring. The gamma distribution is parameterized in terms
@@ -37,6 +37,17 @@
 #'  \item{Information}{The observed information matrix.}
 #'  \item{Outcome}{The fitted mean, median, and variance.}
 #' }
+#'
+#' @seealso
+#' \itemize{
+#'   \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+#' }
+#'
+#' @examples
+#' # Simulate
+#' D = rGamma(n=1e3,a=2,l=2);
+#' # Estimate
+#' M = fitParaSurv(time=D$time,status=D$status,dist="gamma");
 
 fit.Gamma = function(time,status,sig=0.05,init=NULL,eps=1e-6,maxit=10,report=F){
   # Input check

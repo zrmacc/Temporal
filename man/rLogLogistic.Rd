@@ -2,7 +2,7 @@
 % Please edit documentation in R/DataGen.R
 \name{rLogLogistic}
 \alias{rLogLogistic}
-\title{Random Generation from the Log-Logistic Distribution}
+\title{Simulation from the Log-Logistic Distribution}
 \usage{
 rLogLogistic(n, a = 4, l = 1, p = 0)
 }
@@ -16,14 +16,16 @@ rLogLogistic(n, a = 4, l = 1, p = 0)
 \item{p}{Expected censoring proportion.}
 }
 \value{
-A data.frame with two columns, the observation time and status indicator.
+A data.frame including the observation times and status indicators.
 }
 \description{
-Generates log-logistic random deviates with shape parameter \eqn{\alpha} and rate
-paramter \eqn{\lambda}. See \code{\link{fit.LogLogistic}} for the parameterization. If
-a censoring proportion \eqn{p} is provided, the deviates are subject to
-non-informative random right censoring.
+Generates log-logistic event times with shape parameter \eqn{\alpha} and rate
+parameter \eqn{\lambda}. See \code{\link{fit.LogLogistic}} for the
+parameterization. If a censoring proportion \eqn{p} is provided, the event
+times are subject to non-informative random right censoring.
 }
 \examples{
+# Log-logistic event times with shape 4 and rate 1
+# Expected censoring proportion of 20\%
 D = rLogLogistic(n=1e3,a=4,l=1,p=0.2);
 }

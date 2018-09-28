@@ -2,7 +2,7 @@
 % Please edit documentation in R/GenGamma.R
 \name{fit.GenGamma}
 \alias{fit.GenGamma}
-\title{Generalized Gamma Parameter Estimation}
+\title{Generalized Gamma Distribution Parameter Estimation}
 \usage{
 fit.GenGamma(time, status, sig = 0.05, init = NULL, eps = 1e-06,
   maxit = 10, report = F)
@@ -36,4 +36,16 @@ Estimates parameters for generalized gamma event times subject to non-informativ
 right censoring. The gamma distribution is parameterized in terms
 of the shape parameters \eqn{(\alpha,\beta)}, and the rate \eqn{\lambda}:
 \deqn{f(t) = \frac{\beta\lambda}{\Gamma(\alpha)} (\lambda t)^{\alpha\beta-1}e^{-(\lambda t)^{\beta}}, t>0}
+}
+\examples{
+set.seed(100);
+# Simulate
+D = rGenGamma(n=1e4,a=2,b=2,l=2);
+# Estimate
+M = fitParaSurv(time=D$time,status=D$status,dist="gengamma");
+}
+\seealso{
+\itemize{
+  \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+}
 }

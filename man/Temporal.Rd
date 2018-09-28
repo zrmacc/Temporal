@@ -4,7 +4,7 @@
 \name{Temporal}
 \alias{Temporal}
 \alias{Temporal-package}
-\title{Temporal: Parametric Survival Analysis}
+\title{Temporal: Utilities for Parametric Survival Analysis}
 \description{
 This package performs estimation and inference on parametric survival curves.
 See \code{\link{fitParaSurv}} for maximum likelihood estimation of model parameters.

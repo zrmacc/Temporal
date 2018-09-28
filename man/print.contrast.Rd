@@ -2,7 +2,7 @@
 % Please edit documentation in R/Class.R
 \name{print.contrast}
 \alias{print.contrast}
-\title{Print for Contrasts}
+\title{Print Method for a Contrast of Survival Distributions.}
 \usage{
 \method{print}{contrast}(x, ...)
 }
@@ -12,5 +12,5 @@
 \item{...}{Unused.}
 }
 \description{
-Print method for objects of class \code{contrast}.
+Print method for an object of class \code{contrast}.
 }

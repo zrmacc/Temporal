@@ -4,7 +4,7 @@
 \alias{qLogLogistic}
 \title{Quantile Function for the Log-Logistic Distribution}
 \usage{
-qLogLogistic(p, a, l)
+qLogLogistic(p, a = 1, l = 1)
 }
 \arguments{
 \item{p}{Probability.}
@@ -13,7 +13,14 @@ qLogLogistic(p, a, l)
 
 \item{l}{Rate.}
 }
+\value{
+Scalar quantile.
+}
 \description{
 Quantile function for the log-logistic distribution. See \code{\link{fit.LogLogistic}}
 for the parameterization.
+}
+\examples{
+# Median of standard log-logistic distribution
+qLogLogistic(p=0.5);
 }

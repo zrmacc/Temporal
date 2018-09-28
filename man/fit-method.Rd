@@ -3,13 +3,13 @@
 \docType{methods}
 \name{show,fit-method}
 \alias{show,fit-method}
-\title{Show for Fitted Survival Models}
+\title{Show Method for Fitted Survival Distributions}
 \usage{
 \S4method{show}{fit}(object)
 }
 \arguments{
-\item{object}{A \code{fit} object.}
+\item{object}{An object of class \code{fit}.}
 }
 \description{
-Show for Fitted Survival Models
+Show Method for Fitted Survival Distributions
 }

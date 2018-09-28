@@ -3,9 +3,9 @@
 \docType{class}
 \name{contrast-class}
 \alias{contrast-class}
-\title{Model Contrast}
+\title{Contrast of Survival Distributions.}
 \description{
-Defines the object class returned by fitting functions.
+Defines the object class returned by the comparison function.
 }
 \section{Slots}{
 

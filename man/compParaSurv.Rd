@@ -17,11 +17,11 @@ censored.}
 reference group.}
 
 \item{dist1}{Distribution to fit for the target group. Selected from among:
-exp, gamma, log-logistic, log-normal, and weibull.}
+exp, gamma, gengamma, log-logistic, log-normal, and weibull.}
 
-\item{dist0}{Distribution to fit for the reference group. Selected from
-among: exp, gamma, log-logistic, log-normal, and weibull. If omitted,
-defaults to the distribution used for the target group.}
+\item{dist0}{Distribution to fit for the reference group. Same choices as for
+the target group. If omitted, defaults to the distribution specified for
+the target group.}
 
 \item{init1}{List of initial parameter values for the target group. See
 individual distributions for naming convention.}
@@ -41,14 +41,14 @@ individual distributions for naming convention.}
 An object of class \code{contrast} containing the following:
 \describe{
   \item{Model1}{The fitted model for the target group.}
-  \item{Model2}{The fitted model for the reference group.}
-  \item{Contrast}{The parametric contrasts.}
+  \item{Model0}{The fitted model for the reference group.}
+  \item{Contrast}{Contrasts of means and medians.}
 }
 }
 \description{
 Compares the means and medians of parametric survival distributions fit to
 each of two treatment arms. Available distributions include: exponential,
-gamma, log-logistic, log-normal, and Weibull.
+gamma, generalized gamma, log-logistic, log-normal, and Weibull.
 }
 \examples{
 set.seed(100);
@@ -87,4 +87,9 @@ D0$arm = 0;
 D = rbind(D1,D0);
 # Comparison
 E = compParaSurv(time=D$time,status=D$status,arm=D$arm,dist1="log-normal",dist0="weibull");
+}
+\seealso{
+\itemize{
+  \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+}
 }

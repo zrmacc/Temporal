@@ -7,9 +7,9 @@
 dIncGamma(a, s, Dirn = "a", Order = 1)
 }
 \arguments{
-\item{a}{Value of \eqn{\alpha} at which to evaluate.}
+\item{a}{Value of the shape \eqn{\alpha} at which to evaluate.}
 
-\item{s}{Value of \eqn{s} at which to evaluate.}
+\item{s}{Value of the lower limit \eqn{s} at which to evaluate.}
 
 \item{Dirn}{Direction in which to differentiate. Select from among "a", "s",
 and "as".}
@@ -17,7 +17,18 @@ and "as".}
 \item{Order}{Order of the derivative, if the direction is either "a", or "s".
 Select from among 1 and 2.}
 }
+\value{
+Scalar value of the partial derivative in the direction of interest.
+}
 \description{
 Evaluates derivatives of the upper incomplete gamma function, defined as:
 \deqn{\Gamma(\alpha,s) = \int_{s}^{\infty}u^{\alpha-1}e^{-u}du}
+}
+\examples{
+# First partial in shape at (a=1,s=1)
+dIncGamma(a=1,s=1,Dirn="a",Order=1);
+# Second partial in lower limit at (a=1,s=1)
+dIncGamma(a=1,s=1,Dirn="s",Order=2);
+# Mixed partial at (a=1,s=1);
+dIncGamma(a=1,s=1,Dirn="as");
 }

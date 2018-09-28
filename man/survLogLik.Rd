@@ -2,7 +2,7 @@
 % Please edit documentation in R/LogLik.R
 \name{survLogLik}
 \alias{survLogLik}
-\title{Log Likelihood}
+\title{Survival Distribution Log Likelihood}
 \usage{
 survLogLik(time, status, dist, theta, log.scale = T)
 }
@@ -21,5 +21,14 @@ survLogLik(time, status, dist, theta, log.scale = T)
 Scalar value of the log likelihood.
 }
 \description{
-Evaluation of log-likelihood for parametric survival distribution.
+Evaluation of the log-likelihood for parametric survival distribution.
+}
+\examples{
+\dontrun{
+# Simulate
+D = rWeibull(n=1e3,a=2,l=2,p=0.2);
+# Log likelihood
+ll = survLogLik(time=D$time,status=D$status,
+dist="weibull",theta=list("a"=2,"l"=2),log.scale=F);
+}
 }

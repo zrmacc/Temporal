@@ -17,6 +17,11 @@ estRatio(t1, s1, t0, s0, sig = 0.05)
 
 \item{sig}{Significance level}
 }
+\value{
+Data.frame containing estimated ratio, its standard error, lower and
+  upper confidence bounds, and a p-value assessing the null hypothesis that
+  the ratio is unity.
+}
 \description{
 Calculate CIs and p-value for the ratio of estimated parameters
 }

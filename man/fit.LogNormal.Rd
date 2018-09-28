@@ -2,7 +2,7 @@
 % Please edit documentation in R/LogNormal.R
 \name{fit.LogNormal}
 \alias{fit.LogNormal}
-\title{Log-Normal Parameter Estimation}
+\title{Log-Normal Distribution Parameter Estimation}
 \usage{
 fit.LogNormal(time, status, sig = 0.05, init = NULL, eps = 1e-06,
   maxit = 10, report = F)
@@ -37,4 +37,15 @@ Estimates parameters for log-normal event times subject to non-informative
 right censoring. The log-normal distribution is parameterized in terms
 of the location \eqn{\mu} and scale \eqn{\sigma}:
 \deqn{f(t) = \phi\left(\frac{\ln t-\mu}{\sigma}\right)\frac{1}{t\sigma}, t>0}
+}
+\examples{
+# Simulate
+D = rLogNormal(n=1e3,m=0,s=1);
+# Estimate
+M = fitParaSurv(time=D$time,status=D$status,dist="log-normal");
+}
+\seealso{
+\itemize{
+  \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+}
 }

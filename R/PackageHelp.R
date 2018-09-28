@@ -5,7 +5,7 @@
 #' @importFrom Rcpp sourceCpp
 NULL
 
-#' Temporal: Parametric Survival Analysis
+#' Temporal: Utilities for Parametric Survival Analysis
 #'
 #' This package performs estimation and inference on parametric survival curves.
 #' See \code{\link{fitParaSurv}} for maximum likelihood estimation of model parameters.

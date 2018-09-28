@@ -3,7 +3,7 @@
 \docType{class}
 \name{fit-class}
 \alias{fit-class}
-\title{Model Fit}
+\title{Fitted Survival Distribution}
 \description{
 Defines the object class returned by fitting functions.
 }
@@ -16,6 +16,6 @@ Defines the object class returned by fitting functions.
 
 \item{\code{Information}}{Information components.}
 
-\item{\code{Outcome}}{Properties of fitted distribution.}
+\item{\code{Outcome}}{Properties of the fitted distribution.}
 }}
 

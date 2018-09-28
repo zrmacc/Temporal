@@ -2,12 +2,12 @@
 % Please edit documentation in R/Class.R
 \name{print.fit}
 \alias{print.fit}
-\title{Print for Fitted Survival Models}
+\title{Print Method for Fitted Survival Distributions}
 \usage{
 \method{print}{fit}(x, ...)
 }
 \arguments{
-\item{x}{A \code{fit} object.}
+\item{x}{An object of class \code{fit}.}
 
 \item{...}{Unused.}
 }

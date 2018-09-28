@@ -2,7 +2,7 @@
 % Please edit documentation in R/LogLogistic.R
 \name{fit.LogLogistic}
 \alias{fit.LogLogistic}
-\title{Log-Logistic Parameter Estimation}
+\title{Log-Logistic Distribution Parameter Estimation}
 \usage{
 fit.LogLogistic(time, status, sig = 0.05, init = NULL, eps = 1e-06,
   maxit = 10, report = F)
@@ -33,14 +33,25 @@ An object of class \code{fit} containing the following:
 }
 \description{
 Estimates parameters for log-logistic event times subject to non-informative
-right censoring. The log-logistic distribution is parameterized in terms
-of the shape \eqn{\alpha} and rate \eqn{\lambda}:
+right censoring. The log-logistic distribution is parameterized in terms of
+the shape \eqn{\alpha} and rate \eqn{\lambda}:
 \deqn{f(t) = \frac{\alpha\lambda(\lambda t)^{\alpha-1}}{[1+(\lambda t)^{\alpha}]^{2}}, t>0}
 }
 \details{
 For the log-logistic distribution, the mean is only defined if the shape
-parameter \eqn{\alpha>1}, and the variance if the shape parameter \eqn{\alpha>2}.
-Consequently, estimates of the outcome mean and variance are only returned
-if the estimated shape parameter exceeds these thresholds. For \eqn{\alpha\ll 1},
-the fitting function may fail.
+parameter \eqn{\alpha>1}, and the variance if the shape parameter
+\eqn{\alpha>2}. Consequently, estimates of the fitted mean and variance are
+only returned if the estimated shape parameter exceeds these thresholds. For
+\eqn{\alpha\ll 1}, the fitting function may fail.
+}
+\examples{
+# Simulate
+D = rLogLogistic(n=1e3,a=4,l=2);
+# Estimate
+M = fitParaSurv(time=D$time,status=D$status,dist="log-logistic");
+}
+\seealso{
+\itemize{
+  \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+}
 }

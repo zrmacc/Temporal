@@ -4,7 +4,7 @@
 \alias{qWeibull}
 \title{Quantile Function for the Weibull Distribution}
 \usage{
-qWeibull(p, a, l)
+qWeibull(p, a = 1, l = 1)
 }
 \arguments{
 \item{p}{Probability.}
@@ -12,6 +12,9 @@ qWeibull(p, a, l)
 \item{a}{Shape.}
 
 \item{l}{Rate.}
+}
+\value{
+Scalar quantile.
 }
 \description{
 Quantile function for the Weibull distribution. See \code{\link{fit.Weibull}}

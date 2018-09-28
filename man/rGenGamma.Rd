@@ -2,7 +2,7 @@
 % Please edit documentation in R/DataGen.R
 \name{rGenGamma}
 \alias{rGenGamma}
-\title{Random Generation from the Generalized Gamma Distribution}
+\title{Simulation from the Generalized Gamma Distribution}
 \usage{
 rGenGamma(n, a = 1, b = 1, l = 1, p = 0)
 }
@@ -19,16 +19,17 @@ distribution, set \eqn{\beta=1}.}
 \item{p}{Expected censoring proportion.}
 }
 \value{
-A data.frame with two columns, the observation time and status
-  indicator.
+A data.frame including the observation times and status indicators.
 }
 \description{
-Generates generalized gamma random deviates with shape parameters 
-\eqn{(\alpha,\beta)}, and rate paramter \eqn{\lambda}. See 
-\code{\link{fit.GenGamma}} for the parameterization. If a censoring 
-proportion \eqn{p} is provided, the deviates are subject to non-informative 
-random right censoring.
+Generates generalized gamma event times with shape parameters
+\eqn{(\alpha,\beta)}, and rate parameter \eqn{\lambda}. See
+\code{\link{fit.GenGamma}} for the parameterization. If a censoring
+proportion \eqn{p} is provided, the event times are subject to
+non-informative random right censoring.
 }
 \examples{
+# Generalized gamma event times with shapes (2,2) and rate 2
+# Expected censoring proportion of 20\%
 D = rGenGamma(n=1e3,a=2,b=2,l=2,p=0.2);
 }

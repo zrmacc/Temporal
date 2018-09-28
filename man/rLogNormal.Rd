@@ -2,7 +2,7 @@
 % Please edit documentation in R/DataGen.R
 \name{rLogNormal}
 \alias{rLogNormal}
-\title{Random Generation from the Log-Normal Distribution}
+\title{Simulation from the Log-Normal Distribution}
 \usage{
 rLogNormal(n, m = 0, s = 1, p = 0)
 }
@@ -16,14 +16,16 @@ rLogNormal(n, m = 0, s = 1, p = 0)
 \item{p}{Expected censoring proportion.}
 }
 \value{
-A data.frame with two columns, the observation time and status indicator.
+A data.frame including the observation times and status indicators.
 }
 \description{
-Generates log-normal random deviates with location parameter \eqn{\mu} and scale
-paramter \eqn{\sigma}. See \code{\link{fit.LogNormal}} for the parameterization. If
-a censoring proportion \eqn{p} is provided, the deviates are subject to
-non-informative random right censoring.
+Generates log-normal event times with location parameter \eqn{\mu} and scale
+parameter \eqn{\sigma}. See \code{\link{fit.LogNormal}} for the
+parameterization. If a censoring proportion \eqn{p} is provided, the event
+times are subject to non-informative random right censoring.
 }
 \examples{
+# Log-normal event times with location 0 and scale 1
+# Expected censoring proportion of 20\%
 D = rLogNormal(n=1e3,m=0,s=1,p=0.2);
 }

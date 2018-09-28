@@ -8,11 +8,17 @@
 #' Difference of Estimates
 #'
 #' Calculate CIs and p-value for the difference of estimated parameters
+#'
 #' @param t1 Treatment estimate
 #' @param s1 Treatment standard error
 #' @param t0 Reference estimate
 #' @param s0 Reference standard error
 #' @param sig Significance level
+#'
+#' @return Data.frame containing estimated difference, its standard error, lower and
+#'   upper confidence bounds, and a p-value assessing the null hypothesis of no
+#'   difference.
+#'
 #' @importFrom stats pnorm qnorm
 
 estDiff = function(t1,s1,t0,s0,sig=0.05){
@@ -35,11 +41,17 @@ estDiff = function(t1,s1,t0,s0,sig=0.05){
 #' Ratio of Estimates
 #'
 #' Calculate CIs and p-value for the ratio of estimated parameters
+#'
 #' @param t1 Treatment estimate
 #' @param s1 Treatment standard error
 #' @param t0 Reference estimate
 #' @param s0 Reference standard error
 #' @param sig Significance level
+#'
+#' @return Data.frame containing estimated ratio, its standard error, lower and
+#'   upper confidence bounds, and a p-value assessing the null hypothesis that
+#'   the ratio is unity.
+#'
 #' @importFrom stats pnorm qnorm
 
 estRatio = function(t1,s1,t0,s0,sig=0.05){
@@ -69,7 +81,7 @@ estRatio = function(t1,s1,t0,s0,sig=0.05){
 #'
 #' Compares the means and medians of parametric survival distributions fit to
 #' each of two treatment arms. Available distributions include: exponential,
-#' gamma, log-logistic, log-normal, and Weibull.
+#' gamma, generalized gamma, log-logistic, log-normal, and Weibull.
 #'
 #' @param time Observation time.
 #' @param status Status indicator, coded as 1 if an event was observed, 0 if
@@ -77,10 +89,10 @@ estRatio = function(t1,s1,t0,s0,sig=0.05){
 #' @param arm Treatment indicator, coded as 1 for the target group, 0 for the
 #'   reference group.
 #' @param dist1 Distribution to fit for the target group. Selected from among:
-#'   exp, gamma, log-logistic, log-normal, and weibull.
-#' @param dist0 Distribution to fit for the reference group. Selected from
-#'   among: exp, gamma, log-logistic, log-normal, and weibull. If omitted,
-#'   defaults to the distribution used for the target group.
+#'   exp, gamma, gengamma, log-logistic, log-normal, and weibull.
+#' @param dist0 Distribution to fit for the reference group. Same choices as for
+#'   the target group. If omitted, defaults to the distribution specified for
+#'   the target group.
 #' @param sig Significance level, for CIs.
 #' @param init1 List of initial parameter values for the target group. See
 #'   individual distributions for naming convention.
@@ -96,8 +108,13 @@ estRatio = function(t1,s1,t0,s0,sig=0.05){
 #' @return An object of class \code{contrast} containing the following:
 #' \describe{
 #'   \item{Model1}{The fitted model for the target group.}
-#'   \item{Model2}{The fitted model for the reference group.}
-#'   \item{Contrast}{The parametric contrasts.}
+#'   \item{Model0}{The fitted model for the reference group.}
+#'   \item{Contrast}{Contrasts of means and medians.}
+#' }
+#'
+#' @seealso
+#' \itemize{
+#'   \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
 #' }
 #'
 #' @examples

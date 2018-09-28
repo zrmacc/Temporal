@@ -1,26 +1,31 @@
 # Purpose: Censored Data Generation
-# Updated: 180817
+# Updated: 180828
 
 ########################
 # Gamma
 ########################
 
-#' Random Generation from the Gamma Distribution
+#' Simulation from the Gamma Distribution
 #'
-#' Generates gamma random deviates with shape parameter \eqn{\alpha} and rate
-#' paramter \eqn{\lambda}. See \code{\link{fit.Gamma}} for the parameterization. If
-#' a censoring proportion \eqn{p} is provided, the deviates are subject to
+#' Generates gamma event times with shape parameter \eqn{\alpha} and rate
+#' parameter \eqn{\lambda}. See \code{\link{fit.Gamma}} for the parameterization. If
+#' a censoring proportion \eqn{p} is provided, the event times are subject to
 #' non-informative random right censoring.
 #'
 #' @param n Sample size.
 #' @param a Shape.
 #' @param l Rate.
 #' @param p Expected censoring proportion.
+#'
+#' @return A data.frame including the observation times and status indicators.
+#'
 #' @importFrom stats rgamma
 #' @importFrom plyr aaply
 #' @export
-#' @return A data.frame with two columns, the observation time and status indicator. 
+#'
 #' @examples
+#' # Gamma event times with shape 2 and rate 2
+#' # Expected censoring proportion of 20%
 #' D = rGamma(n=1e3,a=2,l=2,p=0.2);
 
 rGamma = function(n,a=1,l=1,p=0){
@@ -55,25 +60,29 @@ rGamma = function(n,a=1,l=1,p=0){
 # Generalized Gamma
 ########################
 
-#' Random Generation from the Generalized Gamma Distribution
-#' 
-#' Generates generalized gamma random deviates with shape parameters 
-#' \eqn{(\alpha,\beta)}, and rate paramter \eqn{\lambda}. See 
-#' \code{\link{fit.GenGamma}} for the parameterization. If a censoring 
-#' proportion \eqn{p} is provided, the deviates are subject to non-informative 
-#' random right censoring.
-#' 
+#' Simulation from the Generalized Gamma Distribution
+#'
+#' Generates generalized gamma event times with shape parameters
+#' \eqn{(\alpha,\beta)}, and rate parameter \eqn{\lambda}. See
+#' \code{\link{fit.GenGamma}} for the parameterization. If a censoring
+#' proportion \eqn{p} is provided, the event times are subject to
+#' non-informative random right censoring.
+#'
 #' @param n Sample size.
 #' @param a First shape parameter, \eqn{\alpha}.
 #' @param b Second shape parameter, \eqn{\beta}. For the standard gamma
 #'   distribution, set \eqn{\beta=1}.
 #' @param l Rate.
 #' @param p Expected censoring proportion.
+#'
+#' @return A data.frame including the observation times and status indicators.
+#'
 #' @importFrom plyr aaply
 #' @export
-#' @return A data.frame with two columns, the observation time and status
-#'   indicator.
+#'
 #' @examples
+#' # Generalized gamma event times with shapes (2,2) and rate 2
+#' # Expected censoring proportion of 20%
 #' D = rGenGamma(n=1e3,a=2,b=2,l=2,p=0.2);
 
 rGenGamma = function(n,a=1,b=1,l=1,p=0){
@@ -85,7 +94,7 @@ rGenGamma = function(n,a=1,b=1,l=1,p=0){
   time = rgamma(n=n,shape=a,rate=(l^b));
   # Transform to general gammas
   time = (time)^(1/b);
-  
+
   # Return time if no censoring
   if(p==0){
     return(data.frame("time"=time,"status"=rep(1,n)));
@@ -119,9 +128,16 @@ rGenGamma = function(n,a=1,b=1,l=1,p=0){
 #' @param p Probability.
 #' @param a Shape.
 #' @param l Rate.
+#'
+#' @return Scalar quantile.
+#'
 #' @export
+#'
+#' @examples
+#' # Median of standard log-logistic distribution
+#' qLogLogistic(p=0.5);
 
-qLogLogistic = function(p,a,l){
+qLogLogistic = function(p,a=1,l=1){
   # Input checks
   if(a<0){stop("Positive shape parameter is required.")};
   if(l<0){stop("Positive rate parameter is required.")};
@@ -131,22 +147,27 @@ qLogLogistic = function(p,a,l){
   return(Out)
 }
 
-#' Random Generation from the Log-Logistic Distribution
+#' Simulation from the Log-Logistic Distribution
 #'
-#' Generates log-logistic random deviates with shape parameter \eqn{\alpha} and rate
-#' paramter \eqn{\lambda}. See \code{\link{fit.LogLogistic}} for the parameterization. If
-#' a censoring proportion \eqn{p} is provided, the deviates are subject to
-#' non-informative random right censoring.
+#' Generates log-logistic event times with shape parameter \eqn{\alpha} and rate
+#' parameter \eqn{\lambda}. See \code{\link{fit.LogLogistic}} for the
+#' parameterization. If a censoring proportion \eqn{p} is provided, the event
+#' times are subject to non-informative random right censoring.
 #'
 #' @param n Sample size.
 #' @param a Shape.
 #' @param l Rate.
 #' @param p Expected censoring proportion.
+#'
+#' @return A data.frame including the observation times and status indicators.
+#'
 #' @importFrom stats rnorm qnorm
 #' @importFrom plyr aaply
 #' @export
-#' @return A data.frame with two columns, the observation time and status indicator. 
+#'
 #' @examples
+#' # Log-logistic event times with shape 4 and rate 1
+#' # Expected censoring proportion of 20%
 #' D = rLogLogistic(n=1e3,a=4,l=1,p=0.2);
 
 rLogLogistic = function(n,a=4,l=1,p=0){
@@ -207,22 +228,27 @@ rLogLogistic = function(n,a=4,l=1,p=0){
 # Log-Normal
 ########################
 
-#' Random Generation from the Log-Normal Distribution
+#' Simulation from the Log-Normal Distribution
 #'
-#' Generates log-normal random deviates with location parameter \eqn{\mu} and scale
-#' paramter \eqn{\sigma}. See \code{\link{fit.LogNormal}} for the parameterization. If
-#' a censoring proportion \eqn{p} is provided, the deviates are subject to
-#' non-informative random right censoring.
+#' Generates log-normal event times with location parameter \eqn{\mu} and scale
+#' parameter \eqn{\sigma}. See \code{\link{fit.LogNormal}} for the
+#' parameterization. If a censoring proportion \eqn{p} is provided, the event
+#' times are subject to non-informative random right censoring.
 #'
 #' @param n Sample size.
 #' @param m Location.
 #' @param s Scale.
 #' @param p Expected censoring proportion.
+#'
+#' @return A data.frame including the observation times and status indicators.
+#'
 #' @importFrom stats rnorm qnorm
 #' @importFrom plyr aaply
 #' @export
-#' @return A data.frame with two columns, the observation time and status indicator. 
+#'
 #' @examples
+#' # Log-normal event times with location 0 and scale 1
+#' # Expected censoring proportion of 20%
 #' D = rLogNormal(n=1e3,m=0,s=1,p=0.2);
 
 rLogNormal = function(n,m=0,s=1,p=0){
@@ -263,9 +289,10 @@ rLogNormal = function(n,m=0,s=1,p=0){
 #' @param p Probability.
 #' @param a Shape.
 #' @param l Rate.
-#' @export
+#'
+#' @return Scalar quantile.
 
-qWeibull = function(p,a,l){
+qWeibull = function(p,a=1,l=1){
   # Input checks
   if(a<0){stop("Positive shape parameter is required.")};
   if(l<0){stop("Positive rate parameter is required.")};
@@ -274,10 +301,10 @@ qWeibull = function(p,a,l){
   return((1/l)*(-log(p))^(1/a));
 }
 
-#' Random Generation from the Weibull Distribution
+#' Simulation from the Weibull Distribution
 #'
-#' Generates Weibull random deviates with shape parameter \eqn{\alpha} and rate
-#' paramter \eqn{\lambda}. See \code{\link{fit.Weibull}} for the parameterization. If
+#' Generates Weibull event times with shape parameter \eqn{\alpha} and rate
+#' parameter \eqn{\lambda}. See \code{\link{fit.Weibull}} for the parameterization. If
 #' a censoring proportion \eqn{p} is provided, the deviates are subject to
 #' non-informative random right censoring.
 #'
@@ -285,11 +312,16 @@ qWeibull = function(p,a,l){
 #' @param a Shape.
 #' @param l Rate.
 #' @param p Expected censoring proportion.
+#'
+#' @return A data.frame including the observation times and status indicators.
+#'
 #' @importFrom stats runif
 #' @importFrom plyr aaply
 #' @export
-#' @return A data.frame with two columns, the observation time and status indicator. 
+#'
 #' @examples
+#' # Weibull event times with shape 2 and rate 2
+#' # Expected censoring proportion of 20%
 #' D = rWeibull(n=1e3,a=2,l=2,p=0.2);
 
 rWeibull = function(n,a=1,l=1,p=0){

@@ -8,7 +8,7 @@
 # Weibull Distribution
 ########################
 
-#' Weibull Parameter Estimation
+#' Weibull Distribution Parameter Estimation
 #'
 #' Estimates parameters for Weibull event times subject to non-informative
 #' right censoring. The Weibull distribution is parameterized in terms
@@ -18,7 +18,7 @@
 #' @param time Observation times.
 #' @param status Status indicator, coded as 1 if an event was observed, 0 if censored.
 #' @param sig Significance level, for CIs.
-#' @param init List of initial parameter values, including the shape parameter "a".
+#' @param init List containing an initial value for the shape parameter "a".
 #'
 #' @importFrom methods new
 #' @importFrom stats quantile uniroot
@@ -29,6 +29,17 @@
 #'  \item{Information}{The observed information matrix.}
 #'  \item{Outcome}{The fitted mean, median, and variance.}
 #' }
+#'
+#' @seealso
+#' \itemize{
+#'   \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+#' }
+#'
+#' @examples
+#' # Simulate
+#' D = rWeibull(n=1e3,a=2,l=2);
+#' # Estimate
+#' M = fitParaSurv(time=D$time,status=D$status,dist="weibull");
 
 fit.Weibull = function(time,status,sig=0.05,init=NULL){
   # Input check
