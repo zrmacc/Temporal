@@ -4,8 +4,8 @@
 \alias{fitParaSurv}
 \title{Fit Parametric Survival Distribution}
 \usage{
-fitParaSurv(time, status, dist = "weibull", alpha = 0.05, eps = 1e-06,
-  maxit = 10)
+fitParaSurv(time, status, dist = "weibull", sig = 0.05, init = NULL,
+  eps = 1e-06, maxit = 10, report = F)
 }
 \arguments{
 \item{time}{Observation times.}
@@ -13,24 +13,29 @@ fitParaSurv(time, status, dist = "weibull", alpha = 0.05, eps = 1e-06,
 \item{status}{Status indicator, coded as 1 if an event was observed, 0 if
 censored.}
 
-\item{dist}{Distribution to fit, selected from among: exp, gamma,
+\item{dist}{Distribution to fit, selected from among: exp, gamma, gengamma,
 log-logistic, log-normal, and weibull.}
 
-\item{alpha}{Significance level, for CIs.}
+\item{sig}{Significance level, for CIs.}
+
+\item{init}{List of initial parameter values. See individual distributions for
+naming convention.}
 
 \item{eps}{Tolerance for Newton-Raphson iterations.}
 
 \item{maxit}{Maximum number of NR iterations.}
+
+\item{report}{Report fitting progress?}
 }
 \value{
-An object of class \code{fit} containing the following: \describe{ 
+An object of class \code{fit} containing the following: \describe{
   \item{Parameters}{The estimated rate \eqn{\lambda}.} \item{Information}{The
   observed information.} \item{Outcome}{The fitted mean, median, and
   variance.} }
 }
 \description{
-Estimates parameters for parametric event times subject to non-informative 
-right censoring. Available distributions include: exponential, gamma, 
+Estimates parameters for parametric event times subject to non-informative
+right censoring. Available distributions include: exponential, gamma,
 log-logistic, log-normal, and Weibull.
 }
 \examples{

@@ -4,8 +4,8 @@
 \alias{compParaSurv}
 \title{Compare Parametric Survival Distribution}
 \usage{
-compParaSurv(time, status, arm, dist1 = "weibull", dist0, alpha = 0.05,
-  eps = 1e-06, maxit = 10)
+compParaSurv(time, status, arm, dist1 = "weibull", dist0, init1 = NULL,
+  init0 = NULL, sig = 0.05, eps = 1e-06, maxit = 10, report = F)
 }
 \arguments{
 \item{time}{Observation time.}
@@ -23,20 +23,31 @@ exp, gamma, log-logistic, log-normal, and weibull.}
 among: exp, gamma, log-logistic, log-normal, and weibull. If omitted,
 defaults to the distribution used for the target group.}
 
-\item{alpha}{Significance level, for CIs.}
+\item{init1}{List of initial parameter values for the target group. See
+individual distributions for naming convention.}
+
+\item{init0}{List of initial parameter values for the reference group. See
+individual distributions for naming convention.}
+
+\item{sig}{Significance level, for CIs.}
 
 \item{eps}{Tolerance for Newton-Raphson iterations.}
 
 \item{maxit}{Maximum number of NR iterations.}
+
+\item{report}{Report fitting progress?}
 }
 \value{
-An object of class \code{contrast} containing the following: 
-  \describe{ \item{Model1}{The fitted model for group 1.} \item{Model2}{The
-  fitted model for group 2.} \item{Contrast}{The parametric contrasts.} }
+An object of class \code{contrast} containing the following:
+\describe{
+  \item{Model1}{The fitted model for the target group.}
+  \item{Model2}{The fitted model for the reference group.}
+  \item{Contrast}{The parametric contrasts.}
+}
 }
 \description{
-Compares the means and medians of parametric survival distributions fit to 
-each of two treatment arms. Available distributions include: exponential, 
+Compares the means and medians of parametric survival distributions fit to
+each of two treatment arms. Available distributions include: exponential,
 gamma, log-logistic, log-normal, and Weibull.
 }
 \examples{

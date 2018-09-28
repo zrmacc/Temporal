@@ -10,7 +10,7 @@ vignette: >
 ---
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=2*3, fig.height=2*2, fig.align="center", fig.path='Figs/',echo=T, warning=F, message=F, cache=F, results='hold');
+knitr::opts_chunk$set(echo=T,cache=T,results='hold');
 library(Temporal);
 set.seed(101);
 ```
@@ -26,7 +26,7 @@ set.seed(101);
 
 ## Overview
 
-This package performs estimation and inference on parametric survival curves. Supported distributions include the exponential, gamma, log-logistic, log-normal, and Weibull. Data are expected in time-to-event format, with a status indicator to accommodate non-informative right censoring. The function `fitParaSurv` provides maximum likelihood point estimates (MLEs) and confidence intervals (CIs) for the distribution of interest. Estimates are presented for model parameters, and for characteristics of the event time distribution (the mean, median, and variance). The function `compParaSurv` compares the fitted survival distributions of two treatment groups. The groups are contrasted using the difference and ratio of means and medians. For each contrast, point estimates and CIs are presented. *p*-values are calculated assessing the null hypothesis of no difference between the treatment groups. 
+This package performs estimation and inference on parametric survival curves. Supported distributions include the exponential, gamma, generalized gamma, log-logistic, log-normal, and Weibull. Data are expected in time-to-event format, with a status indicator to accommodate non-informative right censoring. The function `fitParaSurv` provides maximum likelihood point estimates (MLEs) and confidence intervals (CIs) for the distribution of interest. Estimates are presented for model parameters, and for characteristics of the event time distribution (the mean, median, and variance). The function `compParaSurv` compares the fitted survival distributions of two treatment groups. The groups are contrasted using the difference and ratio of means and medians. For each contrast, point estimates and CIs are presented. *p*-values are calculated assessing the null hypothesis of no difference between the treatment groups. 
 
 ## Setting
 
@@ -51,7 +51,7 @@ Exponential event times may be simulated using the `rWeibull` function with the 
 ```{r}
 # Generate exponential time to event data
 D = rWeibull(n=1e3,a=1,l=2,p=0.2);
-# Estimate rate
+# Estimate parameters
 M = fitParaSurv(time=D$time,status=D$status,dist="exp");
 show(M);
 ```
@@ -69,9 +69,41 @@ In the following, $n=10^{3}$ gamma event times are simulated, with shape $\alpha
 ```{r}
 # Generate gamma time to event data
 D = rGamma(n=1e3,a=2,l=2,p=0.2);
-# Estimate rate
+# Estimate parameters
 M = fitParaSurv(time=D$time,status=D$status,dist="gamma");
 show(M);
+```
+
+## Generalized Gamma
+
+The generalized gamma distributionis parameterized in terms of shapes $\alpha$ and $\beta$, and rate $\lambda$. The density is:
+
+$$
+f(t) = \frac{\beta\lambda}{\Gamma(\alpha)}(\lambda t)^{\alpha\beta-1}e^{-(\lambda t)^{\beta}},\ t>0
+$$
+
+The standard gamma and Weibull distributions are nested within the generalized gamma. Setting $\beta=1$ recovers the standard gamma, while setting $\alpha=1$ recovers the Weibull. In the following, $n=10^{3}$ generalized gamma event times are simulated, with shapes $\alpha=2$ and $\beta=2$, rate $\lambda=2$, and expected censoring proportion $20$%. Generative parameters are recovered using `fitParaSurv` with `dist="gengamma"`.
+
+```{r}
+set.seed(100);
+# Generate generalized gamma time to event data
+D = rGenGamma(n=1e4,a=2,b=2,l=2,p=0.2);
+# Estimate parameters
+M = fitParaSurv(time=D$time,status=D$status,dist="gengamma",report=T);
+show(M);
+```
+
+The final parameter estimates for the generalized gamma distribution are sensitive to the initial values. If the Newton-Raphson iteration is initialized too far from the optimum of the log-likelihood, the search may not reach the maximum. If the search halts prematurely, the fitting procedure will indicate that the information matrix was not positive definite, and will return robust standard errors. Supplying initial parameter values may improve the final estimates.
+
+```{r, results='markup'}
+set.seed(103);
+# Generate generalized gamma time to event data
+D = rGenGamma(n=1e3,a=2,b=2,l=2,p=0.2);
+# Estimate parameters
+fitParaSurv(time=D$time,status=D$status,dist="gengamma",report=T);
+# Initialization
+init0 = list("la"=log(2),"lb"=log(2),"ll"=log(2));
+fitParaSurv(time=D$time,status=D$status,dist="gengamma",init=init0,report=T);
 ```
 
 ## Log-Logistic
@@ -87,7 +119,7 @@ In the following, $n=10^{3}$ log-logistic event times are simulated, with shape 
 ```{r}
 # Generate log-logistic time to event data
 D = rLogLogistic(n=1e3,a=4,l=2,p=0.2);
-# Estimate rate
+# Estimate parameters
 M = fitParaSurv(time=D$time,status=D$status,dist="log-logistic");
 show(M);
 ```
@@ -105,7 +137,7 @@ In the following, $n=10^{3}$ log-normal event times are simulated, with location
 ```{r}
 # Generate log-normal time to event data
 D = rLogNormal(n=1e3,m=1,s=2,p=0.2)
-# Estimate rate
+# Estimate parameters
 M = fitParaSurv(time=D$time,status=D$status,dist="log-normal");
 show(M);
 ```
@@ -123,7 +155,7 @@ In the following, $n=10^{3}$ Weibull event times are simulated, with shape $\alp
 ```{r}
 # Generate Weibull time to event data
 D = rWeibull(n=1e3,a=2,l=2,p=0.2);
-# Estimate rate
+# Estimate parameters
 M = fitParaSurv(time=D$time,status=D$status,dist="weibull");
 show(M);
 ```
@@ -198,6 +230,7 @@ show(E);
 In this example, the target group consists of $10^{2}$ observations from the log-normal distribution with location $\mu=0$ and scale $\sigma=\sqrt{2\ln2}$. The reference group consists of $10^{2}$ observations from the exponential distribution with rate $\lambda=1$. In each case the expected censoring proportion is $20$%. The true difference of mean survival times is $1.0$, and the true ratio is $2.0$. The true difference of median survival times is $0.0$, and the true ratio is $1.0$. 
 
 ```{r}
+set.seed(100);
 # Target group
 D1 = rLogNormal(n=1e2,m=0,s=sqrt(2*log(2)),p=0.2);
 D1$arm = 1;

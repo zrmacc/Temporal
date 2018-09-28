@@ -4,18 +4,18 @@
 \alias{SchurC}
 \title{Schur complement}
 \usage{
-SchurC(I11, I22, I12)
+SchurC(Ibb, Iaa, Iba)
 }
 \arguments{
-\item{I11}{Information of target parameter}
+\item{Ibb}{Information of target parameter}
 
-\item{I22}{Information of nuisance parameter}
+\item{Iaa}{Information of nuisance parameter}
 
-\item{I12}{Cross information between target and nuisance parameters}
+\item{Iba}{Cross information between target and nuisance parameters}
 }
 \value{
 Numeric matrix.
 }
 \description{
-Calculates the efficient information \eqn{I_{11}-I_{12}I_{22}^{-1}I_{21}}.
+Calculates the efficient information \eqn{I_{bb}-I_{ba}I_{aa}^{-1}I_{ab}}.
 }

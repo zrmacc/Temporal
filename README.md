@@ -1,7 +1,7 @@
 ---
 title: "README"
 author: "Zachary McCaw"
-date: "2018-08-18"
+date: "2018-09-28"
 output: 
   html_document: 
     keep_md: TRUE
@@ -23,7 +23,7 @@ output:
 
 ## Overview
 
-This package performs estimation and inference on parametric survival curves. Supported distributions include the exponential, gamma, log-logistic, log-normal, and Weibull. Data are expected in time-to-event format, with a status indicator to accommodate non-informative right censoring. The function `fitParaSurv` provides maximum likelihood point estimates (MLEs) and confidence intervals (CIs) for the distribution of interest. Estimates are presented for model parameters, and for characteristics of the event time distribution (the mean, median, and variance). The function `compParaSurv` compares the fitted survival distributions of two treatment groups. The groups are contrasted using the difference and ratio of means and medians. For each contrast, point estimates and CIs are presented. *p*-values are calculated assessing the null hypothesis of no difference between the treatment groups. 
+This package performs estimation and inference on parametric survival curves. Supported distributions include the exponential, gamma, generalized gamma, log-logistic, log-normal, and Weibull. Data are expected in time-to-event format, with a status indicator to accommodate non-informative right censoring. The function `fitParaSurv` provides maximum likelihood point estimates (MLEs) and confidence intervals (CIs) for the distribution of interest. Estimates are presented for model parameters, and for characteristics of the event time distribution (the mean, median, and variance). The function `compParaSurv` compares the fitted survival distributions of two treatment groups. The groups are contrasted using the difference and ratio of means and medians. For each contrast, point estimates and CIs are presented. *p*-values are calculated assessing the null hypothesis of no difference between the treatment groups. 
 
 ## Setting
 
@@ -49,7 +49,7 @@ Exponential event times may be simulated using the `rWeibull` function with the 
 ```r
 # Generate exponential time to event data
 D = rWeibull(n=1e3,a=1,l=2,p=0.2);
-# Estimate rate
+# Estimate parameters
 M = fitParaSurv(time=D$time,status=D$status,dist="exp");
 show(M);
 ```
@@ -81,24 +81,138 @@ In the following, $n=10^{3}$ gamma event times are simulated, with shape $\alpha
 ```r
 # Generate gamma time to event data
 D = rGamma(n=1e3,a=2,l=2,p=0.2);
-# Estimate rate
+# Estimate parameters
 M = fitParaSurv(time=D$time,status=D$status,dist="gamma");
 show(M);
 ```
 
 ```
-## 4 update(s) performed before tolerance limit. 
 ## Fitted Gamma Distribution. 
 ## Estimated Parameters:
 ##   Aspect Estimate     SE    L    U
 ## 1  Shape     1.94 0.0869 1.77 2.11
-## 2   Rate     1.93 0.1050 1.73 2.14
+## 2   Rate     1.93 0.1050 1.74 2.15
 ## 
 ## Distribution Properties:
 ##     Aspect Estimate     SE     L     U
 ## 1     Mean    1.000 0.0254 0.952 1.050
 ## 2   Median    0.835 0.0215 0.793 0.878
 ## 3 Variance    0.518 0.0372 0.445 0.591
+```
+
+## Generalized Gamma
+
+The generalized gamma distributionis parameterized in terms of shapes $\alpha$ and $\beta$, and rate $\lambda$. The density is:
+
+$$
+f(t) = \frac{\beta\lambda}{\Gamma(\alpha)}(\lambda t)^{\alpha\beta-1}e^{-(\lambda t)^{\beta}},\ t>0
+$$
+
+The standard gamma and Weibull distributions are nested within the generalized gamma. Setting $\beta=1$ recovers the standard gamma, while setting $\alpha=1$ recovers the Weibull. In the following, $n=10^{3}$ generalized gamma event times are simulated, with shapes $\alpha=2$ and $\beta=2$, rate $\lambda=2$, and expected censoring proportion $20$%. Generative parameters are recovered using `fitParaSurv` with `dist="gengamma"`.
+
+
+```r
+set.seed(100);
+# Generate generalized gamma time to event data
+D = rGenGamma(n=1e4,a=2,b=2,l=2,p=0.2);
+# Estimate parameters
+M = fitParaSurv(time=D$time,status=D$status,dist="gengamma",report=T);
+show(M);
+```
+
+```
+## Objective increment:  90.2 
+## Objective increment:  0.827 
+## Objective increment:  0.103 
+## Objective increment:  0.00407 
+## Objective increment:  9.08e-06 
+## Objective increment:  4e-11 
+## 5 update(s) performed before tolerance limit.
+## 
+## Fitted GenGamma Distribution. 
+## Estimated Parameters:
+##   Aspect Estimate    SE    L    U
+## 1 ShapeA     2.03 0.156 1.75 2.36
+## 2 ShapeB     1.99 0.089 1.82 2.17
+## 3   Rate     2.04 0.120 1.81 2.29
+## 
+## Distribution Properties:
+##     Aspect Estimate      SE     L      U
+## 1     Mean   0.6590 0.00256 0.654 0.6640
+## 2   Median   0.6430 0.00279 0.637 0.6480
+## 3 Variance   0.0569 0.00096 0.055 0.0588
+```
+
+The final parameter estimates for the generalized gamma distribution are sensitive to the initial values. If the Newton-Raphson iteration is initialized too far from the optimum of the log-likelihood, the search may not reach the maximum. If the search halts prematurely, the fitting procedure will indicate that the information matrix was not positive definite, and will return robust standard errors. Supplying initial parameter values may improve the final estimates.
+
+
+```r
+set.seed(103);
+# Generate generalized gamma time to event data
+D = rGenGamma(n=1e3,a=2,b=2,l=2,p=0.2);
+# Estimate parameters
+fitParaSurv(time=D$time,status=D$status,dist="gengamma",report=T);
+```
+
+```
+## Objective increment:  9.56 
+## 1 update(s) performed before tolerance limit.
+```
+
+```
+## Warning in fit.GenGamma(time = time, status = status, sig = sig, init =
+## init, : Observed information was not positive definite. Consider another
+## parameter initialization.
+```
+
+```
+## Eigenvalues of log-scale information:
+## 11046.41 1956.48 1.76 
+## Eigenvalues of original-scale information:
+## 2290.04 470.49 -1.36
+```
+
+```
+## Fitted GenGamma Distribution. 
+## Estimated Parameters:
+##   Aspect Estimate    SE     L     U
+## 1 ShapeA     2.43 0.447 0.507 11.60
+## 2 ShapeB     1.82 0.212 0.749  4.40
+## 3   Rate     2.33 0.392 0.582  9.34
+## 
+## Distribution Properties:
+##     Aspect Estimate       SE      L      U
+## 1     Mean   0.6640 0.000725 0.6630 0.6660
+## 2   Median   0.6460 0.011200 0.6240 0.6670
+## 3 Variance   0.0572 0.002070 0.0531 0.0612
+```
+
+```r
+# Initialization
+init0 = list("la"=log(2),"lb"=log(2),"ll"=log(2));
+fitParaSurv(time=D$time,status=D$status,dist="gengamma",init=init0,report=T);
+```
+
+```
+## Objective increment:  0.0245 
+## Objective increment:  4.45e-05 
+## Objective increment:  6.96e-09 
+## 2 update(s) performed before tolerance limit.
+```
+
+```
+## Fitted GenGamma Distribution. 
+## Estimated Parameters:
+##   Aspect Estimate    SE    L    U
+## 1 ShapeA     1.98 0.476 1.23 3.17
+## 2 ShapeB     2.02 0.286 1.54 2.67
+## 3   Rate     1.98 0.359 1.39 2.82
+## 
+## Distribution Properties:
+##     Aspect Estimate      SE      L      U
+## 1     Mean   0.6650 0.00814 0.6490 0.6810
+## 2   Median   0.6490 0.00888 0.6310 0.6660
+## 3 Variance   0.0576 0.00307 0.0516 0.0637
 ```
 
 ## Log-Logistic
@@ -115,24 +229,23 @@ In the following, $n=10^{3}$ log-logistic event times are simulated, with shape 
 ```r
 # Generate log-logistic time to event data
 D = rLogLogistic(n=1e3,a=4,l=2,p=0.2);
-# Estimate rate
+# Estimate parameters
 M = fitParaSurv(time=D$time,status=D$status,dist="log-logistic");
 show(M);
 ```
 
 ```
-## 3 update(s) performed before tolerance limit. 
 ## Fitted Log-Logistic Distribution. 
 ## Estimated Parameters:
 ##   Aspect Estimate     SE    L    U
-## 1  Shape     4.24 0.1240 4.00 4.48
-## 2   Rate     2.00 0.0266 1.95 2.05
+## 1  Shape     4.02 0.1160 3.79 4.25
+## 2   Rate     1.99 0.0281 1.93 2.04
 ## 
 ## Distribution Properties:
-##     Aspect Estimate      SE      L      U
-## 1     Mean   0.5490 0.00808 0.5330 0.5650
-## 2   Median   0.5000 0.00665 0.4870 0.5130
-## 3 Variance   0.0706 0.00648 0.0579 0.0833
+##     Aspect Estimate      SE      L     U
+## 1     Mean   0.5580 0.00878 0.5410 0.576
+## 2   Median   0.5030 0.00710 0.4890 0.517
+## 3 Variance   0.0843 0.00800 0.0686 0.100
 ```
 
 ## Log-Normal
@@ -149,24 +262,23 @@ In the following, $n=10^{3}$ log-normal event times are simulated, with location
 ```r
 # Generate log-normal time to event data
 D = rLogNormal(n=1e3,m=1,s=2,p=0.2)
-# Estimate rate
+# Estimate parameters
 M = fitParaSurv(time=D$time,status=D$status,dist="log-normal");
 show(M);
 ```
 
 ```
-## 4 update(s) performed before tolerance limit. 
 ## Fitted Log-Normal Distribution. 
 ## Estimated Parameters:
-##     Aspect Estimate     SE     L    U
-## 1 Location    0.954 0.0663 0.824 1.08
-## 2    Scale    2.010 0.0509 1.910 2.11
+##     Aspect Estimate     SE    L    U
+## 1 Location    0.999 0.0656 0.87 1.13
+## 2    Scale    1.990 0.0504 1.89 2.09
 ## 
 ## Distribution Properties:
-##     Aspect Estimate      SE        L        U
-## 1     Mean     19.7    2.54 1.48e+01    24.70
-## 2   Median      2.6    1.31 2.73e-02     5.16
-## 3 Variance  22200.0 9970.00 2.65e+03 41700.00
+##     Aspect Estimate       SE       L        U
+## 1     Mean    19.60    2.470   14.80    24.50
+## 2   Median     2.72    0.178    2.37     3.06
+## 3 Variance 19700.00 8660.000 2720.00 36700.00
 ```
 
 ## Weibull
@@ -183,7 +295,7 @@ In the following, $n=10^{3}$ Weibull event times are simulated, with shape $\alp
 ```r
 # Generate Weibull time to event data
 D = rWeibull(n=1e3,a=2,l=2,p=0.2);
-# Estimate rate
+# Estimate parameters
 M = fitParaSurv(time=D$time,status=D$status,dist="weibull");
 show(M);
 ```
@@ -192,14 +304,14 @@ show(M);
 ## Fitted Weibull Distribution. 
 ## Estimated Parameters:
 ##   Aspect Estimate     SE    L    U
-## 1  Shape     1.91 0.0531 1.81 2.02
-## 2   Rate     2.01 0.0374 1.93 2.08
+## 1  Shape     2.12 0.0584 2.00 2.23
+## 2   Rate     1.94 0.0331 1.87 2.00
 ## 
 ## Distribution Properties:
 ##     Aspect Estimate      SE      L      U
-## 1     Mean   0.4420 0.00815 0.4260 0.4580
-## 2   Median   0.4110 0.00828 0.3950 0.4280
-## 3 Variance   0.0578 0.00341 0.0511 0.0645
+## 1     Mean   0.4570 0.00781 0.4420 0.4730
+## 2   Median   0.4340 0.00801 0.4190 0.4500
+## 3 Variance   0.0516 0.00289 0.0459 0.0573
 ```
 
 # Group Contrasts
@@ -231,29 +343,27 @@ show(E);
 ```
 
 ```
-## 4 update(s) performed before tolerance limit. 
-## 5 update(s) performed before tolerance limit. 
 ## 
 ## Contrast of Fitted Gamma Distributions. 
 ## 
 ## Fitted Characteristics for Group 1:
 ##     Aspect Estimate     SE     L     U
-## 1     Mean    0.926 0.0808 0.768 1.080
-## 2   Median    0.763 0.0666 0.633 0.894
-## 3 Variance    0.471 0.1160 0.244 0.698
+## 1     Mean    0.988 0.0842 0.823 1.150
+## 2   Median    0.804 0.0698 0.668 0.941
+## 3 Variance    0.568 0.1320 0.308 0.827
 ## 
 ## Fitted Characteristics for Group 0:
-##     Aspect Estimate     SE     L     U
-## 1     Mean    0.535 0.0390 0.459 0.612
-## 2   Median    0.466 0.0342 0.399 0.533
-## 3 Variance    0.114 0.0252 0.065 0.164
+##     Aspect Estimate     SE      L     U
+## 1     Mean    0.479 0.0383 0.4040 0.554
+## 2   Median    0.395 0.0326 0.3310 0.459
+## 3 Variance    0.126 0.0276 0.0724 0.181
 ## 
 ## Contrasts:
 ##      Contrast Point     SE     L     U        p
-## 1 Mean1-Mean0 0.391 0.0897 0.215 0.567 1.32e-05
-## 2   Med1-Med0 0.297 0.0748 0.150 0.444 7.23e-05
-## 3 Mean1/Mean0 1.730 0.1970 1.380 2.160 1.41e-06
-## 4   Med1/Med0 1.640 0.1870 1.310 2.050 1.53e-05
+## 1 Mean1-Mean0 0.509 0.0925 0.328 0.690 3.74e-08
+## 2   Med1-Med0 0.410 0.0770 0.259 0.561 1.03e-07
+## 3 Mean1/Mean0 2.060 0.2410 1.640 2.590 5.87e-10
+## 4   Med1/Med0 2.040 0.2440 1.610 2.580 2.78e-09
 ```
 
 ### Comparison of Equivalent Weibulls
@@ -282,22 +392,22 @@ show(E);
 ## 
 ## Fitted Characteristics for Group 1:
 ##     Aspect Estimate     SE      L      U
-## 1     Mean   0.4310 0.0328 0.3670 0.4950
-## 2   Median   0.3990 0.0295 0.3410 0.4570
-## 3 Variance   0.0571 0.0153 0.0271 0.0872
+## 1     Mean   0.4500 0.0238 0.4030 0.4970
+## 2   Median   0.4420 0.0237 0.3960 0.4890
+## 3 Variance   0.0317 0.0069 0.0182 0.0452
 ## 
 ## Fitted Characteristics for Group 0:
 ##     Aspect Estimate      SE      L      U
-## 1     Mean   0.4000 0.02210 0.3570 0.4430
-## 2   Median   0.3690 0.02340 0.3230 0.4150
-## 3 Variance   0.0505 0.00784 0.0351 0.0659
+## 1     Mean   0.4900 0.02360 0.4440 0.5370
+## 2   Median   0.4680 0.02520 0.4190 0.5180
+## 3 Variance   0.0559 0.00813 0.0399 0.0718
 ## 
 ## Contrasts:
-##      Contrast Point     SE       L     U     p
-## 1 Mean1-Mean0 0.031 0.0395 -0.0464 0.108 0.432
-## 2   Med1-Med0 0.030 0.0376 -0.0437 0.104 0.425
-## 3 Mean1/Mean0 1.080 0.1010  0.8960 1.300 0.426
-## 4   Med1/Med0 1.080 0.1050  0.8940 1.310 0.422
+##      Contrast   Point     SE       L      U     p
+## 1 Mean1-Mean0 -0.0404 0.0335 -0.1060 0.0253 0.229
+## 2   Med1-Med0 -0.0261 0.0346 -0.0938 0.0417 0.451
+## 3 Mean1/Mean0  0.9180 0.0656  0.7980 1.0600 0.230
+## 4   Med1/Med0  0.9440 0.0717  0.8140 1.1000 0.450
 ```
 
 ### Log-Logistic v. Gamma, Same Means, Different Medians
@@ -321,29 +431,27 @@ show(E);
 ```
 
 ```
-## 5 update(s) performed before tolerance limit. 
-## 3 update(s) performed before tolerance limit. 
 ## 
 ## Contrast of Fitted Log-Logistic v. Gamma 
 ## 
 ## Fitted Characteristics for Group 1:
-##     Aspect Estimate     SE     L     U
-## 1     Mean    1.030 0.0543 0.928 1.140
-## 2   Median    0.930 0.0428 0.846 1.010
-## 3 Variance    0.297 0.0956 0.110 0.485
+##     Aspect Estimate     SE      L     U
+## 1     Mean    0.978 0.0431 0.8940 1.060
+## 2   Median    0.902 0.0361 0.8320 0.973
+## 3 Variance    0.187 0.0521 0.0849 0.289
 ## 
 ## Fitted Characteristics for Group 0:
-##     Aspect Estimate     SE     L     U
-## 1     Mean    0.950 0.1480 0.660 1.240
-## 2   Median    0.459 0.0796 0.303 0.615
-## 3 Variance    1.680 0.5910 0.527 2.840
+##     Aspect Estimate    SE     L    U
+## 1     Mean    1.280 0.229 0.828 1.73
+## 2   Median    0.618 0.113 0.396 0.84
+## 3 Variance    3.030 1.250 0.584 5.48
 ## 
 ## Contrasts:
-##      Contrast  Point     SE      L     U        p
-## 1 Mean1-Mean0 0.0842 0.1580 -0.225 0.393 5.93e-01
-## 2   Med1-Med0 0.4710 0.0904  0.294 0.648 1.85e-07
-## 3 Mean1/Mean0 1.0900 0.1790  0.789 1.500 6.06e-01
-## 4   Med1/Med0 2.0300 0.3640  1.430 2.880 8.27e-05
+##      Contrast  Point    SE       L     U      p
+## 1 Mean1-Mean0 -0.299 0.233 -0.7560 0.158 0.2000
+## 2   Med1-Med0  0.284 0.119  0.0514 0.517 0.0168
+## 3 Mean1/Mean0  0.766 0.142  0.5330 1.100 0.1490
+## 4   Med1/Med0  1.460 0.274  1.0100 2.110 0.0436
 ```
 
 ### Log-Normal v. Exponential, Different Means, Same Medians
@@ -352,6 +460,7 @@ In this example, the target group consists of $10^{2}$ observations from the log
 
 
 ```r
+set.seed(100);
 # Target group
 D1 = rLogNormal(n=1e2,m=0,s=sqrt(2*log(2)),p=0.2);
 D1$arm = 1;
@@ -367,26 +476,25 @@ show(E);
 ```
 
 ```
-## 3 update(s) performed before tolerance limit. 
 ## 
 ## Contrast of Fitted Log-Normal v. Exponential 
 ## 
 ## Fitted Characteristics for Group 1:
 ##     Aspect Estimate    SE      L     U
-## 1     Mean    1.580 0.239  1.110  2.04
-## 2   Median    0.899 0.175  0.557  1.24
-## 3 Variance    5.160 2.700 -0.136 10.50
+## 1     Mean    1.840 0.302  1.250  2.43
+## 2   Median    0.956 0.113  0.735  1.18
+## 3 Variance    9.190 5.180 -0.951 19.30
 ## 
 ## Fitted Characteristics for Group 0:
 ##     Aspect Estimate     SE     L     U
-## 1     Mean    1.010 0.1080 0.801 1.220
-## 2   Median    0.702 0.0748 0.555 0.848
-## 3 Variance    1.020 0.2180 0.596 1.450
+## 1     Mean    1.030 0.1200 0.798 1.270
+## 2   Median    0.716 0.0833 0.553 0.879
+## 3 Variance    1.070 0.2480 0.581 1.550
 ## 
 ## Contrasts:
-##      Contrast Point    SE       L    U      p
-## 1 Mean1-Mean0 0.565 0.262  0.0516 1.08 0.0310
-## 2   Med1-Med0 0.198 0.190 -0.1750 0.57 0.2980
-## 3 Mean1/Mean0 1.560 0.288  1.0800 2.24 0.0166
-## 4   Med1/Med0 1.280 0.284  0.8300 1.98 0.2630
+##      Contrast Point    SE       L     U       p
+## 1 Mean1-Mean0 0.808 0.325  0.1710 1.440 0.01290
+## 2   Med1-Med0 0.240 0.140 -0.0351 0.514 0.08740
+## 3 Mean1/Mean0 1.780 0.358  1.2000 2.640 0.00405
+## 4   Med1/Med0 1.330 0.221  0.9650 1.850 0.08150
 ```

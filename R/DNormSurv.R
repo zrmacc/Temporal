@@ -2,12 +2,14 @@
 # Updated: 180829
 
 #' Logarithmic Derivatives of the Normal Surviavl Function
-#' 
+#'
 #' #' Evaluates logarithimic derivatives of the normal survival, defined as:
 #' \deqn{\ln\Phi(s)=\ln\int_{s}^{\infty}\frac{e^{-(u^2)/2}}{\sqrt{2\pi}}du}
-#' 
+#'
 #' @param s Value of \eqn{s} at which to evaluate.
-#' @param Order Order of the derivative, select from among 1 and 2. 
+#' @param Order Order of the derivative, select from among 1 and 2.
+#'
+#' @importFrom stats dnorm pnorm
 
 dLogNormSurv = function(s,Order=1){
   if(!(Order %in% c(1,2))){stop("Select order from among: c(1,2).")};

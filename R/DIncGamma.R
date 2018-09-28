@@ -1,15 +1,17 @@
 # Purpose: Functions related to derivatives of the incomplete gamma
 # Updated: 180828
 
+# Verified numerically.
+
 ########################
 # Derivatives of Incomplete Gamma
 ########################
 
 #' Derivatives of the Incomplete Gamma Function
-#' 
+#'
 #' Evaluates derivatives of the upper incomplete gamma function, defined as:
 #' \deqn{\Gamma(\alpha,s) = \int_{s}^{\infty}u^{\alpha-1}e^{-u}du}
-#' 
+#'
 #' @param a Value of \eqn{\alpha} at which to evaluate.
 #' @param s Value of \eqn{s} at which to evaluate.
 #' @param Dirn Direction in which to differentiate. Select from among "a", "s",
@@ -26,7 +28,7 @@ dIncGamma = function(a,s,Dirn="a",Order=1){
   Dirns = c("a","s","as");
   if(!(Dirn %in% Dirns)){stop("Select dirn from among: c('a','s','as').")};
   if(!(Order %in% c(1,2))){stop("Select order from among: c(1,2).")};
-  
+
   # Derivatives in a
   if(Dirn=="a"){
     # First order
@@ -49,7 +51,7 @@ dIncGamma = function(a,s,Dirn="a",Order=1){
       d = s^(a-2)*exp(-s)*(s-(a-1));
     }
     # Final derivative
-  } else {
+  } else if(Dirn=="as"){
    # Mixed partial
     d = -s^(a-1)*log(s)*exp(-s);
   }
@@ -61,10 +63,10 @@ dIncGamma = function(a,s,Dirn="a",Order=1){
 ########################
 
 #' Derivatives of the Log Incomplete Gamma Function
-#' 
+#'
 #' Evaluates derivatives of the upper log incomplete gamma function, defined as:
 #' \deqn{\ln\Gamma(\alpha,s) = \int_{s}^{\infty}u^{\alpha-1}e^{-u}du}
-#' 
+#'
 #' @param a Value of \eqn{\alpha} at which to evaluate.
 #' @param s Value of \eqn{s} at which to evaluate.
 #' @param Dirn Direction in which to differentiate. Select from among "a", "s",
@@ -82,10 +84,10 @@ dLogIncGamma = function(a,s,Dirn="a",Order=1){
   Dirns = c("a","s","as");
   if(!(Dirn %in% Dirns)){stop("Select dirn from among: c('a','s','as').")};
   if(!(Order %in% c(1,2))){stop("Select order from among: c(1,2).")};
-  
+
   # Incomplete gamma evaluation
   G = gammainc(a=a,x=s);
-  
+
   # Derivatives in a
   if(Dirn=="a"){
     # First order

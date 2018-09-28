@@ -6,7 +6,7 @@
 #' Calculates the trace of a matrix \eqn{A}.
 #'
 #' @param A Numeric matrix.
-#' @return Scalar. 
+#' @return Scalar.
 tr <- function(A) {
     .Call('_Temporal_tr', PACKAGE = 'Temporal', A)
 }
@@ -18,18 +18,8 @@ tr <- function(A) {
 #' @param A Numeric matrix.
 #' @param B Numeric matrix.
 #' @return Numeric matrix. 
-fastMMp <- function(A, B) {
-    .Call('_Temporal_fastMMp', PACKAGE = 'Temporal', A, B)
-}
-
-#' Matrix Transpose
-#'
-#' Constructs \eqn{A'} from \eqn{A}.
-#'
-#' @param A Numeric matrix.
-#' @return Numeric matrix.
-fastT <- function(A) {
-    .Call('_Temporal_fastT', PACKAGE = 'Temporal', A)
+MMP <- function(A, B) {
+    .Call('_Temporal_MMP', PACKAGE = 'Temporal', A, B)
 }
 
 #' Matrix Inner Product
@@ -39,8 +29,8 @@ fastT <- function(A) {
 #' @param A Numeric matrix.
 #' @param B Numeric matrix.
 #' @return Numeric matrix. 
-fastIP <- function(A, B) {
-    .Call('_Temporal_fastIP', PACKAGE = 'Temporal', A, B)
+matIP <- function(A, B) {
+    .Call('_Temporal_matIP', PACKAGE = 'Temporal', A, B)
 }
 
 #' Matrix Inverse
@@ -49,8 +39,8 @@ fastIP <- function(A, B) {
 #'
 #' @param A Numeric matrix.
 #' @return Numeric matrix. 
-fastInv <- function(A) {
-    .Call('_Temporal_fastInv', PACKAGE = 'Temporal', A)
+matInv <- function(A) {
+    .Call('_Temporal_matInv', PACKAGE = 'Temporal', A)
 }
 
 #' Matrix Determinant
@@ -59,8 +49,19 @@ fastInv <- function(A) {
 #'
 #' @param A Numeric matrix.
 #' @return Scalar. 
-fastDet <- function(A) {
-    .Call('_Temporal_fastDet', PACKAGE = 'Temporal', A)
+det <- function(A) {
+    .Call('_Temporal_det', PACKAGE = 'Temporal', A)
+}
+
+#' Fast Outer Product
+#' 
+#' Calculates the outer product \eqn{XY'}.
+#' 
+#' @param X Numeric matrix.
+#' @param Y Numeric matrix.
+#' @return Numeric matrix.
+matOP <- function(X, Y) {
+    .Call('_Temporal_matOP', PACKAGE = 'Temporal', X, Y)
 }
 
 #' Quadratic Form
@@ -69,21 +70,20 @@ fastDet <- function(A) {
 #' 
 #' @param X Numeric matrix.
 #' @param A Numeric matrix.
-#' @return Numeric matrix.
-fastQF <- function(X, A) {
-    .Call('_Temporal_fastQF', PACKAGE = 'Temporal', X, A)
+#' @return Numeric matrix. 
+matQF <- function(X, A) {
+    .Call('_Temporal_matQF', PACKAGE = 'Temporal', X, A)
 }
 
 #' Schur complement
 #'
-#' Calculates the efficient information \eqn{I_{11}-I_{12}I_{22}^{-1}I_{21}}. 
+#' Calculates the efficient information \eqn{I_{bb}-I_{ba}I_{aa}^{-1}I_{ab}}. 
 #'
-#' @param I11 Information of target parameter
-#' @param I22 Information of nuisance parameter
-#' @param I12 Cross information between target and nuisance parameters
+#' @param Ibb Information of target parameter
+#' @param Iaa Information of nuisance parameter
+#' @param Iba Cross information between target and nuisance parameters
 #' @return Numeric matrix. 
-#'
-SchurC <- function(I11, I22, I12) {
-    .Call('_Temporal_SchurC', PACKAGE = 'Temporal', I11, I22, I12)
+SchurC <- function(Ibb, Iaa, Iba) {
+    .Call('_Temporal_SchurC', PACKAGE = 'Temporal', Ibb, Iaa, Iba)
 }
 

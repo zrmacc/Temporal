@@ -4,7 +4,7 @@
 \alias{estDiff}
 \title{Difference of Estimates}
 \usage{
-estDiff(t1, s1, t0, s0, alpha = 0.05)
+estDiff(t1, s1, t0, s0, sig = 0.05)
 }
 \arguments{
 \item{t1}{Treatment estimate}
@@ -15,7 +15,7 @@ estDiff(t1, s1, t0, s0, alpha = 0.05)
 
 \item{s0}{Reference standard error}
 
-\item{alpha}{Alpha level}
+\item{sig}{Significance level}
 }
 \description{
 Calculate CIs and p-value for the difference of estimated parameters
