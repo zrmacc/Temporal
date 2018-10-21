@@ -6,11 +6,12 @@
 #' @slot Parameters Parameters.
 #' @slot Information Information components.
 #' @slot Outcome Properties of the fitted distribution.
+#' @slot S Fitted survival function.
 #' @name fit-class
 #' @rdname fit-class
 #' @exportClass fit
 
-setClass(Class="fit",representation=representation(Distribution="character",Parameters="data.frame",Information="matrix",Outcome="data.frame"));
+setClass(Class="fit",representation=representation(Distribution="character",Parameters="data.frame",Information="matrix",Outcome="data.frame",S="function"));
 
 ########################
 # Print Method

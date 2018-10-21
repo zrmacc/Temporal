@@ -23,7 +23,7 @@
 #'
 #' @seealso
 #' \itemize{
-#'   \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+#'   \item{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
 #' }
 #'
 #' @examples
@@ -72,9 +72,12 @@ fit.Exp = function(time,status,sig=0.05){
   Y$L = Y$Estimate-z*Y$SE;
   Y$U = Y$Estimate+z*Y$SE;
 
+  # Fitted survival function
+  S = function(t){exp(-l1*t)};
+
   ## Format Results
   J = matrix(J);
   rownames(J) = colnames(J) = c("l");
-  Out = new(Class="fit",Distribution="Exponential",Parameters=P,Information=J,Outcome=Y);
+  Out = new(Class="fit",Distribution="Exponential",Parameters=P,Information=J,Outcome=Y,S=S);
   return(Out);
 }

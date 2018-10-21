@@ -37,7 +37,7 @@
 #'
 #' @seealso
 #' \itemize{
-#'   \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+#'   \item{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
 #' }
 #'
 #' @examples
@@ -204,6 +204,7 @@ fit.LogNormal = function(time,status,sig=0.05,init=NULL,eps=1e-6,maxit=10,report
   # Outcome characteristics
   Y = data.frame(c("Mean","Median","Variance"),c(mu,me,v),c(se.mu,se.me,se.v));
   colnames(Y) = c("Aspect","Estimate","SE");
+
   # CIs
   z = qnorm(1-sig/2);
   P$L = P$Estimate-z*P$SE;
@@ -211,7 +212,10 @@ fit.LogNormal = function(time,status,sig=0.05,init=NULL,eps=1e-6,maxit=10,report
   Y$L = Y$Estimate-z*Y$SE;
   Y$U = Y$Estimate+z*Y$SE;
 
+  # Fitted survival function
+  S = function(t){pnorm(q=log(t),mean=m1,sd=s1,lower.tail=F)};
+
   ## Format Results
-  Out = new(Class="fit",Distribution="Log-Normal",Parameters=P,Information=I,Outcome=Y);
+  Out = new(Class="fit",Distribution="Log-Normal",Parameters=P,Information=I,Outcome=Y,S=S);
   return(Out);
 }

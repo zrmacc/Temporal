@@ -43,7 +43,7 @@
 #'
 #' @seealso
 #' \itemize{
-#'   \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+#'   \item{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
 #' }
 #'
 #' @examples
@@ -248,7 +248,10 @@ fit.LogLogistic = function(time,status,sig=0.05,init=NULL,eps=1e-6,maxit=10,repo
   Y$L = Y$Estimate-z*Y$SE;
   Y$U = Y$Estimate+z*Y$SE;
 
+  # Fitted survival function
+  S = function(t){1/(1+(l1*t)^a1)};
+
   ## Format Results
-  Out = new(Class="fit",Distribution="Log-Logistic",Parameters=P,Information=I,Outcome=Y);
+  Out = new(Class="fit",Distribution="Log-Logistic",Parameters=P,Information=I,Outcome=Y,S=S);
   return(Out);
 }

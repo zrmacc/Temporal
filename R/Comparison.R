@@ -114,7 +114,7 @@ estRatio = function(t1,s1,t0,s0,sig=0.05){
 #'
 #' @seealso
 #' \itemize{
-#'   \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+#'   \item{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
 #' }
 #'
 #' @examples

@@ -52,6 +52,6 @@ M = fitParaSurv(time=D$time,status=D$status,dist="log-logistic");
 }
 \seealso{
 \itemize{
-  \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+  \item{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
 }
 }

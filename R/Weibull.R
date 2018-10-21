@@ -32,7 +32,7 @@
 #'
 #' @seealso
 #' \itemize{
-#'   \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+#'   \item{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
 #' }
 #'
 #' @examples
@@ -142,7 +142,10 @@ fit.Weibull = function(time,status,sig=0.05,init=NULL){
   Y$L = Y$Estimate-z*Y$SE;
   Y$U = Y$Estimate+z*Y$SE;
 
+  # Fitted survival function
+  S = function(t){exp(-(l1*t)^a1)};
+
   ## Format Results
-  Out = new(Class="fit",Distribution="Weibull",Parameters=P,Information=J,Outcome=Y);
+  Out = new(Class="fit",Distribution="Weibull",Parameters=P,Information=J,Outcome=Y,S=S);
   return(Out);
 }

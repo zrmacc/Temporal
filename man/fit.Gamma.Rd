@@ -36,7 +36,7 @@ An object of class \code{fit} containing the following:
 Estimates parameters for gamma event times subject to non-informative
 right censoring. The gamma distribution is parameterized in terms
 of the shape \eqn{\alpha} and rate \eqn{\lambda}:
-\deqn{f(t) = \frac{\lambda{\Gamma(\alpha)} (\lambda t)^{\alpha-1}e^{-\lambda t}, t>0}}
+\deqn{f(t) = \frac{\lambda}{\Gamma(\alpha)}(\lambda t)^{\alpha-1}e^{-\lambda t}, t>0}
 }
 \examples{
 # Simulate
@@ -46,6 +46,6 @@ M = fitParaSurv(time=D$time,status=D$status,dist="gamma");
 }
 \seealso{
 \itemize{
-  \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+  \item{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
 }
 }

@@ -53,12 +53,12 @@ M = fitParaSurv(time=D$time,status=D$status,dist="weibull");
 }
 \seealso{
 \itemize{
-  \item{}{Between group comparison of survival experience \code{\link{compParaSurv}}}
-  \item{}{Exponential distribution \code{\link{fit.Exp}}}
-  \item{}{Gamma distribution \code{\link{fit.Gamma}}}
-  \item{}{Generalized gamma distribution \code{\link{fit.GenGamma}}}
-  \item{}{Log-logistic distribution \code{\link{fit.LogLogistic}}}
-  \item{}{Log-normal distribution \code{\link{fit.LogNormal}}}
-  \item{}{Weibull distribution \code{\link{fit.Weibull}}}
+  \item{Between group comparison of survival experience \code{\link{compParaSurv}}}
+  \item{Exponential distribution \code{\link{fit.Exp}}}
+  \item{Gamma distribution \code{\link{fit.Gamma}}}
+  \item{Generalized gamma distribution \code{\link{fit.GenGamma}}}
+  \item{Log-logistic distribution \code{\link{fit.LogLogistic}}}
+  \item{Log-normal distribution \code{\link{fit.LogNormal}}}
+  \item{Weibull distribution \code{\link{fit.Weibull}}}
 }
 }

@@ -14,7 +14,7 @@
 #' Estimates parameters for gamma event times subject to non-informative
 #' right censoring. The gamma distribution is parameterized in terms
 #' of the shape \eqn{\alpha} and rate \eqn{\lambda}:
-#' \deqn{f(t) = \frac{\lambda{\Gamma(\alpha)} (\lambda t)^{\alpha-1}e^{-\lambda t}, t>0}}
+#' \deqn{f(t) = \frac{\lambda}{\Gamma(\alpha)}(\lambda t)^{\alpha-1}e^{-\lambda t}, t>0}
 #'
 #' @param time Observation times.
 #' @param status Status indicator, coded as 1 if an event was observed, 0 if
@@ -40,7 +40,7 @@
 #'
 #' @seealso
 #' \itemize{
-#'   \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+#'   \item{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
 #' }
 #'
 #' @examples
@@ -240,7 +240,10 @@ fit.Gamma = function(time,status,sig=0.05,init=NULL,eps=1e-6,maxit=10,report=F){
   Y$L = Y$Estimate-z*Y$SE;
   Y$U = Y$Estimate+z*Y$SE;
 
+  # Fitted survival function
+  S = function(t){expint::gammainc(a1,l1*t)/gamma(a1)};
+
   ## Format Results
-  Out = new(Class="fit",Distribution="Gamma",Parameters=P,Information=I,Outcome=Y);
+  Out = new(Class="fit",Distribution="Gamma",Parameters=P,Information=I,Outcome=Y,S=S);
   return(Out);
 }

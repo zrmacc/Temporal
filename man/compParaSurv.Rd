@@ -90,6 +90,6 @@ E = compParaSurv(time=D$time,status=D$status,arm=D$arm,dist1="log-normal",dist0=
 }
 \seealso{
 \itemize{
-  \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+  \item{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
 }
 }

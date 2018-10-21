@@ -108,7 +108,7 @@ init.GenGamma = function(tobs,L=0.01,U=10){
 #'
 #' @seealso
 #' \itemize{
-#'   \item{}{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
+#'   \item{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
 #' }
 #'
 #' @examples
@@ -394,7 +394,10 @@ fit.GenGamma = function(time,status,sig=0.05,init=NULL,eps=1e-6,maxit=10,report=
   Y$L = Y$Estimate-z*Y$SE;
   Y$U = Y$Estimate+z*Y$SE;
 
+  # Fitted survival function
+  S = function(t){expint::gammainc(a1,(l1*t)^b1)/gamma(a1)};
+
   ## Format Results
-  Out = new(Class="fit",Distribution="GenGamma",Parameters=P,Information=I,Outcome=Y);
+  Out = new(Class="fit",Distribution="GenGamma",Parameters=P,Information=I,Outcome=Y,S=S);
   return(Out);
 }

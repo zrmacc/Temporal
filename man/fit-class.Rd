@@ -17,5 +17,7 @@ Defines the object class returned by fitting functions.
 \item{\code{Information}}{Information components.}
 
 \item{\code{Outcome}}{Properties of the fitted distribution.}
+
+\item{\code{S}}{Fitted survival function.}
 }}
 
