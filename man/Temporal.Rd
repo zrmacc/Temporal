@@ -3,7 +3,6 @@
 \docType{package}
 \name{Temporal}
 \alias{Temporal}
-\alias{Temporal-package}
 \title{Temporal: Utilities for Parametric Survival Analysis}
 \description{
 This package performs estimation and inference on parametric survival curves.

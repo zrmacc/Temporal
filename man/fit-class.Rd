@@ -10,14 +10,16 @@ Defines the object class returned by fitting functions.
 \section{Slots}{
 
 \describe{
-\item{\code{Distribution}}{Fitted distribution.}
+\item{\code{Distribution}}{Fitted distribution, string.}
 
-\item{\code{Parameters}}{Parameters.}
+\item{\code{Parameters}}{Parameters, data.frame.}
 
-\item{\code{Information}}{Information components.}
+\item{\code{Information}}{Information components, matrix.}
 
-\item{\code{Outcome}}{Properties of the fitted distribution.}
+\item{\code{Outcome}}{Properties of the fitted distribution, data.frame.}
 
-\item{\code{S}}{Fitted survival function.}
+\item{\code{RMST}}{Estimated restricted mean survival times, data.frame}
+
+\item{\code{S}}{Fitted survival function, function.}
 }}
 

@@ -4,19 +4,28 @@
 \alias{fit.LogNormal}
 \title{Log-Normal Distribution Parameter Estimation}
 \usage{
-fit.LogNormal(time, status, sig = 0.05, init = NULL, eps = 1e-06,
-  maxit = 10, report = F)
+fit.LogNormal(
+  time,
+  status,
+  sig = 0.05,
+  tau = NULL,
+  init = NULL,
+  eps = 1e-06,
+  maxit = 10,
+  report = F
+)
 }
 \arguments{
-\item{time}{Observation times.}
+\item{time}{Numeric observation times.}
 
 \item{status}{Status indicator, coded as 1 if an event was observed, 0 if
 censored.}
 
 \item{sig}{Significance level, for CIs.}
 
-\item{init}{List of initial parameter values, including the location "m", and
-the log of the scale parameter "ls".}
+\item{tau}{Optional truncation times for calculating RMSTs.}
+
+\item{init}{Vecotor of initial values for the location \eqn{\mu} and scale \eqn{\sigma}.}
 
 \item{eps}{Tolerance for Newton-Raphson iterations.}
 
@@ -30,6 +39,7 @@ An object of class \code{fit} containing the following:
  \item{Parameters}{The estimated location \eqn{\mu} and scale \eqn{\sigma}.}
  \item{Information}{The observed information matrix.}
  \item{Outcome}{The fitted mean, median, and variance.}
+ \item{RMST}{The estimated RMSTs, if tau was specified.}
 }
 }
 \description{
@@ -39,10 +49,10 @@ of the location \eqn{\mu} and scale \eqn{\sigma}:
 \deqn{f(t) = \phi\left(\frac{\ln t-\mu}{\sigma}\right)\frac{1}{t\sigma}, t>0}
 }
 \examples{
-# Simulate
-D = rLogNormal(n=1e3,m=0,s=1);
+# Generate Log-Normal data with 20\% censoring. 
+data = genData(n=1e3,dist="log-normal",theta=c(0,2),p=0.2);
 # Estimate
-M = fitParaSurv(time=D$time,status=D$status,dist="log-normal");
+fit = fitParaSurv(time=data$time,status=data$status,dist="log-normal");
 }
 \seealso{
 \itemize{

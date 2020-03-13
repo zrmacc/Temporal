@@ -16,16 +16,11 @@ rWeibull(n, a = 1, l = 1, p = 0)
 \item{p}{Expected censoring proportion.}
 }
 \value{
-A data.frame including the observation times and status indicators.
+Data.frame including the observation times and status indicators.
 }
 \description{
 Generates Weibull event times with shape parameter \eqn{\alpha} and rate
 parameter \eqn{\lambda}. See \code{\link{fit.Weibull}} for the parameterization. If
 a censoring proportion \eqn{p} is provided, the deviates are subject to
 non-informative random right censoring.
-}
-\examples{
-# Weibull event times with shape 2 and rate 2
-# Expected censoring proportion of 20\%
-D = rWeibull(n=1e3,a=2,l=2,p=0.2);
 }

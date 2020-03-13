@@ -1,23 +1,23 @@
 Package: Temporal
 Title: Parametric Time to Event Analysis
-Version: 0.1.1
-Authors@R: person("Zachary", "McCaw", email = "zmccaw@g.harvard.edu", role = c("aut", "cre"))
-Description: Performs likelihood-based estimation and inference on time to event data, possibly subject to non-informative right censoring. fitParaSurv() provides maximum likelihood estimates of model parameters and distributional characteristics. compParaSurv() compares the mean and median survival experiences of two treatment arms. Candidate distributions currently include the exponential, gamma, generalized gamma, log-logistic, log-normal, and Weibull. 
-Depends: R (>= 3.4.0)
+Version: 0.2.0
+Authors@R: person("Zachary", "McCaw", email = "zmccaw@alumni.harvard.edu", role = c("aut", "cre"))
+Description: Performs maximum likelihood based estimation and inference on time to event data, possibly subject to non-informative right censoring. fitParaSurv() provides maximum likelihood estimates of model parameters and distributional characteristics, including the mean, median, variance, and restricted mean. compParaSurv() compares the mean, median, and restricted mean survival experiences of two treatment groups. Candidate distributions include the exponential, gamma, generalized gamma, log-normal, and weibull. 
+Depends: R (>= 3.5.0)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 LinkingTo:
 	Rcpp,
-	RcppEigen
+	RcppArmadillo
 Imports:
 	expint,
 	methods,
 	numDeriv,
-	plyr, 
+	plyr,
 	Rcpp,
 	stats
-RoxygenNote: 6.1.0
+RoxygenNote: 7.0.2
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr

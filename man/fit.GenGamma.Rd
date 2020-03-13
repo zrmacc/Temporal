@@ -4,18 +4,34 @@
 \alias{fit.GenGamma}
 \title{Generalized Gamma Distribution Parameter Estimation}
 \usage{
-fit.GenGamma(time, status, sig = 0.05, init = NULL, eps = 1e-06,
-  maxit = 10, report = F)
+fit.GenGamma(
+  time,
+  status,
+  sig = 0.05,
+  tau = NULL,
+  init,
+  bL = 0.1,
+  bU = 10,
+  eps = 1e-06,
+  maxit = 10,
+  report = FALSE
+)
 }
 \arguments{
-\item{time}{Observation times.}
+\item{time}{Numeric observation times.}
 
 \item{status}{Status indicator, coded as 1 if an event was observed, 0 if censored.}
 
 \item{sig}{Significance level, for CIs.}
 
-\item{init}{List of initial parameter values, including the logs of the shape
-parameters "la" and "lb", and the log of the rate parameter "ll".}
+\item{tau}{Optional truncation times for calculating RMSTs.}
+
+\item{init}{Vector of initial values for the shape \eqn{\alpha}, \eqn{\beta}, and
+rate \eqn{\lambda} parameters, respectively.}
+
+\item{bL}{Lower limit on possible values for beta.}
+
+\item{bU}{Upper limit on possible values for beta.}
 
 \item{eps}{Tolerance for Newton-Raphson iterations.}
 
@@ -29,6 +45,7 @@ An object of class \code{fit} containing the following:
  \item{Parameters}{The estimated shape \eqn{(\alpha,\beta)} and rate \eqn{\lambda} parameters.}
  \item{Information}{The observed information matrix.}
  \item{Outcome}{The fitted mean, median, and variance.}
+ \item{RMST}{The estimated RMSTs, if tau was specified.}
 }
 }
 \description{
@@ -38,11 +55,11 @@ of the shape parameters \eqn{(\alpha,\beta)}, and the rate \eqn{\lambda}:
 \deqn{f(t) = \frac{\beta\lambda}{\Gamma(\alpha)} (\lambda t)^{\alpha\beta-1}e^{-(\lambda t)^{\beta}}, t>0}
 }
 \examples{
-set.seed(100);
-# Simulate
-D = rGenGamma(n=1e4,a=2,b=2,l=2);
+set.seed(103);
+# Generalized Gamma data with 20\% censoring.
+data = genData(n=1e4,dist="gen-gamma",theta=c(2,2,2),p=0.2);
 # Estimate
-M = fitParaSurv(time=D$time,status=D$status,dist="gengamma");
+fit = fitParaSurv(time=data$time,status=data$status,dist="gen-gamma",report=TRUE);
 }
 \seealso{
 \itemize{

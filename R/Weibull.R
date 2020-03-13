@@ -1,5 +1,5 @@
 # Purpose: Estimation of Weibull distribution
-# Updated: 180926
+# Updated: 20/03/07
 
 # Notes
 # Numerically verified: Score, Hessian, Mean, Median, Variance
@@ -15,10 +15,11 @@
 #' of the shape \eqn{\alpha} and rate \eqn{\lambda}:
 #' \deqn{f(t) = \alpha\lambda^{\alpha}t^{\alpha-1}e^{-(\lambda t)^{\alpha}}, t>0}
 #'
-#' @param time Observation times.
+#' @param time Numierc observation times.
 #' @param status Status indicator, coded as 1 if an event was observed, 0 if censored.
 #' @param sig Significance level, for CIs.
-#' @param init List containing an initial value for the shape parameter "a".
+#' @param tau Optional truncation times for calculating RMSTs
+#' @param init Numeric vector containing the initial value for \eqn{\alpha}. 
 #'
 #' @importFrom methods new
 #' @importFrom stats quantile uniroot
@@ -28,6 +29,7 @@
 #'  \item{Parameters}{The estimated shape \eqn{\alpha} and rate \eqn{\lambda}.}
 #'  \item{Information}{The observed information matrix.}
 #'  \item{Outcome}{The fitted mean, median, and variance.}
+#'  \item{RMST}{The estimated RMSTs, if tau was specified.}
 #' }
 #'
 #' @seealso
@@ -36,16 +38,12 @@
 #' }
 #'
 #' @examples
-#' # Simulate
-#' D = rWeibull(n=1e3,a=2,l=2);
+#' # Generate Weibull data with 20% censoring
+#' data = genData(n=1e3,dist="weibull",theta=c(2,2),p=0.2);
 #' # Estimate
-#' M = fitParaSurv(time=D$time,status=D$status,dist="weibull");
+#' fit = fitParaSurv(time=data$time,status=data$status,dist="weibull");
 
-fit.Weibull = function(time,status,sig=0.05,init=NULL){
-  # Input check
-  if(!is.null(init)){
-    if(!all(names(init)%in%c("a"))){stop("For weibull, init should contain shape 'a'.")};
-  }
+fit.Weibull = function(time,status,sig=0.05,tau=NULL,init=NULL){
 
   # Events
   n = length(time);
@@ -55,81 +53,97 @@ fit.Weibull = function(time,status,sig=0.05,init=NULL){
   # Log times
   logtime = log(time);
   logtobs = log(tobs);
-
+  
+  # MLE of rate
+  rate = function(a){
+    ta = time^a;
+    l = (sum(ta)/nobs)^(-1/a);
+    return(l);
+  }
+  
   # Profile score for shape
-  Score = function(a){
+  score = function(a){
     if(a==0){
-      Out = Inf;
+      out = Inf;
     }  else {
       # Scaled time
       ta = time^a;
       # Score
-      Out = nobs/a-nobs*sum(ta*logtime)/sum(ta)+sum(logtobs);
+      out = nobs/a-nobs*sum(ta*logtime)/sum(ta)+sum(logtobs);
     }
-    return(Out);
+    return(out);
   }
-
+  
   ## Initialize
-  a0 = init$a0;
-  if(is.null(a0)){
+  a0 = init[1];
+  if(!is.numeric(a0)){
     q0 = as.numeric(quantile(x=tobs,probs=c(1-exp(-1))));
     l0 = 1/q0;
     a0 = digamma(1)/(log(l0)+mean(logtobs));
-  } else {
-    a0 = a0;
-  }
-  # Search for upper limit
-  U = a0;
-  fU = Score(U);
-  sU = sign(fU);
-  if(sU==1){
-    while(sU==1){
-      U = 2*U;
-      fU = Score(U);
-      sU = sign(fU);
-    }
-  }
+  };
 
-  ## Optimize
-  # MLE for alpha
-  a1 = uniroot(f=Score,lower=0,upper=U,f.upper=fU)$root;
-  # MLE for lambda
-  ta1 = time^a1;
-  l1 = (sum(ta1)/nobs)^(-1/a1);
-
-  ## Information
-  S1 = sum(ta1);
-  S2 = sum(ta1*logtime);
-  S3 = sum(ta1*(logtime)^2);
-  # Information components
-  Jaa = (nobs/(a1^2))+(l1^a1)*(log(l1))^2*S1+2*(l1^a1)*log(l1)*S2+(l1^a1)*S3;
-  Jll = (nobs*a1)/(l1^2)+a1*(a1-1)*(l1^(a1-2))*S1;
-  Jla = -(nobs/l1)+(l1^(a1-1))*S1+a1*(l1^(a1-1))*log(l1)*S1+a1*(l1^(a1-1))*S2;
-  # Information matrix
-  J = matrix(c(Jaa,Jla,Jla,Jll),nrow=2);
-  colnames(J) = rownames(J) = c("a","l");
+  # Optimize
+  ## MLE for alpha
+  a = uniroot(f=score,lower=0,upper=2*a0,extendInt="downX")$root;
+  ## MLE for lambda
+  l = rate(a);
+  
+  # Observed information
+  obsInfo = function(a,l){
+    ta = time^a;
+    ## Sums
+    S1 = sum(ta);
+    S2 = sum(ta*logtime);
+    S3 = sum(ta*(logtime)^2);
+    ## Information components
+    Jaa = (nobs/(a^2))+(l^a)*(log(l))^2*S1+2*(l^a)*log(l)*S2+(l^a)*S3;
+    Jll = (nobs*a)/(l^2)+a*(a-1)*(l^(a-2))*S1;
+    Jla = -(nobs/l)+(l^(a-1))*S1+a*(l^(a-1))*log(l)*S1+a*(l^(a-1))*S2;
+    ## Information matrix
+    J = matrix(c(Jaa,Jla,Jla,Jll),nrow=2);
+    colnames(J) = rownames(J) = c("a","l");
+    return(J);
+  }
+  
+  J = obsInfo(a,l);
   Ji = matInv(J);
+  
+  if(any(diag(Ji)<0)){
+    stop("Information matrix not positive definite. Try another initialization");
+  }
 
   # Parameters
-  P = data.frame(c("Shape","Rate"),c(a1,l1),sqrt(diag(Ji)));
+  P = data.frame(c("Shape","Rate"),c(a,l),sqrt(diag(Ji)));
   colnames(P) = c("Aspect","Estimate","SE");
 
-  ## Fitted Distribution
-  # Estimate mean
-  mu = (1/l1)*gamma(1+1/a1);
-  dg = -(1/l1)*gamma(1+1/a1)*c(digamma(1+1/a1)/a1^2,1/l1);
+  # Fitted Distribution
+  ## Estimate mean
+  mu = (1/l)*gamma(1+1/a);
+  dg = -(1/l)*gamma(1+1/a)*c(digamma(1+1/a)/a^2,1/l);
+  dg = matrix(dg,ncol=1);
   se.mu = sqrt(as.numeric(matQF(dg,Ji)));
+  ## Numerical check
+  # g = function(x){(1/x[2])*gamma(1+1/x[1])};
+  # grad(func=g,x=c(a,l));
 
-  # Estimate median
-  me = (1/l1)*(log(2))^(1/a1);
-  dg = -(1/l1)*(log(2))^(1/a1)*c(log(log(2))/a1^2,(1/l1));
+  ## Estimate median
+  me = (1/l)*(log(2))^(1/a);
+  dg = -(1/l)*(log(2))^(1/a)*c(log(log(2))/a^2,(1/l));
+  dg = matrix(dg,ncol=1);
   se.me = sqrt(as.numeric(matQF(dg,Ji)));
+  ## Numerical check
+  # g = function(x){(1/x[2])*(log(2))^(1/x[1])};
+  # grad(func=g,x=c(a,l));
 
-  # Estimate variance
-  v = (1/l1^2)*(gamma(1+2/a1)-gamma(1+1/a1)^2);
-  dg = -(2/l1^2)*c((1/a1^2)*(gamma(1+2/a1)*digamma(1+2/a1)-(gamma(1+1/a1)^2)*digamma(1+1/a1)),
-                   (1/l1)*(gamma(1+2/a1)-gamma(1+1/a1)^2));
+  ## Estimate variance
+  v = (1/l^2)*(gamma(1+2/a)-gamma(1+1/a)^2);
+  dg = -(2/l^2)*c((1/a^2)*(gamma(1+2/a)*digamma(1+2/a)-(gamma(1+1/a)^2)*digamma(1+1/a)),
+                   (1/l)*(gamma(1+2/a)-gamma(1+1/a)^2));
+  dg = matrix(dg,ncol=1);
   se.v = sqrt(as.numeric(matQF(dg,Ji)));
+  ## Numerical check
+  # g = function(x){(1/x[2]^2)*(gamma(1+2/x[1])-gamma(1+1/x[1])^2)};
+  # grad(func=g,x=c(a,l));
 
   # Outcome characteristics
   Y = data.frame(c("Mean","Median","Variance"),c(mu,me,v),c(se.mu,se.me,se.v));
@@ -143,9 +157,16 @@ fit.Weibull = function(time,status,sig=0.05,init=NULL){
   Y$U = Y$Estimate+z*Y$SE;
 
   # Fitted survival function
-  S = function(t){exp(-(l1*t)^a1)};
+  S = function(t){exp(-(l*t)^a)};
 
-  ## Format Results
-  Out = new(Class="fit",Distribution="Weibull",Parameters=P,Information=J,Outcome=Y,S=S);
+  # Format Results
+  Out = new(Class="fit",Distribution="weibull",Parameters=P,Information=J,Outcome=Y,S=S);
+  
+  ## Add RMST if requested. 
+  if(is.numeric(tau)){
+    rmst = paraRMST(fit=Out,sig=sig,tau=tau);
+    Out@RMST = rmst;
+  }
+  
   return(Out);
 }

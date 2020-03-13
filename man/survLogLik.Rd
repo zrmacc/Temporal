@@ -2,33 +2,46 @@
 % Please edit documentation in R/LogLik.R
 \name{survLogLik}
 \alias{survLogLik}
-\title{Survival Distribution Log Likelihood}
+\title{Log Likelihood}
 \usage{
-survLogLik(time, status, dist, theta, log.scale = T)
+survLogLik(time, status = NULL, dist, theta, log.scale = FALSE)
 }
 \arguments{
-\item{time}{Observation times.}
+\item{time}{Numeric observation times.}
 
 \item{status}{Status indicator, coded as 1 if an event was observed, 0 if censored.}
 
-\item{dist}{Distribution.}
+\item{dist}{Distribution, from among: "exp","gamma","gen-gamma","log-normal","weibull".}
 
-\item{theta}{List of parameters, which will vary according to the distribution.}
+\item{theta}{Parameters, which will vary according to the distribution.}
 
-\item{log.scale}{Are positive parameters on log-scale?}
+\item{log.scale}{Are strictly positive parameters on log-scale?}
 }
 \value{
 Scalar value of the log likelihood.
 }
 \description{
-Evaluation of the log-likelihood for parametric survival distribution.
+Evaluates the log-likelihood for a parametric survival distribution.
+}
+\details{
+The parameter vector theta should contain the following elements, in order,
+depending on the distribution:
+\describe{
+ \item{Exponential}{Rate \eqn{\lambda}.}
+ \item{Gamma}{Shape \eqn{\alpha}, rate \eqn{\lambda}.}
+ \item{Generalized Gamma}{Shape 1 \eqn{\alpha}, shape 2 \eqn{\beta}, rate \eqn{\lambda}.}
+ \item{Log-Normal}{Locaion \eqn{\mu}, scale \eqn{\sigma}.}
+ \item{Weibull}{Shape \eqn{\alpha}, rate \eqn{\lambda}.}
+}
 }
 \examples{
-\dontrun{
-# Simulate
-D = rWeibull(n=1e3,a=2,l=2,p=0.2);
+# Generate Weibull data with 20\% censoring.
+data = genData(n=1e3,dist="weibull",theta=c(2,2),p=0.2);
 # Log likelihood
-ll = survLogLik(time=D$time,status=D$status,
-dist="weibull",theta=list("a"=2,"l"=2),log.scale=F);
-}
+ll = survLogLik(time=data$time,status=data$status,dist="weibull",theta=c(2,2));
+
+# Generate Gamam data with 10\% censoring. 
+data = genData(n=1e3,dist="gamma",theta=c(2,2),p=0.1);
+# Log likelihood
+ll = survLogLik(time=data$time,status=data$status,dist="gamma",theta=c(2,2));
 }

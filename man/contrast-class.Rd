@@ -10,14 +10,16 @@ Defines the object class returned by the comparison function.
 \section{Slots}{
 
 \describe{
-\item{\code{Dist1}}{Distribution fit to the target group.}
+\item{\code{Dist1}}{Distribution fit to the target group, string.}
 
-\item{\code{Dist0}}{Distribution fit to the reference group.}
+\item{\code{Dist0}}{Distribution fit to the reference group, string.}
 
-\item{\code{Model1}}{Fitted model for the target group.}
+\item{\code{Model1}}{Fitted model for the target group, fit.}
 
-\item{\code{Model0}}{Fitted model for the reference group.}
+\item{\code{Model0}}{Fitted model for the reference group, fit.}
 
-\item{\code{Contrast}}{Model contrasts.}
+\item{\code{Location}}{Contrasts of means and medians, data.frame.}
+
+\item{\code{RMST}}{Contrasts of RMSTs, data.frame.}
 }}
 

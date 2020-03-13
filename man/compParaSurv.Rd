@@ -4,8 +4,22 @@
 \alias{compParaSurv}
 \title{Compare Parametric Survival Distribution}
 \usage{
-compParaSurv(time, status, arm, dist1 = "weibull", dist0, init1 = NULL,
-  init0 = NULL, sig = 0.05, eps = 1e-06, maxit = 10, report = F)
+compParaSurv(
+  time,
+  status = NULL,
+  arm,
+  tau = NULL,
+  dist1 = "weibull",
+  dist0 = NULL,
+  init1 = NULL,
+  init0 = NULL,
+  boot = NULL,
+  perm = NULL,
+  sig = 0.05,
+  eps = 1e-06,
+  maxit = 10,
+  report = F
+)
 }
 \arguments{
 \item{time}{Observation time.}
@@ -16,18 +30,22 @@ censored.}
 \item{arm}{Treatment indicator, coded as 1 for the target group, 0 for the
 reference group.}
 
+\item{tau}{Optional truncation times for calculating RMST.}
+
 \item{dist1}{Distribution to fit for the target group. Selected from among:
-exp, gamma, gengamma, log-logistic, log-normal, and weibull.}
+exp, gamma, gengamma, log-normal, and weibull.}
 
 \item{dist0}{Distribution to fit for the reference group. Same choices as for
 the target group. If omitted, defaults to the distribution specified for
 the target group.}
 
-\item{init1}{List of initial parameter values for the target group. See
-individual distributions for naming convention.}
+\item{init1}{Initial parameter values for the target group.}
 
-\item{init0}{List of initial parameter values for the reference group. See
-individual distributions for naming convention.}
+\item{init0}{Initial parameter values for the reference group.}
+
+\item{boot}{If provided, integer number of bootstraps for constructing CIs.}
+
+\item{perm}{If provided, integer number of permutations for calculating p-values.}
 
 \item{sig}{Significance level, for CIs.}
 
@@ -48,45 +66,56 @@ An object of class \code{contrast} containing the following:
 \description{
 Compares the means and medians of parametric survival distributions fit to
 each of two treatment arms. Available distributions include: exponential,
-gamma, generalized gamma, log-logistic, log-normal, and Weibull.
+gamma, generalized gamma, log-normal, and Weibull.
+}
+\details{
+Status is encoded 0 for censored and 1 for observed. Arm is encoded 0 for 
+reference, 1 for target. Tau is an optional numeric vector of truncation times 
+for calculating restricted mean survival time, which is the area under the
+survival curve up to the specified truncation point.
 }
 \examples{
+\dontrun{
 set.seed(100);
-## Weibull and Weibull, different means and medians
-# Target group
-D1 = rWeibull(n=1e3,a=1,l=1,p=0.2);
-D1$arm = 1;
-# Reference group
-D0 = rWeibull(n=1e3,a=1,l=2,p=0.2);
-D0$arm = 0;
-# Overall data set
-D = rbind(D1,D0);
-# Comparison
-E = compParaSurv(time=D$time,status=D$status,arm=D$arm,dist1="weibull");
+# Weibull and Weibull, different means and medians
+n = 1e3;
+## Target group
+d1 = genData(n=n,dist="weibull",theta=c(1,1),p=0.2);
+d1$arm = 1;
+## Reference group
+d0 = genData(n=n,dist="weibull",theta=c(1,2),p=0.2);
+d0$arm = 0;
+## Overall data set
+data = rbind(d1,d0);
+## Comparison
+comp = compParaSurv(time=data$time,status=data$status,arm=data$arm,tau=0.5,dist1="weibull");
 
-## Gamma and Weibull, different means and medians
-# Target group
-D1 = rGamma(n=1e3,a=2,l=2,p=0.2);
-D1$arm = 1;
-# Reference group
-D0 = rWeibull(n=1e3,a=2,l=2/sqrt(pi),p=0.2);
-D0$arm = 0;
-# Overall data set
-D = rbind(D1,D0);
-# Comparison
-E = compParaSurv(time=D$time,status=D$status,arm=D$arm,dist1="gamma",dist0="weibull");
+# Gamma and Weibull, same mean, different medians, bootstrap CIs
+## Target group
+d1 = genData(n=n,dist="gamma",theta=c(2,2),p=0.2);
+d1$arm = 1;
+## Reference group
+d0 = genData(n=n,dist="weibull",theta=c(2,sqrt(pi)/2),p=0.2);
+d0$arm = 0;
+## Overall data set
+data = rbind(d1,d0);
+## Comparison
+comp = compParaSurv(time=data$time,status=data$status,arm=data$arm,
+                    tau=0.5,dist1="gamma",dist0="weibull",boot=2e3);
 
-## Weibull and Log-normal, different means, same median
-# Target group
-D1 = rLogNormal(n=1e3,m=0,s=2,p=0.2);
-D1$arm = 1;
-# Reference group
-D0 = rWeibull(n=1e3,a=2,l=sqrt(log(2)),p=0.2);
-D0$arm = 0;
-# Overall data set
-D = rbind(D1,D0);
-# Comparison
-E = compParaSurv(time=D$time,status=D$status,arm=D$arm,dist1="log-normal",dist0="weibull");
+# Weibull and Log-normal, different means, same median, permutation p.values
+## Target group
+d1 = genData(n=n,dist="log-normal",theta=c(0,2),p=0.2);
+d1$arm = 1;
+## Reference group
+d0 = genData(n=n,dist="weibull",theta=c(2,sqrt(log(2))),p=0.2);
+d0$arm = 0;
+## Overall data set
+data = rbind(d1,d0);
+## Comparison
+comp = compParaSurv(time=data$time,status=data$status,arm=data$arm,
+                    tau=0.5,dist1="log-normal",dist0="weibull",perm=2e3);
+}
 }
 \seealso{
 \itemize{

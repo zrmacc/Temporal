@@ -1,5 +1,5 @@
 # Purpose: Parameter estimation
-# Updated: 180817
+# Updated: 20/03/07
 
 ########################
 # Master Fitting Function
@@ -9,16 +9,18 @@
 #'
 #' Estimates parametric survival distributions using event times subject to
 #' non-informative right censoring. Available distributions include:
-#' exponential, gamma, generalized gamma, log-logistic, log-normal, and Weibull.
+#' exponential, gamma, generalized gamma, log-normal, and Weibull.
 #'
-#' @param time Observation times.
-#' @param status Status indicator, coded as 1 if an event was observed, 0 if
-#'   censored.
-#' @param dist Distribution to fit, selected from among: exp, gamma, gengamma,
-#'   log-logistic, log-normal, and weibull.
+#' @param time Numeric observation times.
+#' @param status Status indicator, coded as 1 if observed, 0 if censored.
+#' @param dist String, distribution to fit, selected from among: exp, gamma, gen-gamma
+#'   log-normal, and weibull.
+#' @param tau Optional truncation time for calculating RMSTs.
 #' @param sig Significance level, for CIs.
-#' @param init List of initial parameter values. See individual distributions for
-#'   naming convention.
+#' @param init Numeric vector of initial parameters. See individual distributions for
+#'   parameter order.
+#' @param bL If dist="gen-gamma", lower limit on possible values for beta.
+#' @param bU If dist="gen-gamma", upper limit on possible values for beta. 
 #' @param eps Tolerance for Newton-Raphson iterations.
 #' @param maxit Maximum number of NR iterations.
 #' @param report Report fitting progress?
@@ -30,6 +32,7 @@
 #'   \item{Parameters}{The estimated shape and rate parameters.}
 #'   \item{Information}{The observed information matrix.}
 #'   \item{Outcome}{The fitted mean, median, and variance.}
+#'  \item{RMST}{The estimated RMSTs, if tau was specified.}
 #' }
 #'
 #' @seealso
@@ -38,67 +41,67 @@
 #'   \item{Exponential distribution \code{\link{fit.Exp}}}
 #'   \item{Gamma distribution \code{\link{fit.Gamma}}}
 #'   \item{Generalized gamma distribution \code{\link{fit.GenGamma}}}
-#'   \item{Log-logistic distribution \code{\link{fit.LogLogistic}}}
 #'   \item{Log-normal distribution \code{\link{fit.LogNormal}}}
 #'   \item{Weibull distribution \code{\link{fit.Weibull}}}
 #' }
 #'
 #' @examples
-#' # Generate cenored gamma data
-#' D = rGamma(n=1e3,a=2,l=2,p=0.2);
+#' # Generate Gamma data with 20% censoring
+#' D = genData(n=1e3,dist="gamma",theta=c(2,2),p=0.2);
 #' # Fit gamma distribution
 #' M = fitParaSurv(time=D$time,status=D$status,dist="gamma");
 #'
-#' # Generate cenored weibull data
-#' D = rWeibull(n=1e3,a=2,l=2,p=0.2);
-#' # Fit weibull distribution
-#' M = fitParaSurv(time=D$time,status=D$status,dist="weibull");
+#' # Generate Weibull data with 10% censoring
+#' D = genData(n=1e3,dist="weibull",theta=c(2,2),p=0.1);
+#' # Fit weibull distribution, calculate RMST at tau=0.5
+#' M = fitParaSurv(time=D$time,status=D$status,dist="weibull",tau=0.5);
 
-fitParaSurv = function(time,status,dist="weibull",sig=0.05,init=NULL,eps=1e-6,maxit=10,report=F){
-  ## Input checks
+fitParaSurv = function(time,status=NULL,dist="weibull",tau=NULL,sig=0.05,
+                       init=NULL,bL=0.1,bU=10,eps=1e-6,maxit=10,report=F){
+  
+  # Input checks
   n = length(time);
-  # Positivity
-  if(min(time)<0){stop("Strictly positive observation times required.")};
-  # Status
-  if(missing(status)){status=rep(1,n)};
-  status.levels = sort(unique(status));
-  if(length(status.levels)==1){
-    if(status.levels!=1){status=rep(1,n)};
+  
+  ## Positivity
+  if(min(time)<0){
+    stop("Strictly positive observation times required.");
   }
-  if(length(status.levels)==2){
-    if(!all.equal(status.levels,c(0,1))){stop("Numeric 0,1 coding is expected for status.")};
+ 
+  ## Status
+  if(is.null(status)){
+    status=rep(1,n);
+    warning("Since status was not supplied, all events are assumed observed.");
   }
-  if(length(status.levels)>2){stop("Only two levels are expected for status.")}
-  # Distribution
-  choices = c("exp","gamma","gengamma","log-logistic","log-normal","weibull");
-  if(!(dist %in% choices)){stop(c("Select distribution from among:\n",paste0(choices,collapse=" ")))};
-  # Initialization
-  if(!is.null(init)&!is.list(init)){stop("init is expected as a list.")};
+  pass = checkStatus(n=n,status=status);
+  if(!pass){
+    stop("Status check failed.");
+  }
+  
+  ## Distribution
+  pass = checkDist(dist=dist);
+  if(!pass){
+    stop("Distribution check failed.");
+  }
+  
+  ## Initialization
+  pass = checkInit(dist=dist,init=init);
+  if(!pass){
+    stop("Initialization check failed.");
+  }
 
-  # Exponential
+  # Model fitting
   if(dist=="exp"){
-    M = fit.Exp(time=time,status=status,sig=sig);
+    fit = fit.Exp(time=time,status=status,sig=sig,tau=tau);
+  } else if(dist=="gamma"){
+    fit = fit.Gamma(time=time,status=status,sig=sig,tau=tau,init=init,eps=eps,maxit=maxit,report=report);
+  } else if(dist=="gen-gamma"){
+    fit = fit.GenGamma(time=time,status=status,sig=sig,tau=tau,init=init,eps=eps,maxit=maxit,report=report);
+  } else if(dist=="log-normal"){
+    fit = fit.LogNormal(time=time,status=status,sig=sig,tau=tau,init=init,eps=eps,maxit=maxit,report=report);
+  } else if(dist=="weibull"){
+    fit = fit.Weibull(time=time,status=status,sig=sig,tau=tau,init=init);
   }
-  # Gamma
-  if(dist=="gamma"){
-    M = fit.Gamma(time=time,status=status,sig=sig,init=init,eps=eps,maxit=maxit,report=report);
-  }
-  # Generalized gamma
-  if(dist=="gengamma"){
-    M = fit.GenGamma(time=time,status=status,sig=sig,init=init,eps=eps,maxit=maxit,report=report);
-  }
-  # Log logistic
-  if(dist=="log-logistic"){
-    M = fit.LogLogistic(time=time,status=status,sig=sig,init=init,eps=eps,maxit=maxit,report=report);
-  }
-  # Log normal
-  if(dist=="log-normal"){
-    M = fit.LogNormal(time=time,status=status,sig=sig,init=init,eps=eps,maxit=maxit,report=report);
-  }
-  # Weibull
-  if(dist=="weibull"){
-    M = fit.Weibull(time=time,status=status,sig=sig,init=init);
-  }
+  
   # Output
-  return(M);
+  return(fit);
 }

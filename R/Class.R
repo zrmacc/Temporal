@@ -2,16 +2,22 @@
 #'
 #' Defines the object class returned by fitting functions.
 #'
-#' @slot Distribution Fitted distribution.
-#' @slot Parameters Parameters.
-#' @slot Information Information components.
-#' @slot Outcome Properties of the fitted distribution.
-#' @slot S Fitted survival function.
+#' @slot Distribution Fitted distribution, string.
+#' @slot Parameters Parameters, data.frame. 
+#' @slot Information Information components, matrix. 
+#' @slot Outcome Properties of the fitted distribution, data.frame. 
+#' @slot RMST Estimated restricted mean survival times, data.frame
+#' @slot S Fitted survival function, function.
 #' @name fit-class
 #' @rdname fit-class
 #' @exportClass fit
 
-setClass(Class="fit",representation=representation(Distribution="character",Parameters="data.frame",Information="matrix",Outcome="data.frame",S="function"));
+setClass(Class="fit",representation=representation(Distribution="character",
+                                                   Parameters="data.frame",
+                                                   Information="matrix",
+                                                   Outcome="data.frame",
+                                                   RMST="data.frame",
+                                                   S="function"));
 
 ########################
 # Print Method
@@ -39,6 +45,12 @@ print.fit = function(x,...){
   # Outcome characteristics
   Y = x@Outcome;
   Y[] = lapply(Y,aux);
+  # RMST
+  if(length(x@RMST)>0){
+    R = x@RMST;
+    R[] = lapply(R,aux);
+  }
+  
   # Display
   cat(paste0("Fitted ",dist," Distribution."),"\n");
   cat("Estimated Parameters:\n");
@@ -47,6 +59,11 @@ print.fit = function(x,...){
   cat("Distribution Properties:\n");
   print(Y);
   cat("\n");
+  if(length(x@RMST)>0){
+    cat("Restricted Mean Survival Times:\n");
+    print(R);
+    cat("\n");
+  }
 }
 
 ########################
@@ -59,7 +76,9 @@ print.fit = function(x,...){
 #' @rdname fit-method
 #' @importFrom methods show
 
-setMethod(f="show",signature=c(object="fit"),definition=function(object){print.fit(x=object)});
+setMethod(f="show",
+          signature=c(object="fit"),
+          definition=function(object){print.fit(x=object)});
 
 ########################
 # Model Contrast
@@ -69,16 +88,23 @@ setMethod(f="show",signature=c(object="fit"),definition=function(object){print.f
 #'
 #' Defines the object class returned by the comparison function.
 #'
-#' @slot Dist1 Distribution fit to the target group.
-#' @slot Dist0 Distribution fit to the reference group.
-#' @slot Model1 Fitted model for the target group.
-#' @slot Model0 Fitted model for the reference group.
-#' @slot Contrast Model contrasts.
+#' @slot Dist1 Distribution fit to the target group, string.
+#' @slot Dist0 Distribution fit to the reference group, string.
+#' @slot Model1 Fitted model for the target group, fit.
+#' @slot Model0 Fitted model for the reference group, fit.
+#' @slot Location Contrasts of means and medians, data.frame.
+#' @slot RMST Contrasts of RMSTs, data.frame. 
 #' @name contrast-class
 #' @rdname contrast-class
 #' @exportClass contrast
 
-setClass(Class="contrast",representation=representation(Dist1="character",Dist0="character",Model1="fit",Model0="fit",Contrast="data.frame"));
+setClass(Class="contrast",
+         representation=representation(Dist1="character",
+                                       Dist0="character",
+                                       Model1="fit",
+                                       Model0="fit",
+                                       Location="data.frame",
+                                       RMST="data.frame"));
 
 ########################
 # Print Method
@@ -108,9 +134,15 @@ print.contrast = function(x,...){
   # Group 0
   G0 = x@Model0@Outcome;
   G0[] = lapply(G0,aux);
-  # Contrasts
-  Contrast = x@Contrast;
-  Contrast[] = lapply(Contrast,aux);
+  # Location
+  Location = x@Location;
+  Location[] = lapply(Location,aux);
+  # RMST
+  if(length(x@RMST>0)){
+    RMST = x@RMST;
+    RMST[] = lapply(RMST,aux);
+  }
+  
   # Display
   if(flag){
     cat(paste0("Contrast of Fitted ",dist1," Distributions."),"\n\n");
@@ -123,9 +155,14 @@ print.contrast = function(x,...){
   cat("Fitted Characteristics for Group 0:\n");
   print(G0);
   cat("\n");
-  cat("Contrasts:\n");
-  print(Contrast);
+  cat("Location:\n");
+  print(Location);
   cat("\n");
+  if(length(x@RMST>0)){
+    cat("RMST:\n");
+    print(RMST);
+    cat("\n");
+  }
 }
 
 ########################
@@ -138,4 +175,6 @@ print.contrast = function(x,...){
 #' @rdname contrast-method
 #' @importFrom methods show
 
-setMethod(f="show",signature=c(object="contrast"),definition=function(object){print.contrast(x=object)});
+setMethod(f="show",
+          signature=c(object="contrast"),
+          definition=function(object){print.contrast(x=object)});

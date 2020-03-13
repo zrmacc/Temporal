@@ -4,19 +4,28 @@
 \alias{fit.Gamma}
 \title{Gamma Distribution Parameter Estimation}
 \usage{
-fit.Gamma(time, status, sig = 0.05, init = NULL, eps = 1e-06,
-  maxit = 10, report = F)
+fit.Gamma(
+  time,
+  status,
+  sig = 0.05,
+  tau = NULL,
+  init = NULL,
+  eps = 1e-06,
+  maxit = 10,
+  report = FALSE
+)
 }
 \arguments{
-\item{time}{Observation times.}
+\item{time}{Numeric observation times.}
 
-\item{status}{Status indicator, coded as 1 if an event was observed, 0 if
-censored.}
+\item{status}{Status indicator, coded as 1 if an event was observed, 0 if censored.}
 
 \item{sig}{Significance level, for CIs.}
 
-\item{init}{List of initial parameter values, including the log of the shape
-parameter "la" and the log of the rate parameter "ll".}
+\item{tau}{Optional truncation times for calculating RMSTs.}
+
+\item{init}{Vector of initial values for shape \eqn{\alpha} and
+rate \eqn{\lambda} parameters, respectively.}
 
 \item{eps}{Tolerance for Newton-Raphson iterations.}
 
@@ -30,6 +39,7 @@ An object of class \code{fit} containing the following:
  \item{Parameters}{The estimated shape \eqn{\alpha} and rate \eqn{\lambda}.}
  \item{Information}{The observed information matrix.}
  \item{Outcome}{The fitted mean, median, and variance.}
+ \item{RMST}{The estimated RMSTs, if tau was specified.}
 }
 }
 \description{
@@ -39,10 +49,10 @@ of the shape \eqn{\alpha} and rate \eqn{\lambda}:
 \deqn{f(t) = \frac{\lambda}{\Gamma(\alpha)}(\lambda t)^{\alpha-1}e^{-\lambda t}, t>0}
 }
 \examples{
-# Simulate
-D = rGamma(n=1e3,a=2,l=2);
+# Generate Gamma data with 20\% censoring. 
+data = genData(n=1e3,dist="gamma",theta=c(2,2),p=0.2);
 # Estimate
-M = fitParaSurv(time=D$time,status=D$status,dist="gamma");
+fit = fitParaSurv(time=data$time,status=data$status,dist="gamma");
 }
 \seealso{
 \itemize{

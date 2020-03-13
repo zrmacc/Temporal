@@ -4,16 +4,18 @@
 \alias{fit.Weibull}
 \title{Weibull Distribution Parameter Estimation}
 \usage{
-fit.Weibull(time, status, sig = 0.05, init = NULL)
+fit.Weibull(time, status, sig = 0.05, tau = NULL, init = NULL)
 }
 \arguments{
-\item{time}{Observation times.}
+\item{time}{Numierc observation times.}
 
 \item{status}{Status indicator, coded as 1 if an event was observed, 0 if censored.}
 
 \item{sig}{Significance level, for CIs.}
 
-\item{init}{List containing an initial value for the shape parameter "a".}
+\item{tau}{Optional truncation times for calculating RMSTs}
+
+\item{init}{Numeric vector containing the initial value for \eqn{\alpha}.}
 }
 \value{
 An object of class \code{fit} containing the following:
@@ -21,6 +23,7 @@ An object of class \code{fit} containing the following:
  \item{Parameters}{The estimated shape \eqn{\alpha} and rate \eqn{\lambda}.}
  \item{Information}{The observed information matrix.}
  \item{Outcome}{The fitted mean, median, and variance.}
+ \item{RMST}{The estimated RMSTs, if tau was specified.}
 }
 }
 \description{
@@ -30,10 +33,10 @@ of the shape \eqn{\alpha} and rate \eqn{\lambda}:
 \deqn{f(t) = \alpha\lambda^{\alpha}t^{\alpha-1}e^{-(\lambda t)^{\alpha}}, t>0}
 }
 \examples{
-# Simulate
-D = rWeibull(n=1e3,a=2,l=2);
+# Generate Weibull data with 20\% censoring
+data = genData(n=1e3,dist="weibull",theta=c(2,2),p=0.2);
 # Estimate
-M = fitParaSurv(time=D$time,status=D$status,dist="weibull");
+fit = fitParaSurv(time=data$time,status=data$status,dist="weibull");
 }
 \seealso{
 \itemize{

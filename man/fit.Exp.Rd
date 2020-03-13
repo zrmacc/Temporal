@@ -4,14 +4,16 @@
 \alias{fit.Exp}
 \title{Exponential Distribution Parameter Estimation}
 \usage{
-fit.Exp(time, status, sig = 0.05)
+fit.Exp(time, status, sig = 0.05, tau = NULL)
 }
 \arguments{
-\item{time}{Observation times.}
+\item{time}{Numeric observation times.}
 
 \item{status}{Status indicator, coded as 1 if an event was observed, 0 if censored.}
 
 \item{sig}{Significance level, for CIs.}
+
+\item{tau}{Optional truncation times for calculating RMSTs.}
 }
 \value{
 An object of class \code{fit} containing the following:
@@ -19,6 +21,7 @@ An object of class \code{fit} containing the following:
  \item{Parameters}{The estimated model parameters.}
  \item{Information}{The observed information matrix.}
  \item{Outcome}{The fitted mean, median, and variance of the time to event distribution.}
+ \item{RMST}{The estimated RMSTs, if tau was specified.}
 }
 }
 \description{
@@ -27,10 +30,10 @@ right censoring. The exponential distribution is parameterized in terms
 of the rate \eqn{\lambda}: \deqn{f(t) = \lambda e^{-\lambda t}, t>0}
 }
 \examples{
-# Simulate
-D = rWeibull(n=1e3,a=1,l=2);
+# Generate exponential data with 20\% censoring
+data = genData(n=1e3,dist="exp",theta=c(2),p=0.2);
 # Estimate
-M = fitParaSurv(time=D$time,status=D$status,dist="exp");
+fit = fitParaSurv(time=data$time,status=data$status,dist="exp");
 }
 \seealso{
 \itemize{

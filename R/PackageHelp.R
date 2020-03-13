@@ -1,5 +1,5 @@
 # Purpose: Package documentation
-# Updated: 180818
+# Updated: 20/03/07
 
 #' @useDynLib Temporal
 #' @importFrom Rcpp sourceCpp

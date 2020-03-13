@@ -4,22 +4,38 @@
 \alias{fitParaSurv}
 \title{Fit Parametric Survival Distribution}
 \usage{
-fitParaSurv(time, status, dist = "weibull", sig = 0.05, init = NULL,
-  eps = 1e-06, maxit = 10, report = F)
+fitParaSurv(
+  time,
+  status = NULL,
+  dist = "weibull",
+  tau = NULL,
+  sig = 0.05,
+  init = NULL,
+  bL = 0.1,
+  bU = 10,
+  eps = 1e-06,
+  maxit = 10,
+  report = F
+)
 }
 \arguments{
-\item{time}{Observation times.}
+\item{time}{Numeric observation times.}
 
-\item{status}{Status indicator, coded as 1 if an event was observed, 0 if
-censored.}
+\item{status}{Status indicator, coded as 1 if observed, 0 if censored.}
 
-\item{dist}{Distribution to fit, selected from among: exp, gamma, gengamma,
-log-logistic, log-normal, and weibull.}
+\item{dist}{String, distribution to fit, selected from among: exp, gamma, gen-gamma
+log-normal, and weibull.}
+
+\item{tau}{Optional truncation time for calculating RMSTs.}
 
 \item{sig}{Significance level, for CIs.}
 
-\item{init}{List of initial parameter values. See individual distributions for
-naming convention.}
+\item{init}{Numeric vector of initial parameters. See individual distributions for
+parameter order.}
+
+\item{bL}{If dist="gen-gamma", lower limit on possible values for beta.}
+
+\item{bU}{If dist="gen-gamma", upper limit on possible values for beta.}
 
 \item{eps}{Tolerance for Newton-Raphson iterations.}
 
@@ -33,23 +49,24 @@ An object of class \code{fit} containing the following:
   \item{Parameters}{The estimated shape and rate parameters.}
   \item{Information}{The observed information matrix.}
   \item{Outcome}{The fitted mean, median, and variance.}
+ \item{RMST}{The estimated RMSTs, if tau was specified.}
 }
 }
 \description{
 Estimates parametric survival distributions using event times subject to
 non-informative right censoring. Available distributions include:
-exponential, gamma, generalized gamma, log-logistic, log-normal, and Weibull.
+exponential, gamma, generalized gamma, log-normal, and Weibull.
 }
 \examples{
-# Generate cenored gamma data
-D = rGamma(n=1e3,a=2,l=2,p=0.2);
+# Generate Gamma data with 20\% censoring
+D = genData(n=1e3,dist="gamma",theta=c(2,2),p=0.2);
 # Fit gamma distribution
 M = fitParaSurv(time=D$time,status=D$status,dist="gamma");
 
-# Generate cenored weibull data
-D = rWeibull(n=1e3,a=2,l=2,p=0.2);
-# Fit weibull distribution
-M = fitParaSurv(time=D$time,status=D$status,dist="weibull");
+# Generate Weibull data with 10\% censoring
+D = genData(n=1e3,dist="weibull",theta=c(2,2),p=0.1);
+# Fit weibull distribution, calculate RMST at tau=0.5
+M = fitParaSurv(time=D$time,status=D$status,dist="weibull",tau=0.5);
 }
 \seealso{
 \itemize{
@@ -57,7 +74,6 @@ M = fitParaSurv(time=D$time,status=D$status,dist="weibull");
   \item{Exponential distribution \code{\link{fit.Exp}}}
   \item{Gamma distribution \code{\link{fit.Gamma}}}
   \item{Generalized gamma distribution \code{\link{fit.GenGamma}}}
-  \item{Log-logistic distribution \code{\link{fit.LogLogistic}}}
   \item{Log-normal distribution \code{\link{fit.LogNormal}}}
   \item{Weibull distribution \code{\link{fit.Weibull}}}
 }
