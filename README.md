@@ -57,14 +57,14 @@ show(fit);
 ```
 ## Fitted exp Distribution. 
 ## Estimated Parameters:
-##   Aspect Estimate    SE    L    U
-## 1   Rate     2.03 0.071 1.89 2.17
+##   Aspect Estimate     SE    L    U
+## 1   Rate     2.12 0.0741 1.98 2.27
 ## 
 ## Distribution Properties:
 ##     Aspect Estimate     SE     L     U
-## 1     Mean    0.492 0.0172 0.459 0.526
-## 2   Median    0.341 0.0119 0.318 0.365
-## 3 Variance    0.242 0.0169 0.209 0.276
+## 1     Mean    0.471 0.0164 0.439 0.503
+## 2   Median    0.327 0.0114 0.304 0.349
+## 3 Variance    0.222 0.0155 0.192 0.252
 ```
 
 ## Gamma 
@@ -90,18 +90,18 @@ show(fit);
 ## Fitted gamma Distribution. 
 ## Estimated Parameters:
 ##   Aspect Estimate     SE    L    U
-## a  Shape     1.97 0.0895 1.80 2.15
-## l   Rate     1.98 0.1090 1.78 2.21
+## a  Shape     1.90 0.0854 1.74 2.07
+## l   Rate     1.85 0.1020 1.67 2.07
 ## 
 ## Distribution Properties:
 ##     Aspect Estimate     SE     L     U
-## 1     Mean    0.996 0.0256 0.946 1.050
-## 2   Median    0.833 0.0216 0.791 0.876
-## 3 Variance    0.503 0.0367 0.431 0.575
+## 1     Mean    1.020 0.0267 0.972 1.080
+## 2   Median    0.851 0.0224 0.807 0.895
+## 3 Variance    0.552 0.0404 0.473 0.631
 ## 
 ## Restricted Mean Survival Times:
 ##   Tau Estimate      SE    L     U
-## 1 0.5    0.447 0.00334 0.44 0.453
+## 1 0.5    0.447 0.00335 0.44 0.453
 ```
 
 ## Generalized Gamma
