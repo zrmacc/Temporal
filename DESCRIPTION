@@ -15,7 +15,7 @@ Imports:
 	methods,
 	numDeriv,
 	plyr,
-	Rcpp,
+	Rcpp (>= 1.0.3),
 	stats
 RoxygenNote: 7.0.2
 Suggests: knitr,

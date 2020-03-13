@@ -1,7 +1,7 @@
 # Purpose: Package documentation
 # Updated: 20/03/07
 
-#' @useDynLib Temporal
+#' @useDynLib Temporal, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 NULL
 
