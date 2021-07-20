@@ -1,262 +1,252 @@
-# Purpose: Functions to select inputs. 
+# Purpose: Functions to check inputs and set defaults.
+# Updated: 2021-07-17
 
-########################
-# Parameter Defaults
-########################
+# -----------------------------------------------------------------------------
 
 #' Set Default Parameters
-#' 
-#' Function to select default parameter values for each distribution. 
-#' 
+#'
+#' Function to select default parameter values for each distribution.
+#'
 #' @param dist String, distribution name.
-#' 
-#' @return Numeric parameter vector
+#' @return Numeric parameter ist.
 
-defaultParam = function(dist){
-  theta = c();
-  if(dist=="exp"){
-    # Rate
-    theta[1] = 1;
-  } else if(dist=="gamma"){
-    # Shape
-    theta[1] = 1;
-    # Rate
-    theta[2] = 1;
-  } else if(dist=="gen-gamma"){
-    # Shape
-    theta[1] = theta[2] = 1;
-    # Rate
-    theta[3] = 1;
-  } else if(dist=="log-normal"){
-    # Location
-    theta[1] = 0;
-    # Scale
-    theta[2] = 1;
-  } else if(dist=="weibull"){
-    # Shape
-    theta[1] = 1;
-    # Rate
-    theta[2] = 1;
+DefaultParam <- function(dist) {
+  if (dist == "exp") {
+    theta <- c(rate = 1)
+  } else if (dist == "gamma") {
+    theta <- c(shape = 1, rate = 1)
+  } else if (dist == "gen-gamma") {
+    theta <- c(alpha = 1, beta = 1, lambda = 1)
+  } else if (dist == "log-normal") {
+    theta <- c(loc = 0, scale = 1)
+  } else if (dist == "weibull") {
+    theta <- c(shape = 1, rate = 1)
   }
-  return(theta);
+  return(theta)
 }
 
-########################
-# Check Arm
-########################
+
+# -----------------------------------------------------------------------------
 
 #' Check Arm
-#' 
-#' Check whether treatment arm is properly formatted. 
 #'
-#' @param arm 0/1, treatment arm. 
-#' @param n Integer, sample size. 
-#' 
-#' @return Logical indication of whether arm was properly formatted. 
+#' Check whether treatment arm is properly formatted.
+#'
+#' @param arm 0/1, treatment arm.
+#' @return None.
 
-checkArm = function(arm,n){
-  
-  pass = TRUE;
-  
-  if(length(arm)!=n){
-    pass = FALSE;
-    warning("Arm should have the same length as time.");
+CheckArm <- function(arm) {
+  arm_levels <- sort(unique(arm))
+  if (!all.equal(arm_levels, c(0, 1))) {
+    stop("Arm should have 2 levels, coded 0 for reference, 1 for treatment.")
   }
-  
-  arm.levels = sort(unique(arm));
-  n.arm.levels = length(arm.levels);
-  
-  if(n.arm.levels==1){
-    pass = FALSE;
-    warning("compParaSurv is for comparing arms. See fitParaSurv for single arm estimation.")
-  } else if(n.arm.levels==2){
-    if(!all.equal(arm.levels,c(0,1))){
-      pass = FALSE;
-      warning("Numeric 0,1 encoding is expected for arm.")
-    }
-  } else {
-    pass = FALSE;
-    warning("Arm should have exactly two levels, encoded 0,1. ")
-  }
-  
-  return(pass);
+  return(invisible(TRUE))
 }
 
-########################
-# Check Distribution
-########################
+
+# -----------------------------------------------------------------------------
 
 #' Check Distribution
-#' 
+#'
 #' Check whether the distribution selected is available.
 #'
 #' @param dist String, distribution name.
-#' 
-#' @return Logical indication of whether the distribution was available. 
+#' @return None.
 
-checkDist = function(dist){
-  
-  pass = TRUE;
-  choices = c("exp","gamma","gen-gamma","log-normal","weibull");
-  valid = (dist %in% choices);
-  
-  if(!valid){
-    pass = FALSE;
-    warning("Select distribution from among the following choices:\n",
-            paste(choices,collapse=", "));
-    
+CheckDist <- function(dist) {
+  choices <- c("exp", "gamma", "gen-gamma", "log-normal", "weibull")
+  if (!(dist %in% choices)) {
+    stop(
+      "Select distribution from among the following choices:\n",
+      paste(choices, collapse = ", ")
+    )
   }
-  
-  return(pass);
+  return(invisible(TRUE))
 }
 
-########################
-# Check Initialization
-########################
+
+# -----------------------------------------------------------------------------
 
 #' Check Initialization
-#' 
-#' Check whether the initialization is valid. 
+#'
+#' Check whether the initialization is valid.
 #'
 #' @param dist String, distribution name.
-#' @param init Numeric vector, initialization.
-#' 
-#' @return Logical indication of whether the initialization was valid. 
+#' @param init List of named parameters.
+#' @return None.
 
-checkInit = function(dist,init){
+CheckInit <- function(dist, init) {
   
-  pass = TRUE;
+  # Only check initialization if not null.
+  if (is.null(init)) {return(invisible(TRUE))}
   
-  # Only check initialization if not null
-  if(!is.null(init)){
-    
-    # Check for NA
-    if(any(is.na(init))){
-      pass = FALSE;
-      warning("All parameters must be initialized.");
-    } else {
-      len = length(init);
-      # Exponential 
-      if (dist=="exp"){
-        warning("Exponential does not require initialization.");
-      } else if(dist=="log-normal"){
-        # Log normal
-        if(len!=2){
-          pass = FALSE;
-          warning("Log-normal requires 2 parameters.");
-        } else if(!init[2]>0){
-          pass = FALSE;
-          warning("Scale parameter must be positive.");
-        }
-      } else {
-        # Remaining distributions
-        ## Ensure positivity
-        if(!all(init>0)){
-          pass = FALSE;
-          warning("Initialize all parameters at positive values");
-        }
-        ## Check length
-        if(dist=="gamma"&len!=2){
-          pass = FALSE;
-          warning("Gamma requires 2 parameters.");
-        } else if(dist=="gen-gamma"&len!=3){
-          pass = FALSE;
-          warning("Generalized gamma requires 3 parameters.");
-        } else if(dist=="weibull"&len!=1){
-          warning("Weibull initialization only requires the shape parameter.");
-        }
-      }
+  # Exponential.
+  if (dist == "exp") {
+    warning("Exponential does not require initialization.")
+  }
+  
+  # Check for named list.
+  if (!is.list(init)){
+    stop("A named list is required for initialization.")
+  }
+  
+  params <- sort(names(init))
+  
+  # Gamma.
+  if (dist == "gamma") {
+    if (length(init) != 2) {
+      stop("Gamma initialization requires 2 parameters.")
+    }
+    if (!all.equal(params, c("rate", "shape"))) {
+      stop("Gamma initialization requires the following named parameters: rate, shape.")
+    }
+    if (!all(init > 0)) {
+      stop("Gamma shape and rate must be strictly positive.")
     }
   }
   
-  return(pass);
+  # Generalized Gamma.
+  if (dist == "gen-gamma") {
+    if (length(init) != 3) {
+      stop("Generalized gamma initialization requires 2 parameters.")
+    }
+    if (!all.equal(params, c("alpha", "beta", "lambda"))) {
+      stop("Generalized gamma initialization requires the following 
+           named parameters: alpha, beta, lambda.")
+    }
+    if (!all(init > 0)) {
+      stop("Generalized gamma parameters must be strictly positive.")
+    }
+  }
+  
+  # Log-normal.
+  if (dist == "log-normal") {
+    if (length(init) != 2) {
+      stop("Log-normal initialization requires 2 parameters.")
+    }
+    if (!all.equal(params, c("loc", "scale"))) {
+      stop("Log-normal initialization requires the following 
+           named parameters: loc, scale.")
+    }
+    if (!init$scale > 0) {
+      stop("Log-normal scale must be strictly positive.")  
+    }
+  }
+  
+  # Weibull.
+  if (dist == "weibull") {
+    if (length(init) > 1) {
+      warning("Only the shape parameter is required for initializing Weibull.")
+    }
+    if (!(init$shape > 0)) {
+      stop("Weibull shape must be strictly positive.")  
+    }
+  } 
+  
+  return(invisible(TRUE))
 }
 
-########################
-# Check Status
-########################
+
+# -----------------------------------------------------------------------------
 
 #' Status Check
 #'
 #' Function to ensure the status indicator is properly formatted
 #'
-#' @param n Integer, sample size.
 #' @param status 0/1 status indicator.
-#'
-#' @return Logical indicator of whether the status indicator was properly
-#'   formatted.
+#' @return None.
 
-checkStatus = function(n,status){
+CheckStatus <- function(status) {
+  status_levels <- sort(unique(status))
+  n_status_levels <- length(status_levels)
   
-  pass = TRUE;
-  
-  if(length(status)!=n){
-    pass = FALSE;
-    warning("Status should have the same length as time.");
+  if (n_status_levels == 1) {
+    if (status_levels == 1) {
+      return(invisible(TRUE))
+    } else {
+      stop("If all events are observed, code status as 1 for all records.")
+    }
   }
   
-  status.levels = sort(unique(status));
-  n.status.levels = length(status.levels);
-  
-  if(n.status.levels==1){
-    if(status.levels!=1){
-      pass = FALSE;
-      warning("If only one status level is present, all observations should have status 1.")
-    }
-  } else if(n.status.levels==2){
-    if(!all.equal(status.levels,c(0,1))){
-      pass = FALSE;
-      warning("Numeric 0,1 encoding is expected for status.")
+  if (n_status_levels == 2) {
+    if (all(status_levels == c(0, 1))) {
+      return(invisible(TRUE))
+    } else {
+      stop("Status should have two levels, coded as 0 for censored, 1 for observed.")
     }
   } else {
-    pass = FALSE;
-    warning("Status should have at most two levels, encoded 0,1. ")
+    stop("Status should only have two levels.")
   }
-  
-  return(pass);
 }
 
-
-########################
-# Check Theta
-########################
+# -----------------------------------------------------------------------------
 
 #' Check Theta
 #'
 #' Function to check the appropriate number of parameters are supplied for the
-#' selected distribution.
+#' selected distribution. Used by \code{\link{GenData}}.
 #'
 #' @param dist String, distribution.
 #' @param theta Numeric, parameter vector.
-#'
-#' @return Logical indication of whether the appropriate number of parameters
-#'   was provided.
+#' @return None.
 
-checkTheta = function(dist,theta){
+CheckTheta <- function(dist, theta) {
+  len_theta <- length(theta)
   
-  pass = TRUE;
-  len = length(theta);
-  
-  # Exponential
-  if(dist=="exp" & len!=1){
-    pass = FALSE;
-    warning("Exponential requires a single rate parameter.");
-  } else if(dist=="gamma" & len!=2){
-    pass = FALSE;
-    warning("Gamma requires a shape and a rate parameter.");
-  } else if(dist=="gen-gamma" & len!=3){
-    pass = FALSE; 
-    warning("Generalized gamma requires two shape and one rate parameters.");
-  } else if(dist=="log-normal" & len!=2){
-    pass = FALSE;
-    warning("Log-normal requires a location and a scale parameter.");
-  } else if(dist=="weibull" & len!=2){
-    pass = FALSE;
-    warning("Weibull requires a shape and a rate parameter.");
+  # Check numeric.
+  if (!is.numeric(theta)) {
+    stop("Supply theta as a numeric vector.")
   }
   
-  # Output
-  return(pass);
+  # Exponential.
+  if (dist == "exp") {
+    if (len_theta != 1) {
+      stop("Exponential requires a single rate parameter.")
+    }
+    if (!(theta[1] > 0)) {
+      stop("Exponential rate must be strictly positive.")
+    }
+  }
+  
+  # Gamma.
+  if (dist == "gamma") {
+    if (len_theta != 2) {
+      stop("Gamma requires a shape and a rate parameter.")
+    }
+    if (!all(theta > 0)) {
+      stop("Gamma shape and a rate must be strictly positive.")
+    }
+  }
+  
+  # Generalized gamma.
+  if (dist == "gen-gamma") {
+    if (len_theta != 3) {
+      stop("Generalized gamma requires two shape parameters and one rate parameter.")
+    }
+    if (!all(theta > 0)) {
+      stop("Gamma shape and a rate must be strictly positive.")
+    }
+  }
+  
+  # Log-normal.
+  if (dist == "log-normal") {
+    if (len_theta != 2) {
+      stop("Log-normal requires a location and a scale parameter.")
+    }
+    if (!(theta[2] > 0)) {
+      stop("Log-normal scale paramter must be strictly positive.")
+    }
+  }
+  
+  # Weibull.
+  if (dist == "weibull") {
+    if (len_theta != 2) {
+      stop("Weibull requires a shape and a rate parameter.")
+    }
+    if (!all(theta > 0)) {
+      stop("Weibull shape and a rate must be strictly positive.")
+    }
+  }
+  
+  return(invisible(TRUE))
 }
-
-

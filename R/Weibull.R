@@ -1,12 +1,130 @@
 # Purpose: Estimation of Weibull distribution
-# Updated: 20/03/07
+# Updated: 2021-07-19
 
-# Notes
-# Numerically verified: Score, Hessian, Mean, Median, Variance
+# -----------------------------------------------------------------------------
+# Weibull distribution.
+# -----------------------------------------------------------------------------
 
-########################
-# Weibull Distribution
-########################
+#' Weibull Rate MLE
+#' 
+#' Profile MLE of the Weibull rate as a function of the shape.
+#'
+#' @param data Data.frame.
+#' @param shape Shape parameter.
+#' @return Numeric rate.
+
+WeiRate <- function(data, shape) {
+  
+  # Unpack.
+  time <- data$time
+  nobs <- sum(data$status)
+  
+  # Calculation.
+  ta <- time^shape
+  rate <- exp(-log(sum(ta) / nobs) / shape)
+  return(rate)
+}
+
+
+#' Weibull Profile Score for Shape
+#' 
+#' Profile score equation for the Weibull shape parameter.
+#' 
+#' @param data Data.frame.
+#' @param shape Shape parameter.
+#' @return Numeric score.
+
+WeiScore <- function(data, shape) {
+  
+  # Case of invalid shape. 
+  if (shape <= 0) {
+    return(Inf)
+  }
+  
+  # Definitions.
+  time <- data$time
+  logtime <- log(time)
+  nobs <- sum(data$status)
+  tobs <- data$time[data$status == 1]
+  logtobs <- log(tobs)
+  
+  # Calculation.
+  ta <- time^shape
+  score <- nobs / shape - nobs * sum(ta * logtime) / sum(ta) + sum(logtobs)
+  return(score)
+}
+
+
+#' Weibull Initialization.
+#' 
+#' @param data Data.frame.
+#' @param init Initialization list.
+#' @return Numeric initial value for shape.
+
+WeiInit <- function(data, init) {
+  a0 <- init$shape
+  if (!is.null(a0)) {
+    tobs <- data$time[data$status == 1]
+    logtobs <- log(tobs)
+    q0 <- as.numeric(stats::quantile(x = tobs, probs = c(1 - exp(-1))))
+    l0 <- 1 / q0
+    a0 <- digamma(1) / (log(l0) + mean(logtobs))
+  } 
+  a0 <- max(a0, 1e-3)
+  return(a0)
+}
+
+
+#' Weibull Information Matrix.
+#' 
+#' Information matrix for the Weibull shape and rate parameters.
+#' 
+#' @param data Data.frame.
+#' @param shape Shape parameter, alpha.
+#' @param rate Rate parameter, lambda.
+#' @return Numeric information matrix.
+
+WeiInfo <- function(
+  data,
+  shape,
+  rate
+) {
+  
+  # Unpack.
+  time <- data$time
+  logtime <- log(time)
+  nobs <- sum(data$status)
+  tobs <- data$time[data$status == 1]
+  logtobs <- log(tobs)
+  
+  # Calculation.
+  ta <- data$time^shape
+  s0 <- sum(ta)
+  s1 <- sum(ta * logtime)
+  s2 <- sum(ta * (logtime)^2)
+  
+  # Information for shape.
+  info_shape <- (nobs / (shape^2)) + 
+    (rate^shape) * (log(rate))^2 * s0 + 
+    2 * (rate^shape) * log(rate) * s1 + 
+    (rate^shape) * s2
+  
+  # Information for rate.
+  info_rate <- (nobs * shape) / (rate^2) + 
+    shape * (shape - 1) * (rate^(shape - 2)) * s0
+  
+  # Cross information.
+  cross_info <- -(nobs / rate) + 
+    (rate^(shape - 1)) * s0 + 
+    shape * (rate^(shape - 1)) * log(rate) * s0 + 
+    shape * (rate^(shape - 1)) * s1
+  
+  # Output.
+  info <- matrix(c(info_shape, cross_info, cross_info, info_rate), nrow = 2)
+  dimnames(info) <- list(c("shape", "rate"), c("shape", "rate"))
+  return(info)
+}
+
 
 #' Weibull Distribution Parameter Estimation
 #'
@@ -15,15 +133,12 @@
 #' of the shape \eqn{\alpha} and rate \eqn{\lambda}:
 #' \deqn{f(t) = \alpha\lambda^{\alpha}t^{\alpha-1}e^{-(\lambda t)^{\alpha}}, t>0}
 #'
-#' @param time Numierc observation times.
-#' @param status Status indicator, coded as 1 if an event was observed, 0 if censored.
+#' @param data Data.frame.
+#' @param init List containing the initial value for the shape, \eqn{\alpha}.
 #' @param sig Significance level, for CIs.
-#' @param tau Optional truncation times for calculating RMSTs
-#' @param init Numeric vector containing the initial value for \eqn{\alpha}. 
-#'
-#' @importFrom methods new
-#' @importFrom stats quantile uniroot
-#'
+#' @param status_name Name of the status indicator, 1 if observed, 0 if censored.
+#' @param tau Optional truncation times for calculating RMSTs.
+#' @param time_name Name of column containing the time to event.
 #' @return An object of class \code{fit} containing the following:
 #' \describe{
 #'  \item{Parameters}{The estimated shape \eqn{\alpha} and rate \eqn{\lambda}.}
@@ -31,142 +146,137 @@
 #'  \item{Outcome}{The fitted mean, median, and variance.}
 #'  \item{RMST}{The estimated RMSTs, if tau was specified.}
 #' }
-#'
-#' @seealso
-#' \itemize{
-#'   \item{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
-#' }
-#'
+#' @importFrom dplyr "%>%"
 #' @examples
-#' # Generate Weibull data with 20% censoring
-#' data = genData(n=1e3,dist="weibull",theta=c(2,2),p=0.2);
-#' # Estimate
-#' fit = fitParaSurv(time=data$time,status=data$status,dist="weibull");
+#' # Generate Weibull data with 20% censoring.
+#' data <- GenData(n = 1e3, dist = "weibull", theta = c(2, 2), p = 0.2)
+#' 
+#' # Estimate parameters.
+#' fit <- FitParaSurv(data, dist = "weibull")
 
-fit.Weibull = function(time,status,sig=0.05,tau=NULL,init=NULL){
+FitWeibull <- function(
+  data, 
+  init = list(),
+  sig = 0.05, 
+  status_name = "status", 
+  tau = NULL, 
+  time_name = "time"
+) {
+  
+  # Data formatting.
+  data <- data %>%
+    dplyr::rename(
+      status = {{ status_name }},
+      time = {{ time_name }}
+    )
 
-  # Events
-  n = length(time);
-  nobs = sum(status);
-  # Observed events
-  tobs = time[status==1];
-  # Log times
-  logtime = log(time);
-  logtobs = log(tobs);
-  
-  # MLE of rate
-  rate = function(a){
-    ta = time^a;
-    l = (sum(ta)/nobs)^(-1/a);
-    return(l);
-  }
-  
-  # Profile score for shape
-  score = function(a){
-    if(a==0){
-      out = Inf;
-    }  else {
-      # Scaled time
-      ta = time^a;
-      # Score
-      out = nobs/a-nobs*sum(ta*logtime)/sum(ta)+sum(logtobs);
-    }
-    return(out);
-  }
-  
-  ## Initialize
-  a0 = init[1];
-  if(!is.numeric(a0)){
-    q0 = as.numeric(quantile(x=tobs,probs=c(1-exp(-1))));
-    l0 = 1/q0;
-    a0 = digamma(1)/(log(l0)+mean(logtobs));
-  };
+  # Optimize.
+  shape0 <- WeiInit(data, init)
+  shape <- stats::uniroot(
+    f = function(a) {WeiScore(data, a)}, 
+    lower = 0, 
+    upper = 2 * shape0, 
+    extendInt = "downX")$root
+  rate <- WeiRate(data, shape)
 
-  # Optimize
-  ## MLE for alpha
-  a = uniroot(f=score,lower=0,upper=2*a0,extendInt="downX")$root;
-  ## MLE for lambda
-  l = rate(a);
+  # Observed information.
+  info <- WeiInfo(data, shape, rate)
+  inv_info <- solve(info)
   
-  # Observed information
-  obsInfo = function(a,l){
-    ta = time^a;
-    ## Sums
-    S1 = sum(ta);
-    S2 = sum(ta*logtime);
-    S3 = sum(ta*(logtime)^2);
-    ## Information components
-    Jaa = (nobs/(a^2))+(l^a)*(log(l))^2*S1+2*(l^a)*log(l)*S2+(l^a)*S3;
-    Jll = (nobs*a)/(l^2)+a*(a-1)*(l^(a-2))*S1;
-    Jla = -(nobs/l)+(l^(a-1))*S1+a*(l^(a-1))*log(l)*S1+a*(l^(a-1))*S2;
-    ## Information matrix
-    J = matrix(c(Jaa,Jla,Jla,Jll),nrow=2);
-    colnames(J) = rownames(J) = c("a","l");
-    return(J);
-  }
-  
-  J = obsInfo(a,l);
-  Ji = matInv(J);
-  
-  if(any(diag(Ji)<0)){
-    stop("Information matrix not positive definite. Try another initialization");
+  # Check information matrix for positive definiteness.
+  if (any(diag(inv_info) < 0)) {
+    stop("Information matrix not positive definite. Try another initialization")
   }
 
-  # Parameters
-  P = data.frame(c("Shape","Rate"),c(a,l),sqrt(diag(Ji)));
-  colnames(P) = c("Aspect","Estimate","SE");
+  # Parameters.
+  params <- data.frame(
+    Aspect = c("Shape", "Rate"), 
+    Estimate = c(shape, rate), 
+    SE = sqrt(diag(inv_info)),
+    row.names = NULL,
+    stringsAsFactors = FALSE
+  )
 
-  # Fitted Distribution
-  ## Estimate mean
-  mu = (1/l)*gamma(1+1/a);
-  dg = -(1/l)*gamma(1+1/a)*c(digamma(1+1/a)/a^2,1/l);
-  dg = matrix(dg,ncol=1);
-  se.mu = sqrt(as.numeric(matQF(dg,Ji)));
-  ## Numerical check
-  # g = function(x){(1/x[2])*gamma(1+1/x[1])};
-  # grad(func=g,x=c(a,l));
-
-  ## Estimate median
-  me = (1/l)*(log(2))^(1/a);
-  dg = -(1/l)*(log(2))^(1/a)*c(log(log(2))/a^2,(1/l));
-  dg = matrix(dg,ncol=1);
-  se.me = sqrt(as.numeric(matQF(dg,Ji)));
-  ## Numerical check
-  # g = function(x){(1/x[2])*(log(2))^(1/x[1])};
-  # grad(func=g,x=c(a,l));
-
-  ## Estimate variance
-  v = (1/l^2)*(gamma(1+2/a)-gamma(1+1/a)^2);
-  dg = -(2/l^2)*c((1/a^2)*(gamma(1+2/a)*digamma(1+2/a)-(gamma(1+1/a)^2)*digamma(1+1/a)),
-                   (1/l)*(gamma(1+2/a)-gamma(1+1/a)^2));
-  dg = matrix(dg,ncol=1);
-  se.v = sqrt(as.numeric(matQF(dg,Ji)));
-  ## Numerical check
-  # g = function(x){(1/x[2]^2)*(gamma(1+2/x[1])-gamma(1+1/x[1])^2)};
-  # grad(func=g,x=c(a,l));
-
-  # Outcome characteristics
-  Y = data.frame(c("Mean","Median","Variance"),c(mu,me,v),c(se.mu,se.me,se.v));
-  colnames(Y) = c("Aspect","Estimate","SE");
-
-  # CIs
-  z = qnorm(1-sig/2);
-  P$L = P$Estimate-z*P$SE;
-  P$U = P$Estimate+z*P$SE;
-  Y$L = Y$Estimate-z*Y$SE;
-  Y$U = Y$Estimate+z*Y$SE;
-
-  # Fitted survival function
-  S = function(t){exp(-(l*t)^a)};
-
-  # Format Results
-  Out = new(Class="fit",Distribution="weibull",Parameters=P,Information=J,Outcome=Y,S=S);
+  # Outcome mean.
+  mu <- (1 / rate) * gamma(1 + 1 / shape)
+  grad <-  -(1 / rate) * gamma(1 + 1 / shape) * 
+    c(digamma(1 + 1 / shape) / shape^2, 1 / rate)
+  se_mu <- sqrt(QF(grad, inv_info))
   
-  ## Add RMST if requested. 
-  if(is.numeric(tau)){
-    rmst = paraRMST(fit=Out,sig=sig,tau=tau);
-    Out@RMST = rmst;
+  # Numerical verification.
+  # g <- function(x) {(1 / x[2]) * gamma(1 + 1 / x[1])}
+  # numDeriv::grad(g, x = c(shape, rate))
+
+  # Outcome median.
+  me <- (1 / rate) * (log(2))^(1 / shape)
+  grad <- -(1 / rate) * (log(2))^(1 / shape) * c(
+    log(log(2)) / shape^2, 
+    (1 / rate)
+  )
+  se_me <- sqrt(QF(grad, inv_info))
+  
+  # Numerical verification.
+  # g <- function(x){(1 / x[2]) * (log(2))^(1 / x[1])}
+  # numDeriv::grad(g, x = c(shape, rate))
+
+  # Outcome variance.
+  v <- (1 / rate^2) * (gamma(1 + 2 / shape) - gamma(1 + 1 / shape)^2)
+  grad <- -(2 / rate^2) * c(
+    (1 / shape^2) * (gamma(1 + 2 / shape) * digamma(1 + 2 / shape) - 
+                       (gamma(1 + 1 / shape)^2) * digamma(1 + 1 / shape)),
+    (1 / rate) * (gamma(1 + 2 / shape) - gamma(1 + 1 / shape)^2)
+  )
+  se_v <- sqrt(QF(grad, inv_info))
+  
+  # Numerical verification.
+  # g <- function(x){(1 / x[2]^2) * (gamma(1 + 2 / x[1]) - gamma(1 + 1 / x[1])^2)}
+  # numDeriv::grad(g,x = c(shape, rate))
+
+  # Outcome characteristics.
+  outcome <- data.frame(
+    Aspect = c("Mean", "Median", "Variance"),
+    Estimate = c(mu, me, v), 
+    SE = c(se_mu, se_me, se_v),
+    stringsAsFactors = FALSE
+  )
+
+  # Confidence intervals.
+  Estimate <- NULL
+  SE <- NULL
+  z <- stats::qnorm(1 - sig / 2)
+  
+  params <- params %>%
+    dplyr::mutate(
+      L = Estimate - z * SE,
+      U = Estimate + z * SE
+    )
+  
+  outcome <- outcome %>%
+    dplyr::mutate(
+      L = Estimate - z * SE,
+      U = Estimate + z * SE
+    )
+
+  # Fitted survival function.
+  surv <- function(t) {return(exp(-(rate * t)^shape))}
+
+  # Format results.
+  out <- methods::new(
+    Class = "fit", 
+    Distribution = "weibull", 
+    Parameters = params, 
+    Information = info, 
+    Outcome = outcome, 
+    S = surv
+  )
+  
+  # RMST.
+  if (is.numeric(tau)) {
+    rmst <- ParaRMST(fit = out, sig = sig, tau = tau)
+    out@RMST <- rmst
   }
   
-  return(Out);
+  # Output.
+  return(out)
 }
+

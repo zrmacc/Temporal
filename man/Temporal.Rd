@@ -6,8 +6,8 @@
 \title{Temporal: Utilities for Parametric Survival Analysis}
 \description{
 This package performs estimation and inference on parametric survival curves.
-See \code{\link{fitParaSurv}} for maximum likelihood estimation of model parameters.
-See \code{\link{compParaSurv}} for contrasting the survival experience of two
+See \code{\link{FitParaSurv}} for maximum likelihood estimation of model parameters.
+See \code{\link{CompParaSurv}} for contrasting the survival experience of two
 treatment arms.
 }
 \author{

@@ -1,7 +1,7 @@
 #' Survival Functions
-#' 
+#'
 #' Constructs the survival function for a parameter distribution.
-#' 
+#'
 #' The parameter vector theta should contain the following elements, in order,
 #' according to the distribution:
 #' \describe{
@@ -11,65 +11,58 @@
 #'  \item{Log-Normal}{Locaion \eqn{\mu}, scale \eqn{\sigma}.}
 #'  \item{Weibull}{Shape \eqn{\alpha}, rate \eqn{\lambda}.}
 #' }
-#' 
+#'
 #' @param dist String, distribution name.
 #' @param theta Numeric parameter vector.
+#' @return Survival function.
+#' @export
 #' 
-#' @return Survival function. 
+#' @examples 
+#' # Survival function for the generalized gamma.
+#' surv <- SurvFunc(dist = "gen-gamma", theta = c(2, 2, 2))
 #' 
-#' @importFrom expint gammainc
-#' @export 
+#' # Evaluation.
+#' surv(1.0)
 
-survFunc = function(dist,theta){
-  
-  # Input check
-  ## Distribution
-  pass = checkDist(dist);
-  if(!pass){
-    stop("Distribution check failed.");
-  }
-  
-  ## Parameter
-  pass = checkTheta(dist=dist,theta=theta);
-  if(!pass){
-    stop("Parameter check failed.");
-  }
-  
-  S = NULL;
-  
-  # Define survival function
-  if(dist=="exp"){
-    l = theta[1];
-    S = function(t){
-      exp(-l*t);
+SurvFunc <- function(dist, theta) {
+
+  # Input checks.
+  CheckDist(dist)
+  CheckTheta(dist, theta)
+
+  # Define survival function.
+  if (dist == "exp") {
+    rate <- theta[1]
+    surv <- function(t) {
+      return(exp(-rate * t))
     }
-  } else if(dist=="gamma"){
-    a = theta[1];
-    l = theta[2];
-    S = function(t){
-      expint::gammainc(a,l*t)/gamma(a);
+  } else if (dist == "gamma") {
+    shape <- theta[1]
+    rate <- theta[2]
+    surv <- function(t) {
+      return(expint::gammainc(shape, rate * t) / gamma(shape))
     }
-  } else if(dist=="gen-gamma"){
-    a = theta[1];
-    b = theta[2];
-    l = theta[3];
-    S = function(t){
-      expint::gammainc(a,(l*t)^b)/gamma(a);
+  } else if (dist == "gen-gamma") {
+    alpha <- theta[1]
+    beta <- theta[2]
+    rate <- theta[3]
+    surv <- function(t) {
+      return(expint::gammainc(alpha, (rate * t)^beta) / gamma(alpha))
     }
-  } else if(dist=="log-normal"){
-    m = theta[1];
-    s = theta[2];
-    S = function(t){
-      pnorm(q=log(t),mean=m,sd=s,lower.tail=F);
+  } else if (dist == "log-normal") {
+    loc <- theta[1]
+    scale <- theta[2]
+    surv <- function(t) {
+      return(stats::pnorm(q = log(t), mean = loc, sd = scale, lower.tail = FALSE))
     }
-  } else if(dist=="weibull"){
-    a = theta[1];
-    l = theta[2];
-    S = function(t){
-      exp(-(l*t)^a);
+  } else if (dist == "weibull") {
+    shape <- theta[1]
+    rate <- theta[2]
+    surv <- function(t) {
+      return(exp(-(rate * t)^shape))
     }
   }
-  
-  # Output
-  return(S);
+
+  # Output.
+  return(surv)
 }

@@ -17,6 +17,6 @@ qWeibull(p, a = 1, l = 1)
 Scalar quantile.
 }
 \description{
-Quantile function for the Weibull distribution. See \code{\link{fit.Weibull}}
+Quantile function for the Weibull distribution. See \code{\link{FitWeibull}}
 for the parameterization.
 }

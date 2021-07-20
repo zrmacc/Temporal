@@ -16,11 +16,11 @@ rGamma(n, a = 1, l = 1, p = 0)
 \item{p}{Expected censoring proportion.}
 }
 \value{
-Data.frame including the observation times and status indicators.
+Data.frame including the observation times and status.
 }
 \description{
 Generates gamma event times with shape parameter \eqn{\alpha} and rate
-parameter \eqn{\lambda}. See \code{\link{fit.Gamma}} for the parameterization. If
+parameter \eqn{\lambda}. See \code{\link{FitGamma}} for the parameterization. If
 a censoring proportion \eqn{p} is provided, the event times are subject to
 non-informative random right censoring.
 }

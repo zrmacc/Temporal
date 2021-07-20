@@ -19,12 +19,12 @@ distribution, set \eqn{\beta=1}.}
 \item{p}{Expected censoring proportion.}
 }
 \value{
-DSata.frame including the observation times and status indicators.
+Data.frame including the observation times and status indicators.
 }
 \description{
 Generates generalized gamma event times with shape parameters
 \eqn{(\alpha,\beta)}, and rate parameter \eqn{\lambda}. See
-\code{\link{fit.GenGamma}} for the parameterization. If a censoring
+\code{\link{FitGenGamma}} for the parameterization. If a censoring
 proportion \eqn{p} is provided, the event times are subject to
 non-informative random right censoring.
 }

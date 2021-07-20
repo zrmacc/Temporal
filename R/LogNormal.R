@@ -1,12 +1,9 @@
 # Purpose: Estimation of log-normal distribution
-# Updated: 20/03/08
+# Updated: 2021-07-13
 
-# Notes
-# Numerically verified: Score, Hessian, Mean, Median, Variance
-
-########################
-# Log-Normal Distribution
-########################
+# -----------------------------------------------------------------------------
+# Log-normal distribution.
+# -----------------------------------------------------------------------------
 
 #' Log-Normal Distribution Parameter Estimation
 #'
@@ -15,19 +12,17 @@
 #' of the location \eqn{\mu} and scale \eqn{\sigma}:
 #' \deqn{f(t) = \phi\left(\frac{\ln t-\mu}{\sigma}\right)\frac{1}{t\sigma}, t>0}
 #'
-#' @param time Numeric observation times.
-#' @param status Status indicator, coded as 1 if an event was observed, 0 if
-#'   censored.
-#' @param sig Significance level, for CIs.
-#' @param tau Optional truncation times for calculating RMSTs. 
-#' @param init Vecotor of initial values for the location \eqn{\mu} and scale \eqn{\sigma}. 
+#' @param data Data.frame.
 #' @param eps Tolerance for Newton-Raphson iterations.
+#' @param init List with initial values for the location (`loc`) \eqn{\mu} and
+#'   `scale` \eqn{\sigma}.
 #' @param maxit Maximum number of NR iterations.
 #' @param report Report fitting progress?
-#'
-#' @importFrom methods new
-#' @importFrom stats sd var
-#'
+#' @param sig Significance level, for CIs.
+#' @param status_name Name of the status indicator, 1 if observed, 0 if censored.
+#' @param tau Optional truncation times for calculating RMSTs.
+#' @param time_name Name of column containing the time to event.
+#' 
 #' @return An object of class \code{fit} containing the following:
 #' \describe{
 #'  \item{Parameters}{The estimated location \eqn{\mu} and scale \eqn{\sigma}.}
@@ -36,223 +31,238 @@
 #'  \item{RMST}{The estimated RMSTs, if tau was specified.}
 #' }
 #'
-#' @seealso
-#' \itemize{
-#'   \item{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
-#' }
-#'
 #' @examples
-#' # Generate Log-Normal data with 20% censoring. 
-#' data = genData(n=1e3,dist="log-normal",theta=c(0,2),p=0.2);
-#' # Estimate
-#' fit = fitParaSurv(time=data$time,status=data$status,dist="log-normal");
+#' # Generate log-normal data with 20% censoring.
+#' data <- GenData(n = 1e3, dist = "log-normal", theta = c(0, 2), p = 0.2)
+#' 
+#' # Estimate parameters.
+#' fit <- FitParaSurv(data, dist = "log-normal")
 
-fit.LogNormal = function(time,status,sig=0.05,tau=NULL,init=NULL,eps=1e-6,maxit=10,report=F){
-  # Events
-  n = length(time);
-  nobs = sum(status);
-  # Observed events
-  tobs = time[status==1];
-  tcen = time[status==0];
-  # Presence of censored events
-  flag = (length(tcen)>0);
+FitLogNormal <- function(
+  data,
+  eps = 1e-6, 
+  init = list(), 
+  maxit = 10, 
+  report = FALSE,
+  sig = 0.05, 
+  status_name = "status",
+  tau = NULL, 
+  time_name = "time"
+) {
+
+  # Data formatting.
+  status <- NULL
+  time <- NULL 
+  
+  data <- data %>%
+    dplyr::rename(
+      status = {{ status_name }},
+      time = {{ time_name }}
+    )
   
   # Fitting procedure is simplified if complete data are available. Each branch
-  # should return: estimated theta, and a function for calculating observed
-  # information.
+  # should return: estimated parameter vector and the information matrix.
   
-  if(!flag){
-    
-    # MLEs
-    theta = c(mean(log(tobs)),sd(log(tobs)));
-    
-    # Score
-    ## Verified numerically. 
-    score = function(theta,log.scale){
-      # Extract parameters
-      m = theta[1];
-      s = theta[2];
-      if(log.scale){
-        s = exp(s);
-      }
-      # Calculate score
-      zobs = (log(tobs)-m)/s;
-      um = (1/s)*sum(zobs);
-      us = -1*(nobs/s)+(1/s)*sum(zobs^2);
-      out = c(um,us);
-      # Map to log scale
-      if(log.scale){
-        out = out*c(1,s);
-      }
-      # Output
-      return(out);
-    }
-    
-    # Function to calculate observed information
-    ## Verified numerically
-    obsInfo = function(theta,log.scale){
-      # Extract parameters
-      m = theta[1];
-      s = theta[2];
-      if(log.scale){
-        s = exp(s);
-      }
-      # Calculate information
-      ## Standardize
-      zobs = (log(tobs)-m)/s;
-      Jmm = nobs/(s^2);
-      Jss = -nobs/(s^2)+3/(s^2)*sum(zobs^2);
-      Jms = 2/(s^2)*sum(zobs);
-      # Observed info
-      out = matrix(c(Jmm,Jms,Jms,Jss),nrow=2);
-      # Map to log scale
-      if(log.scale){
-        v = matrix(c(1,s),ncol=1);
-        u = score(theta,log.scale=TRUE);
-        out = out*matOP(v,v)-diag(c(0,u[2]));
-      }
-      # Output
-      return(out);
-    }
+  # Presence of censoring.
+  is_cens <- any(data$status == 0)
+  
+  if (!is_cens) {
+
+    theta <- FitLogNormComplete(data)
+    info <- LogNormInfo(data, loc = theta["loc"], scale = theta["scale"])
     
   } else {
-    
-    # Log lkelihood
-    ll = function(theta,log.scale){
-      out = survLogLik(time=time,status=status,dist="log-normal",theta=theta,log.scale=log.scale);
-      return(as.numeric(out));
+
+    # Log likelihood.
+    ll <- function(theta) {
+      out <- SurvLogLik(data, dist = "log-normal", theta = theta, log_scale = TRUE)
+      return(as.numeric(out))
     }
-    
-    # Numeric score
-    score = function(theta,log.scale){
-      aux = function(theta){ll(theta,log.scale=log.scale)};
-      out = grad(func=aux,x=theta);
-      return(out);
-    }
-    
-    # Numeric observed information
-    obsInfo = function(theta,log.scale){
-      aux = function(theta){ll(theta,log.scale=log.scale)};
-      out = -1*hessian(func=aux,x=theta);
-      return(out);
-    }
-    
-    # NR Update
-    update = function(input,log.scale){
-      theta = input$theta;
-      # Initial log likelihood
-      ll0 = ll(theta,log.scale=log.scale);
-      # Score
-      U = score(theta,log.scale=log.scale);
-      # Inverse observed information
-      Ji = matInv(obsInfo(theta,log.scale=log.scale));
-      # Proposal
-      prop = theta+as.numeric(MMP(Ji,matrix(U,ncol=1)));
-      # Final log likelihood
-      ll1 = ll(prop,log.scale=log.scale);
-      # Increment
-      out = list();
-      out$theta = prop;
-      out$d = ll1-ll0;
-      return(out);
-    }
-    
-    # Initialize
-    m0 = init[1];
-    s0 = init[2];
-    theta0 = list();
-    ## If not specified, apply ML to observed data
-    if(!(is.numeric(m0)&is.numeric(s0))){
-      theta0$theta = c(mean(log(tobs)),log(sd(log(tobs))));
+
+    # Initialize.
+    loc0 <- init$loc
+    scale0 <- init$scale
+    if (!all(is.numeric(loc0), is.numeric(scale0))) {
+      theta0 <- FitLogNormComplete(data %>% dplyr::filter(status == 1))
+      theta0["scale"] <- log(theta0["scale"])
     } else {
-      theta0$theta = c(m0,log(s0));
+      theta0 <- c(loc0, log(scale0))
     }
     
-    ## Maximzation
-    for(i in 1:maxit){
-      # Update
-      theta1 = update(theta0,log.scale=TRUE);
-      # Accept if increment is positive
-      if(theta1$d>0){
-        theta0 = theta1;
-        if(report){cat("Objective increment: ",signif(theta1$d,digits=3),"\n")}
-      }
-      # Terminate if increment is below tolerance
-      if(theta1$d<eps){
-        rm(theta1);
-        break;
-      }
-    }
+    # Estimation.
+    theta <- NewtonRaphson(
+      init = theta0,
+      obj = ll,
+      eps = eps,
+      maxit = maxit,
+      report = report
+    )
+    theta[2] <- exp(theta[2])
     
-    ## Fitting report
-    if(report){
-      if(i<maxit){
-        cat(paste0(i-1," update(s) performed before tolerance limit.\n\n"));
-      } else {
-        cat(paste0(i," update(s) performed without reaching tolerance limit.\n\n"));
-      }
-    };
+    # Observed information.
+    info <- -1 * numDeriv::hessian(
+      func = function(t) {
+        SurvLogLik(data, dist = "log-normal", theta = t)
+      },
+      x = theta
+    )
     
-    ## Clear workspace
-    theta = theta0$theta;
-    theta[2] = exp(theta[2]);
-    rm(theta0,score,update);
   }
 
-  # Final information
-  I = obsInfo(theta=theta,log.scale=FALSE);
-  Ii = matInv(I);
-  if(any(diag(Ii)<0)){
-    stop("Information matrix not positive definite. Try another initialization");
+  # Inverse information.
+  inv_info <- solve(info)
+  
+  # Check information matrix for positive definiteness.
+  if (any(diag(inv_info) < 0)) {
+    stop("Information matrix not positive definite. Try another initialization")
   }
 
-  ## Standard errors
-  se = sqrt(diag(Ii));
+  # Parameter frame.
+  params <- data.frame(
+    Aspect = c("Location", "Scale"), 
+    Estimate = theta, 
+    SE = sqrt(diag(inv_info)),
+    row.names = NULL,
+    stringsAsFactors = FALSE
+  )
 
-  # Parameter frame
-  P = data.frame(c("Location","Scale"),theta,se);
-  colnames(P) = c("Aspect","Estimate","SE");
+  # Extract location and scale.
+  loc <- theta[1]
+  scale <- theta[2]
+  
+  # Outcome mean.
+  mu <- exp(loc + scale^2 / 2)
+  grad <-mu * c(1, scale)
+  se_mu <- sqrt(QF(grad, inv_info))
 
-  # Fitted Distribution
-  m = theta[1];
-  s = theta[2];
-  ## Estimate mean
-  mu = exp(m+s^2/2);
-  dg = mu*c(1,s);
-  se.mu = sqrt(as.numeric(matQF(X=matrix(dg,ncol=1),A=Ii)));
+  # Outcome median.
+  me <- exp(loc)
+  grad <- c(me, 0)
+  se_me <- sqrt(QF(grad, inv_info))
 
-  # Estimate median
-  me = exp(m);
-  dg = c(me,0);
-  se.me = sqrt(as.numeric(matQF(X=matrix(dg,ncol=1),A=Ii)));
+  # Outcome variance.
+  v <- (exp(scale^2) - 1) * exp(2 * loc + scale^2)
+  grad <- 2 * exp(2 * loc + scale^2) * c(
+      exp(scale^2) - 1, 
+      scale * (2 * exp(scale^2) - 1)
+    )
+  se_v <- sqrt(QF(grad, inv_info))
 
-  # Estimate variance
-  v = (exp(s^2)-1)*exp(2*m+s^2);
-  dg = 2*exp(2*m+s^2)*c(exp(s^2)-1,s*(2*exp(s^2)-1));
-  se.v = sqrt(as.numeric(matQF(X=matrix(dg,ncol=1),A=Ii)));
+  # Outcome characteristics.
+  outcome <- data.frame(
+    Aspect = c("Mean", "Median", "Variance"),
+    Estimate = c(mu, me, v), 
+    SE = c(se_mu, se_me, se_v),
+    stringsAsFactors = FALSE
+  )
 
-  # Outcome characteristics
-  Y = data.frame(c("Mean","Median","Variance"),c(mu,me,v),c(se.mu,se.me,se.v));
-  colnames(Y) = c("Aspect","Estimate","SE");
-
-  # CIs
-  z = qnorm(1-sig/2);
-  P$L = P$Estimate-z*P$SE;
-  P$U = P$Estimate+z*P$SE;
-  Y$L = Y$Estimate-z*Y$SE;
-  Y$U = Y$Estimate+z*Y$SE;
+  # Confidence intervals.
+  Estimate <- NULL
+  SE <- NULL
+  z <- stats::qnorm(1 - sig / 2)
+  
+  params <- params %>%
+    dplyr::mutate(
+      L = Estimate - z * SE,
+      U = Estimate + z * SE
+    )
+  
+  outcome <- outcome %>%
+    dplyr::mutate(
+      L = Estimate - z * SE,
+      U = Estimate + z * SE
+    )
 
   # Fitted survival function
-  S = function(t){pnorm(q=log(t),mean=m,sd=s,lower.tail=F)};
+  surv <- function(t) {
+    return(stats::pnorm(q = log(t), mean = loc, sd = scale, lower.tail = FALSE))
+  }
 
-  ## Format Results
-  Out = new(Class="fit",Distribution="log-normal",Parameters=P,Information=I,Outcome=Y,S=S);
+  # Format results.
+  out <- methods::new(
+    Class = "fit", 
+    Distribution = "log-normal", 
+    Parameters = params, 
+    Information = info, 
+    Outcome = outcome, 
+    S = surv
+  )
   
-  ## Add RMST if requested. 
-  if(is.numeric(tau)){
-    rmst = paraRMST(fit=Out,sig=sig,tau=tau);
-    Out@RMST = rmst;
+  # RMST.
+  if (is.numeric(tau)) {
+    rmst <- ParaRMST(fit = out, sig = sig, tau = tau)
+    out@RMST <- rmst
   }
   
-  return(Out);
+  # Output.
+  return(out)
+}
+
+
+# -----------------------------------------------------------------------------
+# Case of no censoring.
+# -----------------------------------------------------------------------------
+
+#' Log-Normal Score Equation
+#' 
+#' Score equation for log-normal event times without censoring.
+#' 
+#' @param data Data.frame.
+#' @param loc Location parameter.
+#' @param scale Scale parameter.
+#' @return Numeric score.
+
+LogNormScore <- function(data, loc, scale) {
+  tobs <- data$time
+  nobs <- length(tobs)
+  zobs <- (log(tobs) - loc) / scale
+  score_loc <- (1 / scale) * sum(zobs)
+  score_scale <- -1 * (nobs / scale) + (1 / scale) * sum(zobs^2)
+  out <- c(score_loc, score_scale)
+  return(out)
+}
+
+
+#' Log-Normal Observed Information
+#' 
+#' Observed information for log-normal event times without censoring.
+#' 
+#' @param data Data.frame.
+#' @param loc Location parameter.
+#' @param scale Scale parameter.
+#' @param log_scale Is the scale parameter logged?
+#' @return Numeric score.
+
+LogNormInfo <- function(data, loc, scale, log_scale = FALSE) {
+  n <- nrow(data)
+  tobs <- data$time
+  zobs <- (log(tobs) - loc) / scale
+  
+  # Information for location.
+  info_loc <- n / (scale^2)
+ 
+  # Information for scale.
+  info_scale <- -n / (scale^2) + 3 / (scale^2) * sum(zobs^2)
+  
+  # Cross info.
+  cross_info <- 2 / (scale^2) * sum(zobs)
+  
+  # Observed info
+  info <- matrix(c(info_loc, cross_info, cross_info, info_scale), nrow = 2)
+  return(info)
+}
+
+
+#' Log-Normal Parameter Estimation without Censoring
+#'
+#' @param data Data.frame.
+#' @return Numeric vector containing the estimate location and scale parameters.
+
+FitLogNormComplete <- function(data) {
+  tobs <- data$time
+  theta <- c(
+    loc = mean(log(tobs)), 
+    scale = stats::sd(log(tobs))
+  )
+  return(theta)
 }

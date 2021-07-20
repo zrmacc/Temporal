@@ -10,8 +10,8 @@ vignette: >
 ---
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(echo=T,cache=T,results='hold');
-library(Temporal);
+knitr::opts_chunk$set(echo = T, cache = T, results = "hold")
+library(Temporal)
 ```
 
 # Contents
@@ -25,17 +25,20 @@ library(Temporal);
 
 ## Overview
 
-This package performs estimation and inference on parametric survival curves. Supported distributions include the exponential, gamma, generalized gamma, log-normal, and Weibull. Data are expected in time-to-event format, with a status indicator to accommodate non-informative right censoring. The function `fitParaSurv` provides maximum likelihood estimates (MLEs) and confidence intervals (CIs) for the distribution of interest. Estimates are presented for model parameters, and for characteristics of the event time distribution (the mean, median, variance, and restricted mean). The function `compParaSurv` compares the fitted survival distributions of two treatment arms with respect to the difference and ratio of means, medians, and restricted means. For each contrast, point estimates, CIs, and p-values assessing the null hypothesis of no between-group difference are presented. While by default the between-group difference is evaluated using asymptotic CIs and p-values, options are provided for estimating the CIs via bootstrap, and the p-values via permutation. 
+This package performs estimation and inference on parametric survival curves. Supported distributions include the exponential, gamma, generalized gamma, log-normal, and Weibull. Data are expected in time-to-event format, with a status indicator to accommodate non-informative right censoring. The function `FitParaSurv` provides maximum likelihood estimates (MLEs) and confidence intervals (CIs) for the distribution of interest. Estimates are presented for model parameters, and for characteristics of the event time distribution (the mean, median, variance, and restricted mean). The function `CompParaSurv` compares the fitted survival distributions of two treatment arms with respect to the difference and ratio of means, medians, and restricted means. For each contrast, point estimates, CIs, and p-values assessing the null hypothesis of no between-group difference are presented. While by default the between-group difference is evaluated using p-values, an option is provided for obtaining permutation p-values.
+
 
 ## Setting
 
-Suppose the data consist of pairs $(U_{i},\delta_{i})$, where the observation time $U_{i} = \min(T_{i},C_{i})$ is the minimum of an event time $T_{i}$ and a censoring time $C_{i}$; and $\delta_{i}=I(T_{i}\leq C_{i})$ is an indicator that an event was observed. The event times $T_{i}$ are assumed to follow a survival distribution $S_{T}$ parameterized by $\theta$. The distribution of censoring times $C_{i}$ is left unspecified. Estimation of $\theta$ proceeds by maximizing the right-censored log likelihood $\ell(\theta) = \sum_{i=1}^{n}\delta_{i}\ln h_{i} + \ln S_{i}$, where $S_{i}$ and $h_{i}$ denote the survival and hazard contributions of the $i$th subject. The asymptotic covariance of the MLE $\hat{\theta}$ is estimated using the (inverse) observed information, and standard errors for functions of the MLE (e.g. means and medians) are obtained from the $\Delta$-method.
+Suppose the data consist of pairs $(U_{i},\delta_{i})$, where the observation time $U_{i} = \min(T_{i},C_{i})$ is the minimum of an event time $T_{i}$ and a censoring time $C_{i}$; and $\delta_{i} = I(T_{i}\leq C_{i})$ is an indicator that an event was observed. The event times $T_{i}$ are assumed to follow a survival distribution $S_{T}$ parameterized by $\theta$. The distribution of censoring times $C_{i}$ is left unspecified. Estimation of $\theta$ proceeds by maximizing the right-censored log likelihood $\ell(\theta) = \sum_{i=1}^{n}\delta_{i}\ln h_{i} + \ln S_{i}$, where $S_{i}$ and $h_{i}$ denote the survival and hazard contributions of the $i$th subject. The asymptotic covariance of the MLE $\hat{\theta}$ is estimated using the (inverse) observed information, and standard errors for functions of the MLE (e.g. means and medians) are obtained from the $\Delta$-method.
+
 
 # Estimation
 
 ## Overview {#fit}
 
-The function `fitParaSurv` requires the observation times `time` and status indicators `status` as input. `status` is coded as 1 if an event was observed, and as 0 if censored. The distribution of interest is specified using `dist`, which defaults to Weibull. The output is an object of class `fit`. The slot `fit@Parameters` contains the parameter estimates and CIs. The slot `fit@Information` contains the observed sample information matrix. The slot `fit@Outcome` contains characteristics of the fitted event time distribution. If truncation times `tau` are provided, the corresponding RMSTs are stored in `fit@RMST`. Functions are presented below for simulating from and estimating the exponential, gamma, generalized gamma, log-normal, and Weibull distributions. If an expected censoring proportion `p` is provided, then the event time are subject to non-informative random right censoring. 
+The function `FitParaSurv` requires a data.frame containing observation times `time` and status indicators `status` as input. `status` is coded as 1 if an event was observed, and as 0 if censored. The distribution of interest is specified using `dist`, which defaults to Weibull. The output is an object of class `fit`. The slot `fit@Parameters` contains the parameter estimates and CIs. The slot `fit@Information` contains the observed sample information matrix. The slot `fit@Outcome` contains characteristics of the fitted event time distribution. If truncation times `tau` are provided, the corresponding RMSTs are stored in `fit@RMST`. Functions are presented below for simulating from and estimating the exponential, gamma, generalized gamma, log-normal, and Weibull distributions. If an expected censoring proportion `p` is provided, then the event time are subject to non-informative random right censoring. 
+
 
 ## Exponential
 
@@ -45,15 +48,17 @@ $$
 f(t) = \lambda e^{-\lambda t},\ t>0
 $$
 
-In the following, $n=10^{3}$ exponential event times are simulated, with rate $\lambda=2$ and expected censoring proportion 20%. Generative parameters are recovered using `fitParaSurv` with `dist="exp"`.
+In the following, $n = 10^{3}$ exponential event times are simulated, with rate $\lambda = 2$ and expected censoring proportion 20%. Generative parameters are recovered using `FitParaSurv` with `dist = "exp"`.
 
 ```{r}
-# Generate exponential time to event data
-data = genData(n=1e3,dist="exp",theta=c(2),p=0.2)
-# Estimate parameters
-fit= fitParaSurv(time=data$time,status=data$status,dist="exp");
-show(fit);
+# Generate exponential event time data.
+data <- GenData(n = 1e3, dist = "exp", theta = c(2), p = 0.2)
+
+# Estimate parameters.
+fit <- FitParaSurv(data, dist = "exp")
+show(fit)
 ```
+
 
 ## Gamma 
 
@@ -63,14 +68,15 @@ $$
 f(t) = \frac{\lambda}{\Gamma(\alpha)}(\lambda t)^{\alpha-1}e^{-\lambda t},\ t>0
 $$
 
-In the following, $n=10^{3}$ gamma event times are simulated, with shape $\alpha=2$, rate $\lambda=2$, and expected censoring proportion 25%. Generative parameters are recovered using `fitParaSurv` with `dist="gamma"`. RMST at $\tau=0.5$ is requested.
+In the following, $n = 10^{3}$ gamma event times are simulated, with shape $\alpha = 2$, rate $\lambda = 2$, and expected censoring proportion 25%. Generative parameters are recovered using `FitParaSurv` with `dist = "gamma"`. RMST at $\tau = 0.5$ is requested.
 
 ```{r}
-# Generate gamma time to event data
-data = genData(n=1e3,dist="gamma",theta=c(2,2),p=0.25);
-# Estimate parameters
-fit = fitParaSurv(time=data$time,status=data$status,dist="gamma",tau=0.5);
-show(fit);
+# Generate gamma event time data.
+data <- GenData(n = 1e3, dist = "gamma", theta = c(2, 2), p = 0.25)
+
+# Estimate parameters.
+fit <- FitParaSurv(data, dist = "gamma", tau = 0.5)
+show(fit)
 ```
 
 ## Generalized Gamma
@@ -81,22 +87,29 @@ $$
 f(t) = \frac{\beta\lambda}{\Gamma(\alpha)}(\lambda t)^{\alpha\beta-1}e^{-(\lambda t)^{\beta}},\ t>0
 $$
 
-The standard gamma and Weibull distributions are nested within the generalized gamma. Setting $\beta=1$ recovers the standard gamma, while setting $\alpha=1$ recovers the Weibull. In the following, $n=10^{4}$ generalized gamma event times are simulated, with shapes $\alpha=2$ and $\beta=2$, rate $\lambda=2$, and expected censoring proportion 10%. Generative parameters are recovered using `fitParaSurv` with `dist="gen-gamma"`. Accurate estimation of the generalized gamma generally requires larger sample sizes. Fitting progress is monitored by setting `report=T`. 
+The standard gamma and Weibull distributions are nested within the generalized gamma. Setting $\beta=1$ recovers the standard gamma, while setting $\alpha=1$ recovers the Weibull. In the following, $n=10^{4}$ generalized gamma event times are simulated, with shapes $\alpha=2$ and $\beta=2$, rate $\lambda=2$, and expected censoring proportion 10%. Generative parameters are recovered using `FitParaSurv` with `dist="gen-gamma"`. Accurate estimation of the generalized gamma generally requires larger sample sizes. Fitting progress is monitored by setting `report = TRUE`. 
 
 ```{r}
-set.seed(102);
-# Generate generalized gamma time to event data
-data = genData(n=1e4,dist="gen-gamma",theta=c(2,2,2),p=0.1);
-# Estimate parameters
-fit = fitParaSurv(time=data$time,status=data$status,dist="gen-gamma",report=T);
-show(fit);
+set.seed(102)
+
+# Generate generalized gamma event time data.
+data <- GenData(n = 1e4, dist = "gen-gamma", theta = c(2, 2, 2), p = 0.1)
+
+# Estimate parameters.
+fit <- FitParaSurv(data, dist = "gen-gamma", report = TRUE)
+show(fit)
 ```
 
 The final parameter estimates for the generalized gamma distribution may be sensitive to the initial values. If the Newton-Raphson iteration is initialized too far from the optimum of the log-likelihood, the search may not reach the maximum. If the search halts prematurely, the fitting procedure will indicate that the information matrix was not positive definite. Supplying initial parameter values, as in the following, may help to improve the final estimates.
 
 ```{r, results='markup', eval=FALSE}
-# Initialization
-fitParaSurv(time=data$time,status=data$status,dist="gen-gamma",init=c(2,2,2));
+# Initialization.
+fit <- FitParaSurv(
+  data, 
+  dist = "gen-gamma", 
+  init = list(alpha = 2, beta = 2, lambda = 2)
+)
+show(fit)
 ```
 
 ## Log-Normal
@@ -107,14 +120,15 @@ $$
 f(t) = \frac{1}{t\sigma\sqrt{2\pi}}e^{-\frac{(\ln t-\mu)^2}{2\sigma^2}},\ t>0
 $$
 
-In the following, $n=10^{3}$ log-normal event times are simulated, with location $\mu=1$, scale $\sigma=2$, and expected censoring proportion 15%. Generative parameters are recovered using `fitParaSurv` with `dist="log-normal"`. RMSTs at $\tau=(5,10,25)$ are requested.
+In the following, $n=10^{3}$ log-normal event times are simulated, with location $\mu=1$, scale $\sigma=2$, and expected censoring proportion 15%. Generative parameters are recovered using `FitParaSurv` with `dist = "log-normal"`. RMSTs at `\tau = c(5,10,25)` are requested.
 
 ```{r}
-# Generate log-normal time to event data
-data = genData(n=1e3,dist="log-normal",theta=c(1,2),p=0.15);
-# Estimate parameters
-fit = fitParaSurv(time=data$time,status=data$status,dist="log-normal",tau=c(5,10,25));
-show(fit);
+# Generate log-normal event time data.
+data <- GenData(n = 1e3, dist = "log-normal", theta = c(1, 2), p = 0.15)
+
+# Estimate parameters.
+fit <- FitParaSurv(data, dist = "log-normal", tau = c(5, 10, 25))
+show(fit)
 ```
 
 ## Weibull
@@ -125,102 +139,117 @@ $$
 f(t) = \alpha\lambda(\lambda t)^{\alpha-1}e^{-(\lambda t)^{\alpha}},\ t>0
 $$
 
-In the following, $n=10^{3}$ Weibull event times are simulated, with shape $\alpha=2$, rate $\lambda=2$, and expected censoring proportion 30%. Generative parameters are recovered using `fitParaSurv` with `dist="weibull"`. 
+In the following, $n = 10^{3}$ Weibull event times are simulated, with shape $\alpha = 2$, rate $\lambda = 2$, and expected censoring proportion 30%. Generative parameters are recovered using `FitParaSurv` with `dist = "weibull"`. 
 
 ```{r}
-# Generate Weibull time to event data
-data = genData(n=1e3,dist="weibull",theta=c(2,2),p=0.3);
-# Estimate parameters
-fit = fitParaSurv(time=data$time,status=data$status,dist="weibull");
-show(fit);
+# Generate Weibull event time data.
+data <- GenData(n = 1e3, dist = "weibull", theta = c(2, 2), p = 0.3)
+
+# Estimate parameters.
+fit <- FitParaSurv(data, dist = "weibull")
+show(fit)
 ```
 
 # Group Contrasts
 
 ## Overview
 
-The function `compParaSurv` takes the observation times `time`, status indicators `status`, and the treatment arms `arm` as inputs. `arm` is coded as 1 for the target group, and 0 for the reference group. The distributions for the target and reference groups are selected using `dist1` and `dist0`, respectively. If unspecified, the distribution for the reference group defaults to the distribution for the target group, and the distribution for the target group defaults to Weibull. The output is an object of class `contrast`. The slots `contrast@Model1` and `contrast@Model2` contain the fitted models for the target and reference groups. See [fit](#fit) for a description of class `fit` objects. The slot `contrast@Location` contains the location parameter contrasts, CIs, and p-values. If truncation times `tau` are specified, the slot `contrast@RMST` will contain these contrasts. 
+The function `CompParaSurv` takes the observation times `time`, status indicators `status`, and the treatment arms `arm` as inputs. `arm` is coded as 1 for the target group, and 0 for the reference group. The distributions for the target and reference groups are selected using `dist1` and `dist0`, respectively. If unspecified, the distribution for the reference group defaults to the distribution for the target group, and the distribution for the target group defaults to Weibull. The output is an object of class `contrast`. The slots `contrast@Model1` and `contrast@Model2` contain the fitted models for the target and reference groups. See [fit](#fit) for a description of class `fit` objects. The slot `contrast@Location` contains the location parameter contrasts, CIs, and p-values. If truncation times `tau` are specified, the slot `contrast@RMST` will contain these contrasts. 
 
-By default, all CIs are p-values are asymptotic. If a number of bootstraps `boot` is specified, then bootstrap confidence intervals are constructed using that many resamples. Likewise, if a number of permutations `perm` is specified, then permutation p-values are calculated using that many reshuffles of the treatment assignments. 
+By default, all CIs are p-values are asymptotic. If the `reps` argument is supplied, then permutation p-values are calculated using that many reshuffles of the treatment assignments. 
 
 ## Examples
 
 ### Comparison of Distinct Gammas
 
-The target group consists of $10^{3}$ observations from a gamma distribution with shape $\alpha=2$, rate $\lambda=1$, and 25% censoring. The reference group consists of $10^{3}$ observations from a gamma distribution with the same shape ($\alpha=2$) but different rate ($\lambda=2$) and censoring frequency (15%). The true difference of mean survival times is $1.0$, and the true ratio is $2.0$. The true difference of median survival times is $0.84$, and the true ratio is $2$. 
+The target group consists of $10^{3}$ observations from a gamma distribution with shape $\alpha = 2$, rate $\lambda = 1$, and 25% censoring. The reference group consists of $10^{3}$ observations from a gamma distribution with the same shape ($\alpha = 2$) but different rate ($\lambda = 2$) and censoring frequency (15%). The true difference of mean survival times is $1.0$, and the true ratio is $2.0$. The true difference of median survival times is $0.84$, and the true ratio is $2$. 
 
 ```{r}
-set.seed(101);
-# Target group
-d1 = genData(n=1e3,dist="gamma",theta=c(2,1),p=0.25);
-d1$arm = 1;
-# Reference group 
-d0 = genData(n=1e3,dist="gamma",theta=c(2,2),p=0.15);
-d0$arm = 0;
-# Overall data 
-data = rbind(d1,d0);
-# Comparison
-comp = compParaSurv(time=data$time,status=data$status,arm=data$arm,dist1="gamma",dist0="gamma");
-cat("\n");
-show(comp);
+set.seed(101)
+
+# Target group.
+df1 <- GenData(n = 1e3, dist = "gamma", theta = c(2, 1), p = 0.25)
+df1$arm <- 1
+
+# Reference group.
+df0 <- GenData(n = 1e3, dist = "gamma", theta = c(2, 2), p = 0.15)
+df0$arm <- 0
+
+# Overall data set.
+data <- rbind(df1, df0)
+
+# Compare fitted distributions.
+comp <- CompParaSurv(data, dist1 = "gamma", dist0 = "gamma")
+cat("\n")
+show(comp)
 ```
 
 ### Comparison of Equivalent Weibulls
 
-Both the target and the reference groups consist of $10^{3}$ observations from the Weibull distribution with shape $\alpha=2$ and rate $\lambda=2$. However, the target group is subject to 50% censoring, while the reference group is uncensored. The true difference in means and medians is $0.0$. The true ratio of means and medians is $1.0$. Both asymptotic and bootstrap confidence intervals are constructed. 
+Both the target and the reference groups consist of $10^{3}$ observations from the Weibull distribution with shape $\alpha = 2$ and rate $\lambda = 2$. However, the target group is subject to 50% censoring, while the reference group is uncensored. The true difference in means and medians is $0.0$. The true ratio of means and medians is $1.0$.
 
 ```{r}
-# Target group
-d1 =genData(n=1e3,dist="weibull",theta=c(2,2),p=0.5);
-d1$arm = 1;
-# Reference group
-d0 = genData(n=1e3,dist="weibull",theta=c(2,2),p=0.0);
-d0$arm = 0;
-# Overall data
-data = rbind(d1,d0);
-# Comparison
-comp = compParaSurv(time=data$time,status=data$status,arm=data$arm,dist1="weibull",dist0="weibull",boot=1e3);
-cat("\n");
-show(comp);
+# Target group.
+df1 <- GenData(n = 1e3, dist = "weibull", theta = c(2, 2), p = 0.5)
+df1$arm <- 1
+
+# Reference group.
+d0 <- GenData(n = 1e3, dist = "weibull", theta = c(2, 2), p = 0.0)
+d0$arm <- 0
+
+# Overall data set.
+data <- rbind(df1, df0)
+
+# Compare fitted distributions.
+comp <- CompParaSurv(data, dist1 = "weibull", dist0 = "weibull")
+cat("\n")
+show(comp)
 ```
 
 ### Log-Normal v. Weibull, Different Means, Same Medians
 
-The target group consists of $10^{3}$ observations from a log-normal distribution with location $\mu=0$ and scale $\sigma=\sqrt{2\ln2}$. The reference group consists of $10^{3}$ observations from a Weibull distribution with shape $\alpha=2$ and rate $\lambda = \sqrt{\ln(2)}$. In each case the expected censoring proportion is 10%. The true difference of mean survival times is $0.94$, and the true ratio is $1.88$. The true difference of median survival times is $0.0$, and the true ratio is $1.0$. Both asymptotic and permutation p-values are estimated. 
+The target group consists of $10^{3}$ observations from a log-normal distribution with location $\mu = 0$ and scale $\sigma = \sqrt{2\ln2}$. The reference group consists of $10^{3}$ observations from a Weibull distribution with shape $\alpha = 2$ and rate $\lambda = \sqrt{\ln(2)}$. In each case the expected censoring proportion is 10%. The true difference of mean survival times is $0.94$, and the true ratio is $1.88$. The true difference of median survival times is $0.0$, and the true ratio is $1.0$.
 
 ```{r}
-set.seed(105);
-# Target group
-d1 = genData(n=1e3,dist="log-normal",theta=c(0,sqrt(2*log(2))),p=0.1);
-d1$arm = 1;
-# Reference group
-d0 = genData(n=1e3,dist="weibull",theta=c(2,sqrt(log(2))),p=0.1);
-d0$arm = 0;
-# Overall data
-data = rbind(d1,d0);
-# Comparison
-comp = compParaSurv(time=data$time,status=data$status,arm=data$arm,dist1="log-normal",dist0="weibull",perm=1e3);
-cat("\n");
-show(comp);
+set.seed(105)
+
+# Target group.
+df1 <- GenData(n = 1e3, dist = "log-normal", theta = c(0, sqrt(2 * log(2))), p = 0.1)
+df1$arm <- 1
+
+# Reference group.
+d0 <- GenData(n = 1e3, dist = "weibull", theta = c(2, sqrt(log(2))), p = 0.1)
+d0$arm <- 0
+
+# Overall data set.
+data <- rbind(df1, df0)
+
+# Compare fitted distributions.
+comp <- CompParaSurv(data, dist1 = "log-normal", dist0 = "weibull")
+cat("\n")
+show(comp)
 ```
 
 ### Gamma v. Exponential, Same Means, Different Medians
 
-The target group consists of $10^{3}$ observations from a gamma distribution with shape $\alpha=4$ and scale $\lambda=4$. The reference group consists of $10^{3}$ observations from an exponential distribution with rate $\lambda = 1$. In each case the expected censoring proportion is 20%. The true difference of mean survival times is $0.0$, and the true ratio is $1.0$. The true difference of median survival times is $0.22$, and the true ratio is $1.32$. Both asymptotic and permutation p-values are estimated. RMSTs at $\tau=(0.5,1.0,1.5)$ are requested. 
+The target group consists of $10^{3}$ observations from a gamma distribution with shape $\alpha = 4$ and scale $\lambda = 4$. The reference group consists of $10^{3}$ observations from an exponential distribution with rate $\lambda = 1$. In each case the expected censoring proportion is 20%. The true difference of mean survival times is $0.0$, and the true ratio is $1.0$. The true difference of median survival times is $0.22$, and the true ratio is $1.32$. RMSTs at `\tau = c(0.5,1.0,1.5)` are requested. 
 
 ```{r}
-set.seed(106);
-# Target group
-d1 = genData(n=1e3,dist="gamma",theta=c(4,4),p=0.2);
-d1$arm = 1;
-# Reference group
-d0 = genData(n=1e3,dist="exp",theta=c(1),p=0.2);
-d0$arm = 0;
-# Overall data
-data = rbind(d1,d0);
-# Comparison
-comp = compParaSurv(time=data$time,status=data$status,arm=data$arm,dist1="gamma",dist0="exp",tau=c(0.5,1.0,1.5),perm=1e3);
-cat("\n");
-show(comp);
-```
+set.seed(106)
 
+# Target group.
+df1 <- GenData(n = 1e3, dist = "gamma", theta = c(4, 4), p = 0.2)
+df1$arm <- 1
+
+# Reference group.
+df0 <- GenData(n = 1e3, dist = "exp", theta = c(1), p = 0.2)
+df0$arm <- 0
+
+# Overall data set.
+data <- rbind(df1, df0)
+
+# Compare fitted distributions.
+comp <- CompParaSurv(data, dist1 = "gamma", dist0 = "exp", tau = c(0.5, 1.0, 1.5))
+cat("\n")
+show(comp)
+```

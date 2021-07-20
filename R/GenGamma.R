@@ -1,13 +1,9 @@
-# Purpose: Estimation of Gamma distribution
-# Updated: 20/03/11
+# Purpose: Parameter estimation for generalized gamma distribution.
+# Updated: 2021-07-13
 
-# Notes
-# Switched to log-scale parameters for Newton Raphson
-# Numerically verified
-
-########################
+# -----------------------------------------------------------------------------
 # Generalized Gamma Distribution
-########################
+# -----------------------------------------------------------------------------
 
 #' Generalized Gamma Distribution Parameter Estimation
 #'
@@ -16,23 +12,19 @@
 #' of the shape parameters \eqn{(\alpha,\beta)}, and the rate \eqn{\lambda}:
 #' \deqn{f(t) = \frac{\beta\lambda}{\Gamma(\alpha)} (\lambda t)^{\alpha\beta-1}e^{-(\lambda t)^{\beta}}, t>0}
 #'
-#' @param time Numeric observation times.
-#' @param status Status indicator, coded as 1 if an event was observed, 0 if censored.
-#' @param sig Significance level, for CIs.
-#' @param tau Optional truncation times for calculating RMSTs.
-#' @param init Vector of initial values for the shape \eqn{\alpha}, \eqn{\beta}, and
-#'   rate \eqn{\lambda} parameters, respectively. 
-#' @param bL Lower limit on possible values for beta.
-#' @param bU Upper limit on possible values for beta. 
+#' @param data Data.frame.
+#' @param beta_lower If dist="gen-gamma", lower limit on possible values for beta.
+#' @param beta_upper If dist="gen-gamma", upper limit on possible values for beta.
 #' @param eps Tolerance for Newton-Raphson iterations.
+#' @param init List with initial values for the shape `alpha`, `beta` and rate
+#'   `lambda` parameters.
 #' @param maxit Maximum number of NR iterations.
 #' @param report Report fitting progress?
-#'
-#' @importFrom expint gammainc
-#' @importFrom methods new
-#' @importFrom numDeriv grad
-#' @importFrom stats qgamma var
-#'
+#' @param sig Significance level, for CIs.
+#' @param status_name Name of the status indicator, 1 if observed, 0 if
+#'   censored.
+#' @param tau Optional truncation times for calculating RMSTs.
+#' @param time_name Name of column containing the time to event.
 #' @return An object of class \code{fit} containing the following:
 #' \describe{
 #'  \item{Parameters}{The estimated shape \eqn{(\alpha,\beta)} and rate \eqn{\lambda} parameters.}
@@ -40,323 +32,385 @@
 #'  \item{Outcome}{The fitted mean, median, and variance.}
 #'  \item{RMST}{The estimated RMSTs, if tau was specified.}
 #' }
-#'
-#' @seealso
-#' \itemize{
-#'   \item{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
-#' }
+#' 
+#' @importFrom dplyr "%>%"
 #'
 #' @examples
-#' set.seed(103);
-#' # Generalized Gamma data with 20% censoring.
-#' data = genData(n=1e4,dist="gen-gamma",theta=c(2,2,2),p=0.2);
-#' # Estimate
-#' fit = fitParaSurv(time=data$time,status=data$status,dist="gen-gamma",report=TRUE);
+#' set.seed(103)
+#' # Generate generalized gamma data with 20% censoring.
+#' data <- GenData(n = 1e4, dist = "gen-gamma", theta = c(2, 2, 2), p = 0.2)
+#' 
+#' # Estimate parameters.
+#' fit <- FitParaSurv(data, dist = "gen-gamma", report = TRUE)
 
-fit.GenGamma = function(time,status,sig=0.05,tau=NULL,init,bL=0.1,bU=10,eps=1e-6,maxit=10,report=FALSE){
-  # Events
-  n = length(time);
-  nobs = sum(status);
-  # Partition times
-  tobs = time[status==1];
-  tcen = time[status==0];
-  # Presence of censored events
-  flag = (length(tcen)>0);
-  # Reusable sums
-  sum.tobs = sum(tobs);
-  sum.log.tobs = sum(log(tobs));
+FitGenGamma <- function(
+  data,
+  beta_lower = 0.1,
+  beta_upper = 10,
+  eps = 1e-6, 
+  init = list(), 
+  maxit = 10, 
+  report = FALSE,
+  sig = 0.05, 
+  status_name = "status",
+  tau = NULL, 
+  time_name = "time"
+) {
   
+  # Data formatting.
+  status <- NULL
+  time <- NULL
+  
+  data <- data %>%
+    dplyr::rename(
+      status = {{ status_name }},
+      time = {{ time_name }}
+    )
+  
+  # Presence of censoring.
+  is_cens <- any(data$status == 0)
+
   # Fitting procedure is simplified if complete data are available. Each branch
   # should return: estimated theta, and a function for calculating observed
   # information.
-  
-  if(!flag){
-    
+
+  if (!is_cens) {
+
     # MLEs of theta
-    theta = fit.GenGamma.Complete(time=tobs,bL=bL,bU=bU);
-    
-    # Score
-    ## Verified numerically. 
-    score = function(theta,log.scale){
-      a = theta[1];
-      b = theta[2];
-      l = theta[3];
-      if(log.scale){
-        a = exp(a);
-        b = exp(b);
-        l = exp(l);
-      }
-      # Calculate score
-      ua = n*b*log(l)+b*sum.log.tobs-n*digamma(a);
-      ub = (n/b)+n*a*log(l)+a*sum.log.tobs-(l^b)*log(l)*sum(tobs^b)-(l^b)*sum((tobs^b)*log(tobs));
-      ul = n*a*b/l-b*(l^(b-1))*sum(tobs^b);
-      out = c(ua,ub,ul);
-      # Map to log scale
-      if(log.scale){
-        out = out*c(a,b,l);
-      }
-      # Output
-      return(out);
-    }
-    
-    # Observed information
-    ## Verified numerically 
-    obsInfo = function(theta,log.scale){
-      # Extract parameters
-      a = theta[1];
-      b = theta[2];
-      l = theta[3];
-      if(log.scale){
-        a = exp(a);
-        b = exp(b);
-        l = exp(l);
-      }
-      # Reusable terms
-      lb = l^b;
-      lb1 = l^(b-1);
-      lb2 = l^(b-2);
-      ll = log(l);
-      sum.t.b = sum(tobs^b);
-      # Calculate hessian
-      Haa = -n*trigamma(a);
-      Hab = n*ll+sum.log.tobs;
-      Hbb = -n/(b^2)-lb*ll^2*sum(tobs^b)-2*lb*ll*sum((tobs^b)*log(tobs))-lb*sum((tobs^b)*(log(tobs)^2));
-      Hbl = n*a/l-b*lb1*ll*sum.t.b-lb1*sum.t.b-b*lb1*sum((tobs^b)*log(tobs));
-      Hll = -n*a*b/(l^2)-b*(b-1)*lb2*sum.t.b;
-      Hal = n*b/l;
-      # Observed info
-      Out = -1*rbind(c(Haa,Hab,Hal),
-                     c(Hab,Hbb,Hbl),
-                     c(Hal,Hab,Hll));
-      # Map to log scale
-      if(log.scale){
-        v = matrix(c(a,b,l),ncol=1);
-        Out = Out*matOP(v,v)-diag(score(theta=theta,log.scale=TRUE));
-      }
-      # Output
-      return(Out);
-    };
-    
+    theta <- FitGenGammaComplete(data, beta_lower, beta_upper)
+    info <- GenGammaObsInfo(data, theta[1], theta[2], theta[3])
+
   } else {
-    
+
     # Log lkelihood
-    ll = function(theta,log.scale){
-      out = survLogLik(time=time,status=status,dist="gen-gamma",theta=theta,log.scale=log.scale);
-      return(as.numeric(out));
+    ll <- function(theta) {
+      out <- SurvLogLik(data, dist = "gen-gamma", theta = theta, log_scale = TRUE)
+      return(as.numeric(out))
     }
-    
-    # Numeric evaluation of score and hessian is faster than analytic due 
-    # to the presence of incomplete gamma functions. 
-    
-    # Numeric score
-    score = function(theta,log.scale){
-      aux = function(theta){ll(theta,log.scale=log.scale)};
-      out = grad(func=aux,x=theta);
-      return(out);
-    }
-    
-    # Numeric observed information
-    obsInfo = function(theta,log.scale){
-      aux = function(theta){ll(theta,log.scale=log.scale)};
-      out = -1*hessian(func=aux,x=theta);
-      return(out);
-    }
-    
-    # NR Update
-    update = function(input,log.scale){
-      theta = input$theta;
-      # Initial log likelihood
-      ll0 = ll(theta,log.scale=log.scale);
-      # Score
-      U = score(theta,log.scale=log.scale);
-      # Inverse observed information
-      Ji = matInv(obsInfo(theta,log.scale=log.scale));
-      # Proposal
-      prop = theta+as.numeric(MMP(Ji,matrix(U,ncol=1)));
-      # Final log likelihood
-      ll1 = ll(prop,log.scale=log.scale);
-      # Increment
-      out = list();
-      out$theta = prop;
-      out$d = ll1-ll0;
-      return(out);
-    }
-    
-    # Initialize
-    a0 = init[1];
-    b0 = init[2];
-    l0 = init[3];
-    theta0 = list();
-    ## If not specified, apply ML to observed data
-    if(!(is.numeric(a0)&is.numeric(b0)&is.numeric(l0))){
-      theta0$theta = log(fit.GenGamma.Complete(time=tobs,bL=bL,bU=bU));
+
+    # Initialize.
+    alpha0 <- init$alpha
+    beta0 <- init$beta
+    lambda0 <- init$lambda
+    if (!all(is.numeric(alpha0), is.numeric(beta0), is.numeric(lambda0))) {
+      theta0 <- FitGenGammaComplete(
+        data %>% dplyr::filter(status == 1),
+        beta_lower = beta_lower,
+        beta_upper = beta_upper
+      )
     } else {
-      theta0$theta = log(c(a0,b0,l0));
+      theta0 <- c(alpha0, beta0, lambda0)
     }
+    theta0 <- log(theta0)
     
-    ## Maximzation
-    for(i in 1:maxit){
-      # Update
-      theta1 = update(theta0,log.scale=TRUE);
-      # Accept if increment is positive
-      if(theta1$d>0){
-        theta0 = theta1;
-        if(report){cat("Objective increment: ",signif(theta1$d,digits=3),"\n")}
-      }
-      # Terminate if increment is below tolerance
-      if(theta1$d<eps){
-        rm(theta1);
-        break;
-      }
-    }
+    # Estimation.
+    theta <- NewtonRaphson(
+      init = theta0,
+      obj = ll,
+      eps = eps,
+      maxit = maxit,
+      report = report
+    )
+    theta <- exp(theta)
     
-    ## Fitting report
-    if(report){
-      if(i<maxit){
-        cat(paste0(i-1," update(s) performed before tolerance limit.\n\n"));
-      } else {
-        cat(paste0(i," update(s) performed without reaching tolerance limit.\n\n"));
-      }
-    };
+    # Observed information.
+    info <- -1 * numDeriv::hessian(
+      func = function(t) {
+        SurvLogLik(data, dist = "gen-gamma", theta = t)
+      },
+      x = theta
+    )
     
-    ## Clear workspace
-    theta = exp(theta0$theta);
-    rm(theta0,update);
   }
   
-  # Final parameters
-  ## Log scale
-  log.theta = log(theta);
-  
-  # Information 
-  ## Log scale
-  J = obsInfo(log.theta,log.scale=TRUE);
-  Ji = matInv(J);
-  
-  ## Standard scale
-  I = obsInfo(theta,log.scale=FALSE);
-  Ii = matInv(I);
-  
-  if(any(diag(Ji)<0)|any(diag(Ii)<0)){
-    stop("Information matrix not positive definite. Try another initialization");
+  # Inverse information.
+  inv_info <- solve(info)
+
+  if (any(diag(inv_info) < 0)) {
+    stop("Information matrix not positive definite. Try another initialization")
   }
 
-  # Standard errors
-  log.se = sqrt(diag(Ji));
-  se = sqrt(diag(Ii));
+  # Parameter frame.
+  params <- data.frame(
+    Aspect = c("Alpha", "Beta", "Lambda"), 
+    Estimate = c(theta[1], theta[2], theta[3]), 
+    SE = sqrt(diag(inv_info)),
+    row.names = NULL,
+    stringsAsFactors = FALSE
+  )
 
-  # Parameter frame
-  P = data.frame(c("ShapeA","ShapeB","Rate"),theta,se);
-  colnames(P) = c("Aspect","Estimate","SE");
-
-  ## Outcome
-  # Estimate mean
-  g = function(x){
-    a = exp(x[1]); b = exp(x[2]); l = exp(x[3]);
-    return(gamma(a+1/b)/(l*gamma(a)));
-  };
-  mu = g(log.theta);
-  dg = grad(func=g,x=log.theta);
-  se.mu = sqrt(as.numeric(matQF(X=matrix(dg,ncol=1),A=Ji)));
-
-  # Estimate median
-  g = function(x){
-    a = exp(x[1]); b = exp(x[2]); l = exp(x[3]);
-    return(qgamma(p=0.5,shape=a,rate=l^b)^(1/b));
-  };
-  me = g(log.theta);
-  dg = grad(func=g,x=log.theta);
-  se.me = sqrt(as.numeric(matQF(X=matrix(dg,ncol=1),A=Ji)));
-
-  # Estimate variance
-  g = function(x){
-    a = exp(x[1]); b = exp(x[2]); l = exp(x[3]);
-    return(1/(l^2*gamma(a))*(gamma(a+2/b)-gamma(a+1/b)^2/gamma(a)));
+  # Outcome mean.
+  g <- function(theta) {
+    alpha <- theta[1]
+    beta <- theta[2]
+    lambda <- theta[3]
+    mu <- gamma(alpha + 1 / beta) / (lambda * gamma(alpha))
+    return(as.numeric(mu))
   }
-  v = g(log.theta);
-  dg = grad(func=g,x=log.theta);
-  se.v = sqrt(as.numeric(matQF(X=matrix(dg,ncol=1),A=Ji)));
+  mu <- g(theta)
+  grad <- numDeriv::grad(func = g, x = theta)
+  se_mu <- sqrt(QF(grad, inv_info))
 
-  # Distribution characteristics
-  Y = data.frame(c("Mean","Median","Variance"),c(mu,me,v),c(se.mu,se.me,se.v));
-  colnames(Y) = c("Aspect","Estimate","SE");
+  # Outcome median.
+  g <- function(theta) {
+    alpha <- theta[1]
+    beta <- theta[2]
+    lambda <- theta[3]
+    me <- stats::qgamma(
+      p = 0.5, 
+      shape = alpha, 
+      rate = (lambda^beta)^(1 / beta)
+    )
+    return(me)
+  }
+  me <- g(theta)
+  grad <- numDeriv::grad(func = g, x = theta)
+  se_me <- sqrt(QF(grad, inv_info))
 
-  # CIs
-  z = qnorm(1-sig/2);
-  P$L = exp(log.theta-z*log.se);
-  P$U = exp(log.theta+z*log.se);
-  Y$L = Y$Estimate-z*Y$SE;
-  Y$U = Y$Estimate+z*Y$SE;
+  # Outcome variance.
+  g <- function(theta) {
+    alpha <- theta[1]
+    beta <- theta[2]
+    lambda <- theta[3]
+    v <- 1 / (lambda^2 * gamma(alpha)) * 
+      (gamma(alpha + 2 / beta) - gamma(alpha + 1 / beta)^2 / gamma(alpha))
+    return(as.numeric(v))
+  }
+  v <- g(theta)
+  grad <- numDeriv::grad(func = g, x = theta)
+  se_v <- sqrt(QF(grad, inv_info))
+
+  # Outcome characteristics.
+  outcome <- data.frame(
+    Aspect = c("Mean", "Median", "Variance"),
+    Estimate = c(mu, me, v), 
+    SE = c(se_mu, se_me, se_v),
+    stringsAsFactors = FALSE
+  )
+  
+  # Confidence intervals.
+  Estimate <- NULL
+  SE <- NULL
+  z <- stats::qnorm(1 - sig / 2)
+  
+  params <- params %>%
+    dplyr::mutate(
+      L = Estimate - z * SE,
+      U = Estimate + z * SE
+    )
+  
+  outcome <- outcome %>%
+    dplyr::mutate(
+      L = Estimate - z * SE,
+      U = Estimate + z * SE
+    )
 
   # Fitted survival function
-  a = theta[1];
-  b = theta[2];
-  l = theta[3];
-  S = function(t){expint::gammainc(a,(l*t)^b)/gamma(a)};
+  alpha <- theta[1]
+  beta <- theta[2]
+  lambda <- theta[3]
+  surv <- function(t) {
+    return(expint::gammainc(alpha, (lambda * t)^beta) / gamma(alpha))
+  }
 
-  # Format Results
-  Out = new(Class="fit",Distribution="gen-gamma",Parameters=P,Information=I,Outcome=Y,S=S);
+  # Format results.
+  out <- methods::new(
+    Class = "fit", 
+    Distribution = "gen-gamma", 
+    Parameters = params, 
+    Information = info, 
+    Outcome = outcome, 
+    S = surv
+  )
   
-  ## Add RMST if requested. 
-  if(is.numeric(tau)){
-    rmst = paraRMST(fit=Out,sig=sig,tau=tau);
-    Out@RMST = rmst;
+  # RMST.
+  if (is.numeric(tau)) {
+    rmst <- ParaRMST(fit = out, sig = sig, tau = tau)
+    out@RMST <- rmst
   }
   
-  return(Out);
+  return(out)
 }
 
-########################
-# Initialize Generalized Gamma
-########################
+# -----------------------------------------------------------------------------
+# Case of no censoring.
+# -----------------------------------------------------------------------------
 
-#' Initialization for Generalized Gamma
-#'
-#' Initializes the parameters for the generalized gamma distribution via maximum
-#' likelihood.
-#'
-#' @param time Observed event times.
-#' @param bL Lower limit on possible values for beta.
-#' @param bU Upper limit on possible values for beta.
-#'
-#' @return 3x1 numeric vector of estimated parameters, \eqn{\alpha},
-#'   \eqn{\beta}, \eqn{\lambda}.
-#'
-#' @importFrom stats optimize
+#' Generalized Gamma Rate MLE
+#' 
+#' Profile MLE of the generalized gamma rate given the shape parameters.
+#' 
+#' @param data Data.frame.
+#' @param alpha First shape parameter.
+#' @param beta Second shape parameter.
+#' @return Numeric MLE of the rate \eqn{\lambda}.
 
-fit.GenGamma.Complete = function(time,bL,bU){
+GenGammaRate <- function(data, alpha, beta) {
+  n <- nrow(data)
+  time <- data$time
+  out <- 1 / (n * alpha) * sum(time^beta)
+  out <- 1 / (out^(1 / beta))
+  return(out)
+}
+
+
+#' Generalized Gamma Shape MLE
+#' 
+#' Profile MLE of the first shape parameter \eqn{\alpha} of the generalized gamma
+#' given the second shape parameter \eqn{\beta}.
+#' 
+#' @param data Data.frame.
+#' @param beta Second shape parameter.
+#' @return Numeric MLE of the rate \eqn{\alpha}.
+
+GenGammaShape <- function(data, beta) {
+  n <- nrow(data)
+  time <- data$time
+  out <- sum((time^beta) * log(time)) / sum(time^beta) - sum(log(time)) / n
+  out <- 1 / (beta * out)
+  return(out)
+}
+
+
+#' Generalized Gamma Profile Log Likelihood
+#' 
+#' Profile log likelihood of the generalized gamma distribution as a function
+#' of the second shape parameter \eqn{\beta}.
+#' 
+#' @param data Data.frame.
+#' @param beta Second shape parameter.
+#' @return Numeric profile log likelihood.
+
+GenGammaProfileLogLik <- function(data, beta) {
+  alpha <- GenGammaShape(data, beta)
+  lambda <- GenGammaRate(data, alpha, beta)
+  out <- SurvLogLik(
+    data, 
+    theta = c(alpha, beta, lambda), 
+    dist = "gen-gamma"
+  )
+  return(out)
+}
+
+
+#' Generalized Gamma Score Equation
+#' 
+#' Score equation for the generalized gamma log likelihood in the absence
+#' of censoring.
+#' 
+#' @param data Data.frame.
+#' @param alpha First shape parameter.
+#' @param beta Second shape parameter.
+#' @param lambda Rate parameter.
+#' @return Numeric score vector.
+
+GenGammaScore <- function(data, alpha, beta, lambda) {
+  n <- nrow(data)
+  tobs <- data$time
   
-  # Events
-  n = length(time);
-  sum.log.t = sum(log(time));
+  # Score for alpha.
+  score_alpha <- n * beta * log(lambda) + 
+    beta * sum(log(tobs))- n * digamma(alpha)
+  score_alpha <- as.numeric(score_alpha)
   
-  # Rate parameter
-  rate = function(a,b){
-    out = 1/(n*a)*sum(time^b);
-    out = 1/(out^(1/b));
-    return(out);
-  }
+  # Score for beta.
+  score_beta <- n / beta + 
+    n * alpha * log(lambda) + 
+    alpha * sum(log(tobs)) - 
+    (lambda^beta) * log(lambda) * sum(tobs^beta) - 
+    (lambda^beta) * sum((tobs^beta) * log(tobs))
+  score_beta <- as.numeric(score_beta)
   
-  # Shape 1
-  shape1 = function(b){
-    out = sum((time^b)*log(time))/sum(time^b)-sum.log.t/n;
-    out = 1/(b*out);
-    return(out);
-  }
+  # Score for lambda.
+  score_lambda <- n * alpha * beta / lambda - 
+    beta * (lambda^(beta - 1)) * sum(tobs^beta)
+  score_lambda <- as.numeric(score_lambda)
   
-  # Profile log likelihood
-  ll = function(b){
-    a = shape1(b);
-    l = rate(a,b);
-    out = survLogLik(time=time,theta=c(a,b,l),dist="gen-gamma");
-    return(out);
-  }
+  # Overall score vector.
+  score <- c(
+    alpha = score_alpha,
+    beta = score_beta,
+    lambda = score_lambda
+  )
+  return(score)
+}
+
+
+#' Generalized Gamma Observed Information
+#' 
+#' Observed information for the generalized gamma log likelihood in the absence
+#' of censoring.
+#' 
+#' @param data Data.frame.
+#' @param alpha First shape parameter.
+#' @param beta Second shape parameter.
+#' @param lambda Rate parameter.
+#' @return Numeric observed information matrix.
+
+GenGammaObsInfo <- function(data, alpha, beta, lambda) {
+  n <- nrow(data)
+  tobs <- data$time
   
-  b0 = optimize(f=ll,lower=bL,upper=bU,maximum=TRUE)$maximum;
+  # Hessian for alpha.
+  hess_alpha <- -n * trigamma(alpha)
+  hess_alpha <- as.numeric(hess_alpha)
   
-  # Remaining MLEs
-  a0 = shape1(b0);
-  l0 = rate(a0,b0);
-  theta = c("a"=a0,"b"=b0,"l"=l0);
-  return(theta);
+  # Hessian for beta.
+  hess_beta <- -n / (beta^2) - 
+    lambda^beta * log(lambda)^2 * sum(tobs^beta) - 
+    2 * lambda^beta * log(lambda) * sum((tobs^beta) * log(tobs)) - 
+    lambda^beta * sum((tobs^beta) * (log(tobs)^2))
+  hess_beta <- as.numeric(hess_beta)
+  
+  # Hessian for lambda.
+  hess_lambda <- -n * alpha * beta / (lambda^2) - 
+    beta * (beta - 1) * lambda^(beta - 2) * sum(tobs^beta)
+  hess_lambda <- as.numeric(hess_lambda)
+  
+  # Mixed partials.
+  hess_alpha_beta <- n * log(lambda) + sum(log(tobs))
+  hess_alpha_beta <- as.numeric(hess_alpha_beta)
+  
+  hess_alpha_lambda <- n * beta / lambda
+  hess_alpha_lambda <- as.numeric(hess_alpha_lambda)
+  
+  hess_beta_lambda <- n * alpha / lambda - 
+    beta * lambda^(beta - 1) * log(lambda) * sum(tobs^beta) - 
+    lambda^(beta - 1) * sum(tobs^beta) - 
+    beta * lambda^(beta - 1) * sum((tobs^beta) * log(tobs))
+  hess_beta_lambda <- as.numeric(hess_beta_lambda)
+
+  # Observed info.
+  info <- -1 * rbind(
+    c(hess_alpha, hess_alpha_beta, hess_alpha_lambda),
+    c(hess_alpha_beta, hess_beta, hess_beta_lambda),
+    c(hess_alpha_lambda, hess_beta_lambda, hess_lambda)
+  )
+  return(info)
+}
+
+
+#' Generalized Gamma Parameter Estimation without Censoring
+#'
+#' Paramter estimation for generalized gamma event times without censoring.
+#' 
+#' @param data Data.frame.
+#' @param beta_lower Lower limit on possible values for beta.
+#' @param beta_upper Upper limit on possible values for beta.
+#' @return Numeric vector containing the estimated shape and rate parameters.
+
+FitGenGammaComplete <- function(data, beta_lower = 0.1, beta_upper = 10) {
+
+  # Profile MLE of beta.
+  beta <- stats::optimize(
+    f = function(b) {GenGammaProfileLogLik(data, b)}, 
+    lower = beta_lower, 
+    upper = beta_upper, 
+    maximum = TRUE)$maximum
+
+  # Remaining MLEs.
+  alpha <- GenGammaShape(data, beta)
+  lambda <- GenGammaRate(data, alpha, beta)
+  theta <- c(alpha = alpha, beta = beta, lambda = lambda)
+  return(theta)
 }

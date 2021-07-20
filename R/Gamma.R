@@ -1,13 +1,9 @@
-# Purpose: Estimation of Gamma distribution
-# Updated: 20/03/08
+# Purpose: Parameter estimation for gamma distribution.
+# Updated: 2021-07-19
 
-# Notes
-# Switched to log-scale parameters for Newton Raphson
-# Numerically verified
-
-########################
-# Gamma Distribution 
-########################
+# -----------------------------------------------------------------------------
+# Gamma distribution.
+# -----------------------------------------------------------------------------
 
 #' Gamma Distribution Parameter Estimation
 #'
@@ -16,21 +12,16 @@
 #' of the shape \eqn{\alpha} and rate \eqn{\lambda}:
 #' \deqn{f(t) = \frac{\lambda}{\Gamma(\alpha)}(\lambda t)^{\alpha-1}e^{-\lambda t}, t>0}
 #'
-#' @param time Numeric observation times.
-#' @param status Status indicator, coded as 1 if an event was observed, 0 if censored.
-#' @param sig Significance level, for CIs.
-#' @param tau Optional truncation times for calculating RMSTs.
-#' @param init Vector of initial values for shape \eqn{\alpha} and
-#'   rate \eqn{\lambda} parameters, respectively.
+#' @param data Data.frame.
 #' @param eps Tolerance for Newton-Raphson iterations.
+#' @param init List with initial values for the `shape` \eqn{\alpha} and
+#'   `rate` \eqn{\lambda}.
 #' @param maxit Maximum number of NR iterations.
 #' @param report Report fitting progress?
-#'
-#' @importFrom expint gammainc
-#' @importFrom methods new
-#' @importFrom numDeriv grad hessian
-#' @importFrom stats qgamma var
-#'
+#' @param sig Significance level, for CIs.
+#' @param status_name Name of the status indicator, 1 if observed, 0 if censored.
+#' @param tau Optional truncation times for calculating RMSTs.
+#' @param time_name Name of column containing the time to event.
 #' @return An object of class \code{fit} containing the following:
 #' \describe{
 #'  \item{Parameters}{The estimated shape \eqn{\alpha} and rate \eqn{\lambda}.}
@@ -38,286 +29,256 @@
 #'  \item{Outcome}{The fitted mean, median, and variance.}
 #'  \item{RMST}{The estimated RMSTs, if tau was specified.}
 #' }
-#'
-#' @seealso
-#' \itemize{
-#'   \item{Fitting function for parametric survival distributions \code{\link{fitParaSurv}}}
-#' }
+#' 
+#' @importFrom dplyr "%>%"
 #'
 #' @examples
-#' # Generate Gamma data with 20% censoring. 
-#' data = genData(n=1e3,dist="gamma",theta=c(2,2),p=0.2);
-#' # Estimate
-#' fit = fitParaSurv(time=data$time,status=data$status,dist="gamma");
+#' # Generate Gamma data with 20% censoring.
+#' data <- GenData(n = 1e3, dist = "gamma", theta = c(2, 2), p = 0.2)
+#' 
+#' # Estimate parameters.
+#' fit <- FitParaSurv(data, dist = "gamma")
 
-fit.Gamma = function(time,status,sig=0.05,tau=NULL,init=NULL,eps=1e-6,maxit=10,report=FALSE){
-  # Events
-  n = length(time);
-  nobs = sum(status);
-  # Partition times
-  tobs = time[status==1];
-  tcen = time[status==0];
-  # Presence of censored events
-  flag = (length(tcen)>0);
-  # Reusable sums
-  sum.tobs = sum(tobs);
-  sum.log.tobs = sum(log(tobs));
+FitGamma <- function(
+  data,
+  eps = 1e-6, 
+  init = list(), 
+  maxit = 10, 
+  report = FALSE,
+  sig = 0.05, 
+  status_name = "status",
+  tau = NULL, 
+  time_name = "time"
+) {
   
+  # Data formatting.
+  status <- NULL
+  time <- NULL
+  
+  data <- data %>%
+    dplyr::rename(
+      status = {{ status_name }},
+      time = {{ time_name }}
+    )
+  
+  # Presence of censoring.
+  is_cens <- any(data$status == 0)
+
   # Fitting procedure is simplified if complete data are available. Each branch
-  # should return: estimated theta, and a function for calculating observed
-  # information.
+  # should return: estimated parameter vector and the information matrix.
+
+  if (!is_cens) {
+    
+    theta <- FitGammaComplete(data, eps = eps)
+    info <- GammaInfo(data, theta[1], theta[2])
   
-  if(!flag){
-    
-    # MLEs of theta
-    theta = fit.Gamma.Complete(time=time,eps=eps);
-    
-    # Score
-    ## Verified numerically. 
-    score = function(theta,log.scale){
-      a = theta[1];
-      l = theta[2];
-      if(log.scale){
-        a = exp(a);
-        l = exp(l);
-      }
-      # Calculate score
-      ua = n*log(l)+sum.log.tobs-n*digamma(a);
-      ul = n*a/l-sum.tobs;
-      out = c(ua,ul);
-      # Map to log scale
-      if(log.scale){
-        out = out*c(a,l);
-      }
-      # Output
-      return(out);
-    }
-    
-    # Observed information
-    ## Verified numerically 
-    obsInfo = function(theta,log.scale){
-      # Extract parameters
-      a = theta[1];
-      l = theta[2];
-      if(log.scale){
-        a = exp(a);
-        l = exp(l);
-      }
-      # Calculate information
-      Jaa = n*trigamma(a);
-      Jll = nobs*a/(l^2);
-      Jla = -(nobs/l);
-      # Observed info
-      Out = matrix(c(Jaa,Jla,Jla,Jll),nrow=2);
-      # Map to log scale
-      if(log.scale){
-        v = matrix(c(a,l),ncol=1);
-        Out = Out*matOP(v,v)-diag(score(theta=theta,log.scale=TRUE));
-      }
-      # Output
-      return(Out);
-    };
-    
   } else {
-    
-    # Log lkelihood
-    ll = function(theta,log.scale){
-      out = survLogLik(time=time,status=status,dist="gamma",theta=theta,log.scale=log.scale);
-      return(as.numeric(out));
+
+    # Log likelihood.
+    ll <- function(theta) {
+      out <- SurvLogLik(data, dist = "gamma", theta = theta, log_scale = TRUE)
+      return(as.numeric(out))
     }
     
-    # Numeric evaluation of score and hessian is faster than analytic due 
-    # to the presence of incomplete gamma functions. 
-    
-    # Numeric score
-    score = function(theta,log.scale){
-      aux = function(theta){ll(theta,log.scale=log.scale)};
-      out = grad(func=aux,x=theta);
-      return(out);
-    }
-    
-    # Numeric observed information
-    obsInfo = function(theta,log.scale){
-      aux = function(theta){ll(theta,log.scale=log.scale)};
-      out = -1*hessian(func=aux,x=theta);
-      return(out);
-    }
-    
-    # NR Update
-    update = function(input,log.scale){
-      theta = input$theta;
-      # Initial log likelihood
-      ll0 = ll(theta,log.scale=log.scale);
-      # Score
-      U = score(theta,log.scale=log.scale);
-      # Inverse observed information
-      Ji = matInv(obsInfo(theta,log.scale=log.scale));
-      # Proposal
-      prop = theta+as.numeric(MMP(Ji,matrix(U,ncol=1)));
-      # Final log likelihood
-      ll1 = ll(prop,log.scale=log.scale);
-      # Increment
-      out = list();
-      out$theta = prop;
-      out$d = ll1-ll0;
-      return(out);
-    }
-    
-    # Initialize
-    a0 = init[1];
-    l0 = init[2];
-    theta0 = list();
-    ## If not specified, apply ML to observed data
-    if(!(is.numeric(a0)&is.numeric(l0))){
-      theta0$theta = log(fit.Gamma.Complete(time=tobs));
+    # Initialize.
+    shape0 <- init$shape
+    rate0 <- init$rate
+    if (!all(is.numeric(rate0), is.numeric(shape0))) {
+      theta0 <- FitGammaComplete(data %>% dplyr::filter(status == 1))
     } else {
-      theta0$theta = log(c(a0,l0));
+      theta0 <- c(shape0, rate0)
     }
+    theta0 <- log(theta0)
     
-    ## Maximzation
-    for(i in 1:maxit){
-      # Update
-      theta1 = update(theta0,log.scale=TRUE);
-      # Accept if increment is positive
-      if(theta1$d>0){
-        theta0 = theta1;
-        if(report){cat("Objective increment: ",signif(theta1$d,digits=3),"\n")}
-      }
-      # Terminate if increment is below tolerance
-      if(theta1$d<eps){
-        rm(theta1);
-        break;
-      }
-    }
+    # Estimation.
+    theta <- NewtonRaphson(
+      init = theta0,
+      obj = ll,
+      eps = eps,
+      maxit = maxit,
+      report = report
+    )
+    theta <- exp(theta)
     
-    ## Fitting report
-    if(report){
-      if(i<maxit){
-        cat(paste0(i-1," update(s) performed before tolerance limit.\n\n"));
-      } else {
-        cat(paste0(i," update(s) performed without reaching tolerance limit.\n\n"));
-      }
-    };
-    
-    ## Clear workspace
-    theta = exp(theta0$theta);
-    rm(theta0,update);
-  }
-  
-  # Final parameters
-  ## Log scale
-  log.theta = log(theta);
-  
-  # Information 
-  ## Log scale
-  J = obsInfo(log.theta,log.scale=TRUE);
-  Ji = matInv(J);
-  ## Standard scale
-  I = obsInfo(theta,log.scale=FALSE);
-  Ii = matInv(I);
-  
-  if(any(diag(Ji)<0)|any(diag(Ii)<0)){
-    stop("Information matrix not positive definite. Try another initialization");
+    # Observed information.
+    info <- -1 * numDeriv::hessian(
+      func = function(t) {
+        SurvLogLik(data, dist = "gamma", theta = t)
+      },
+      x = theta
+    )
   }
 
-  ## Standard errors
-  log.se = sqrt(diag(Ji));
-  se = sqrt(diag(Ii));
+  # Inverse information.
+  inv_info <- solve(info)
 
-  # Parameter frame
-  P = data.frame(c("Shape","Rate"),theta,se);
-  colnames(P) = c("Aspect","Estimate","SE");
+  # Check information matrix for positive definiteness.
+  if (any(diag(inv_info) < 0)) {
+    stop("Information matrix not positive definite. Try another initialization")
+  }
 
-  # Fitted Distribution
-  a = theta[1];
-  l = theta[2];
-  ## Estimate mean
-  mu = a/l;
-  dg = c(1/l,-1*a/(l^2));
-  se.mu = sqrt(as.numeric(matQF(X=matrix(dg,ncol=1),A=Ii)));
+  # Parameter frame.
+  params <- data.frame(
+    Aspect = c("Shape", "Rate"), 
+    Estimate = c(theta[1], theta[2]), 
+    SE = sqrt(diag(inv_info)),
+    row.names = NULL,
+    stringsAsFactors = FALSE
+  )
 
-  # Estimate median
-  g = function(x){qgamma(p=0.5,shape=x[1],rate=x[2])};
-  me = g(theta);
-  dg = grad(func=g,x=theta);
-  se.me = sqrt(as.numeric(matQF(X=matrix(dg,ncol=1),A=Ii)));
+  # Extract shape and rate.
+  shape <- theta[1]
+  rate <- theta[2]
+ 
+  # Outcome mean.
+  mu <- shape / rate
+  grad <- c(1 / rate, -1 * shape / (rate^2))
+  se_mu <- sqrt(QF(grad, inv_info))
 
-  # Estimate variance
-  v = a/(l^2);
-  dg = c(1/(l^2),-2*a/(l^3));
-  se.v = sqrt(as.numeric(matQF(X=matrix(dg,ncol=1),A=Ii)));
+  # Outcome median.
+  g <- function(x) {
+    return(stats::qgamma(p = 0.5, shape = x[1], rate = x[2]))
+  }
+  me <- g(theta)
+  grad <- numDeriv::grad(func = g, x = theta)
+  se_me <- sqrt(QF(grad, inv_info))
 
-  # Distribution characteristics
-  Y = data.frame(c("Mean","Median","Variance"),
-                 c(mu,me,v),c(se.mu,se.me,se.v),
-                 stringsAsFactors=FALSE);
-  colnames(Y) = c("Aspect","Estimate","SE");
+  # Outcome variance.
+  v <- shape / (rate^2)
+  grad <- c(1 / (rate^2), -2 * shape / (rate^3))
+  se_v <- sqrt(QF(grad, inv_info))
+
+  # Outcome characteristics.
+  outcome <- data.frame(
+    Aspect = c("Mean", "Median", "Variance"),
+    Estimate = c(mu, me, v), 
+    SE = c(se_mu, se_me, se_v),
+    stringsAsFactors = FALSE
+  )
+
+  # Confidence intervals.
+  Estimate <- NULL
+  SE <- NULL
+  z <- stats::qnorm(1 - sig / 2)
   
-
-  # CIs
-  z = qnorm(1-sig/2);
-  P$L = exp(log.theta-z*log.se);
-  P$U = exp(log.theta+z*log.se);
-  Y$L = Y$Estimate-z*Y$SE;
-  Y$U = Y$Estimate+z*Y$SE;
-
-  # Fitted survival function
-  S = function(t){expint::gammainc(a,l*t)/gamma(a)};
-
-  ## Format Results
-  Out = new(Class="fit",Distribution="gamma",Parameters=P,Information=I,Outcome=Y,S=S);
+  params <- params %>%
+    dplyr::mutate(
+      L = Estimate - z * SE,
+      U = Estimate + z * SE
+    )
   
-  ## Add RMST if requested. 
-  if(is.numeric(tau)){
-    rmst = paraRMST(fit=Out,sig=sig,tau=tau);
-    Out@RMST = rmst;
+  outcome <- outcome %>%
+    dplyr::mutate(
+      L = Estimate - z * SE,
+      U = Estimate + z * SE
+    )
+
+  # Fitted survival function.
+  surv <- function(t) {return(expint::gammainc(shape, rate * t) / gamma(shape))}
+
+  # Format results.
+  out <- methods::new(
+    Class = "fit", 
+    Distribution = "gamma", 
+    Parameters = params, 
+    Information = info, 
+    Outcome = outcome, 
+    S = surv
+  )
+  
+  # RMST.
+  if (is.numeric(tau)) {
+    rmst <- ParaRMST(fit = out, sig = sig, tau = tau)
+    out@RMST <- rmst
   }
   
-  return(Out);
+  # Output.
+  return(out)
 }
 
-########################
-# Gamma Distribution without Censoring
-########################
+# -----------------------------------------------------------------------------
+# Case of no censoring.
+# -----------------------------------------------------------------------------
 
-#' Gamma Distribution Parameter Estimation without Censoring
+#' Gamma Profile Score for Shape
+#' 
+#' Profile score equation for gamma event times without censoring.
+#' 
+#' @param data Data.frame.
+#' @param shape Shape parameter.
+#' @return Numeric score.
+
+GammaScore <- function(data, shape) {
+  
+  # Case of invalid shape. 
+  if (shape <= 0) {
+    return(Inf)
+  }
+  
+  # Formatting.
+  n <- nrow(data)
+  sum_time <- sum(data$time)
+  sum_log_time <- sum(log(data$time))
+  
+  # Calculation.
+  score <- -n * digamma(shape) - n * log(sum_time) + 
+      n * log(n * shape) + sum_log_time
+  return(score)
+}
+
+
+#' Gamma Observed Information
+#' 
+#' Observed information for gamme event times without censoring.
+#' 
+#' @param data Data.frame.
+#' @param shape Shape parameter \eqn{\alpha}.
+#' @param rate Rate parameter \eqn{\lambda}.
+#' @return Numeric information matrix.
+
+GammaInfo <- function(data, shape, rate) {
+  n <- nrow(data)
+  
+  # Information for shape.
+  info_shape <- n * trigamma(shape)
+  
+  # Information for rate.
+  info_rate <- n * shape / (rate^2)
+  
+  # Cross information.
+  cross_info <- -(n / rate)
+  
+  # Information.
+  info <- matrix(c(info_shape, cross_info, cross_info, info_rate), nrow = 2)
+  dimnames(info) <- list(c("shape", "rate"), c("shape", "rate"))
+  
+  # Output.
+  return(info)
+}
+
+
+#' Gamma Parameter Estimation without Censoring
 #'
-#' Estimates parameters for gamma event times not subject to censoring. 
+#' Paramter estimation for gamma event times without censoring.
 #'
-#' @param time Observation times.
+#' @param data Data.frame.
 #' @param eps Tolerance for Newton-Raphson iterations.
+#' @return Numeric vector containing the estimated shape and rate parameters.
 
-fit.Gamma.Complete = function(time,eps=1e-6){
-  
-  # Events
-  n = length(time);
-  # Reusable sums
-  sum.t = sum(time);
-  sum.log.t = sum(log(time));
-  
-  # Profile score
-  pscore = function(a){
-    if(a==0){
-      out = Inf;
-    } else {
-      out = -n*digamma(a)-n*log(sum.t)+n*log(n*a)+sum.log.t;
-    }
-    return(out);
-  }
-  
-  # Moment estimators
-  m = mean(time);
-  v = var(time);
-  a0 = m^2/v;
-  
+FitGammaComplete <- function(data, eps = 1e-6) {
+
+  # Moment estimator for initialization.
+  shape0 <- mean(data$time)^2 / stats::var(data$time)
+
   # Numerically zero profile score
-  a = uniroot(f=pscore,lower=0,upper=2*a0,extendInt="downX",tol=eps)$root;
-  l = n*a/sum.t;
-  theta = c("a"=a,"l"=l);
-  return(theta);
+  shape <- stats::uniroot(
+    f = function(shape) {GammaScore(data, shape)}, 
+    lower = 0, 
+    upper = 2 * shape0, 
+    extendInt = "downX", 
+    tol = eps
+  )$root
+  rate <- nrow(data) * shape / sum(data$time)
+  theta <- c(shape = shape, rate = rate)
+  return(theta)
 }
-
-
-
-
-
