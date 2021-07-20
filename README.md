@@ -29,7 +29,7 @@ set.seed(100)
 
 n <- 1000
 # Weibull data with shape = 1, rate = 1, and 20% censoring.
-df1 <- GenData(n = n, dist = "weibull", theta = c(1, 2), p = 0.20)
+df1 <- GenData(n = n, dist = "weibull", theta = c(1, 1), p = 0.20)
 df1$arm <- 1
 fit <- FitParaSurv(df1, dist = "weibull")
 show(fit)
@@ -40,18 +40,18 @@ show(fit)
 ## Estimated Parameters:
 ##   Aspect Estimate    SE     L     U
 ## 1  Shape    0.968 0.026 0.917 1.019
-## 2   Rate    2.173 0.080 2.017 2.329
+## 2   Rate    1.086 0.040 1.008 1.164
 ## 
 ## Distribution Properties:
 ##     Aspect Estimate    SE     L     U
-## 1     Mean    0.467 0.017 0.434 0.500
-## 2   Median    0.315 0.013 0.291 0.340
-## 3 Variance    0.233 0.023 0.189 0.277
+## 1     Mean    0.934 0.034 0.867 1.000
+## 2   Median    0.630 0.025 0.581 0.679
+## 3 Variance    0.931 0.090 0.754 1.107
 ```
 
 ```r
-# Weibull data with shape = 1, rate = 2, and 25% censoring.
-df0 <- GenData(n = n, dist = "weibull", theta = c(2, 2), p = 0.25)
+# Weibull data with shape = 1, rate = w, and 25% censoring.
+df0 <- GenData(n = n, dist = "weibull", theta = c(1, 2), p = 0.25)
 df0$arm <- 0
 fit <- FitParaSurv(df0, dist = "weibull")
 show(fit)
@@ -61,17 +61,18 @@ show(fit)
 ## Fitted Weibull Distribution. 
 ## Estimated Parameters:
 ##   Aspect Estimate    SE     L     U
-## 1  Shape    2.066 0.059 1.950 2.182
-## 2   Rate    1.997 0.035 1.928 2.067
+## 1  Shape    1.033 0.030 0.975 1.091
+## 2   Rate    1.995 0.071 1.856 2.133
 ## 
 ## Distribution Properties:
 ##     Aspect Estimate    SE     L     U
-## 1     Mean    0.444 0.008 0.428 0.459
-## 2   Median    0.419 0.008 0.404 0.435
-## 3 Variance    0.051 0.003 0.045 0.057
+## 1     Mean    0.495 0.018 0.460 0.530
+## 2   Median    0.352 0.013 0.325 0.378
+## 3 Variance    0.230 0.023 0.184 0.275
 ```
 
 ```r
+# Comparison of Weibulls.
 data <- rbind(df1, df0)
 comp <- CompParaSurv(data, dist1 = "weibull")
 show(comp)
@@ -82,20 +83,20 @@ show(comp)
 ## 
 ## Fitted Characteristics for Group 1:
 ##     Aspect Estimate    SE     L     U
-## 1     Mean    0.467 0.017 0.434 0.500
-## 2   Median    0.315 0.013 0.291 0.340
-## 3 Variance    0.233 0.023 0.189 0.277
+## 1     Mean    0.934 0.034 0.867 1.000
+## 2   Median    0.630 0.025 0.581 0.679
+## 3 Variance    0.931 0.090 0.754 1.107
 ## 
 ## Fitted Characteristics for Group 0:
 ##     Aspect Estimate    SE     L     U
-## 1     Mean    0.444 0.008 0.428 0.459
-## 2   Median    0.419 0.008 0.404 0.435
-## 3 Variance    0.051 0.003 0.045 0.057
+## 1     Mean    0.495 0.018 0.460 0.530
+## 2   Median    0.352 0.013 0.325 0.378
+## 3 Variance    0.230 0.023 0.184 0.275
 ## 
 ## Location:
-##      Contrast  Point    SE      L      U     P
-## 1 Mean1-Mean0  0.023 0.019 -0.013  0.060 0.212
-## 2 Mean1/Mean0  1.053 0.043  0.972  1.140 0.204
-## 3   Med1-Med0 -0.104 0.015 -0.133 -0.075 0.000
-## 4   Med1/Med0  0.752 0.033  0.689  0.819 0.000
+##      Contrast Point    SE     L     U P
+## 1 Mean1-Mean0 0.439 0.038 0.364 0.514 0
+## 2 Mean1/Mean0 1.887 0.097 1.707 2.086 0
+## 3   Med1-Med0 0.279 0.028 0.223 0.334 0
+## 4   Med1/Med0 1.793 0.099 1.610 1.997 0
 ```
