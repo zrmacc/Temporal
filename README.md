@@ -1,4 +1,4 @@
-# Temporal: Parametric Comparison of Time to Event Distribution
+# Temporal: Parametric Comparison of Time to Event Distributions
 
 Zachary McCaw <br>
 Updated: 2021-07-19
