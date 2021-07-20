@@ -50,7 +50,7 @@ show(fit)
 ```
 
 ```r
-# Weibull data with shape = 1, rate = w, and 25% censoring.
+# Weibull data with shape = 1, rate = 2, and 25% censoring.
 df0 <- GenData(n = n, dist = "weibull", theta = c(1, 2), p = 0.25)
 df0$arm <- 0
 fit <- FitParaSurv(df0, dist = "weibull")
