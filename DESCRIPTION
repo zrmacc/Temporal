@@ -1,6 +1,6 @@
 Package: Temporal
 Title: Parametric Time to Event Analysis
-Version: 0.3.0
+Version: 0.3.0.1
 Authors@R: 
     person(given = "Zachary",
            family = "McCaw",
@@ -18,7 +18,7 @@ Imports:
 	numDeriv,
 	stats,
 	tidyr
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Suggests: 
 	testthat (>= 3.0.0),
 	knitr,

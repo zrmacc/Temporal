@@ -102,8 +102,8 @@ print.fit <- function(x, ...) {
 #' Show Method for Fitted Survival Distributions
 #'
 #' @param object An object of class \code{fit}.
+#' @name fit-method
 #' @rdname fit-method
-#' @importFrom methods show
 
 setMethod(
   f = "show",
