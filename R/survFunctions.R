@@ -16,14 +16,12 @@
 #' @param theta Numeric parameter vector.
 #' @return Survival function.
 #' @export
-#' 
 #' @examples 
 #' # Survival function for the generalized gamma.
 #' surv <- SurvFunc(dist = "gen-gamma", theta = c(2, 2, 2))
 #' 
 #' # Evaluation.
 #' surv(1.0)
-
 SurvFunc <- function(dist, theta) {
 
   # Input checks.

@@ -21,15 +21,12 @@
 #'  \item{Outcome}{The fitted mean, median, and variance of the time to event distribution.}
 #'  \item{RMST}{The estimated RMSTs, if tau was specified.}
 #' }
-#' @importFrom dplyr "%>%"
-#' 
 #' @examples
 #' # Generate exponential event time data with 20% censoring.
 #' data <- GenData(n = 1e3, dist = "exp", theta = c(2), p = 0.2)
 #' 
 #' # Estimate parameters.
 #' fit <- FitParaSurv(data, dist = "exp")
-
 FitExp <- function(
   data, 
   sig = 0.05, 

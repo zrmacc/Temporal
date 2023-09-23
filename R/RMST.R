@@ -1,5 +1,6 @@
 # Purpose: Calculate area under a fitted parametric survival distribution.
-# Updated: 2021-07-19
+# Updated: 2023-09-23
+
 
 #' Restricted Mean Survival Time
 #'
@@ -10,10 +11,7 @@
 #' @param tau Numeric vector of truncation times.
 #' @param sig Significance level, for CIs.
 #' @return Data.frame containing the estimated RMST at each truncation time.
-#'   
-#' @importFrom dplyr "%>%"
 #' @export
-#'
 #' @examples
 #' # Generate Weibull data with 20% censoring.
 #' data <- GenData(n = 1e3, dist = "weibull", theta = c(2, 0.5), p = 0.2)
@@ -32,11 +30,10 @@
 #' 
 #' # Calculate RMSTs.
 #' rmst <- ParaRMST(fit = fit, tau = c(0.5, 1.0, 1.5, 2.0))
-
 ParaRMST <- function(fit, tau, sig = 0.05) {
 
   # Input check.
-  if (class(fit) != "fit") {
+  if (!methods::is(fit, "fit")) {
     stop("Requires a fitted parametric survival distribution.")
   }
   if (!is.numeric(tau) | (min(tau) < 0)) {

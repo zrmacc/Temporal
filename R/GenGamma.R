@@ -32,9 +32,6 @@
 #'  \item{Outcome}{The fitted mean, median, and variance.}
 #'  \item{RMST}{The estimated RMSTs, if tau was specified.}
 #' }
-#' 
-#' @importFrom dplyr "%>%"
-#'
 #' @examples
 #' set.seed(103)
 #' # Generate generalized gamma data with 20% censoring.
@@ -42,7 +39,6 @@
 #' 
 #' # Estimate parameters.
 #' fit <- FitParaSurv(data, dist = "gen-gamma", report = TRUE)
-
 FitGenGamma <- function(
   data,
   beta_lower = 0.1,
@@ -244,7 +240,6 @@ FitGenGamma <- function(
 #' @param alpha First shape parameter.
 #' @param beta Second shape parameter.
 #' @return Numeric MLE of the rate \eqn{\lambda}.
-
 GenGammaRate <- function(data, alpha, beta) {
   n <- nrow(data)
   time <- data$time
@@ -262,7 +257,6 @@ GenGammaRate <- function(data, alpha, beta) {
 #' @param data Data.frame.
 #' @param beta Second shape parameter.
 #' @return Numeric MLE of the rate \eqn{\alpha}.
-
 GenGammaShape <- function(data, beta) {
   n <- nrow(data)
   time <- data$time
@@ -280,7 +274,6 @@ GenGammaShape <- function(data, beta) {
 #' @param data Data.frame.
 #' @param beta Second shape parameter.
 #' @return Numeric profile log likelihood.
-
 GenGammaProfileLogLik <- function(data, beta) {
   alpha <- GenGammaShape(data, beta)
   lambda <- GenGammaRate(data, alpha, beta)
@@ -303,7 +296,6 @@ GenGammaProfileLogLik <- function(data, beta) {
 #' @param beta Second shape parameter.
 #' @param lambda Rate parameter.
 #' @return Numeric score vector.
-
 GenGammaScore <- function(data, alpha, beta, lambda) {
   n <- nrow(data)
   tobs <- data$time
@@ -346,7 +338,6 @@ GenGammaScore <- function(data, alpha, beta, lambda) {
 #' @param beta Second shape parameter.
 #' @param lambda Rate parameter.
 #' @return Numeric observed information matrix.
-
 GenGammaObsInfo <- function(data, alpha, beta, lambda) {
   n <- nrow(data)
   tobs <- data$time
@@ -398,7 +389,6 @@ GenGammaObsInfo <- function(data, alpha, beta, lambda) {
 #' @param beta_lower Lower limit on possible values for beta.
 #' @param beta_upper Upper limit on possible values for beta.
 #' @return Numeric vector containing the estimated shape and rate parameters.
-
 FitGenGammaComplete <- function(data, beta_lower = 0.1, beta_upper = 10) {
 
   # Profile MLE of beta.

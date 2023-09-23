@@ -6,7 +6,6 @@
 #' @param x Numeric vector.
 #' @param A Numeric matrix.
 #' @return Numeric scalar.
-
 QF <- function(x, A) {
   x <- matrix(x, ncol = 1)
   out <- t(x) %*% A %*% x
@@ -22,7 +21,6 @@ QF <- function(x, A) {
 #' @param state List containing the parameter vector `theta`.
 #' @return List containing the updated parameter vector `theta` and the
 #'   objective increment `delta`.
-
 NRUpdate <- function(obj, state) {
   theta <- state$theta
   
@@ -59,7 +57,6 @@ NRUpdate <- function(obj, state) {
 #' @param report Report fitting progress?
 #' @return Numeric parameter estimate.
 #' @export
-
 NewtonRaphson <- function(
   init,
   obj,

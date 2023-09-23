@@ -22,7 +22,6 @@
 #' @param status_name Name of the status indicator, 1 if observed, 0 if censored.
 #' @param tau Optional truncation times for calculating RMSTs.
 #' @param time_name Name of column containing the time to event.
-#' 
 #' @return An object of class \code{fit} containing the following:
 #' \describe{
 #'  \item{Parameters}{The estimated location \eqn{\mu} and scale \eqn{\sigma}.}
@@ -30,14 +29,12 @@
 #'  \item{Outcome}{The fitted mean, median, and variance.}
 #'  \item{RMST}{The estimated RMSTs, if tau was specified.}
 #' }
-#'
 #' @examples
 #' # Generate log-normal data with 20% censoring.
 #' data <- GenData(n = 1e3, dist = "log-normal", theta = c(0, 2), p = 0.2)
 #' 
 #' # Estimate parameters.
 #' fit <- FitParaSurv(data, dist = "log-normal")
-
 FitLogNormal <- function(
   data,
   eps = 1e-6, 
@@ -211,7 +208,6 @@ FitLogNormal <- function(
 #' @param loc Location parameter.
 #' @param scale Scale parameter.
 #' @return Numeric score.
-
 LogNormScore <- function(data, loc, scale) {
   tobs <- data$time
   nobs <- length(tobs)
@@ -232,7 +228,6 @@ LogNormScore <- function(data, loc, scale) {
 #' @param scale Scale parameter.
 #' @param log_scale Is the scale parameter logged?
 #' @return Numeric score.
-
 LogNormInfo <- function(data, loc, scale, log_scale = FALSE) {
   n <- nrow(data)
   tobs <- data$time
@@ -257,7 +252,6 @@ LogNormInfo <- function(data, loc, scale, log_scale = FALSE) {
 #'
 #' @param data Data.frame.
 #' @return Numeric vector containing the estimate location and scale parameters.
-
 FitLogNormComplete <- function(data) {
   tobs <- data$time
   theta <- c(

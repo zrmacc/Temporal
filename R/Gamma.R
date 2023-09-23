@@ -29,16 +29,12 @@
 #'  \item{Outcome}{The fitted mean, median, and variance.}
 #'  \item{RMST}{The estimated RMSTs, if tau was specified.}
 #' }
-#' 
-#' @importFrom dplyr "%>%"
-#'
 #' @examples
 #' # Generate Gamma data with 20% censoring.
 #' data <- GenData(n = 1e3, dist = "gamma", theta = c(2, 2), p = 0.2)
 #' 
 #' # Estimate parameters.
 #' fit <- FitParaSurv(data, dist = "gamma")
-
 FitGamma <- function(
   data,
   eps = 1e-6, 
@@ -207,7 +203,6 @@ FitGamma <- function(
 #' @param data Data.frame.
 #' @param shape Shape parameter.
 #' @return Numeric score.
-
 GammaScore <- function(data, shape) {
   
   # Case of invalid shape. 
@@ -235,7 +230,6 @@ GammaScore <- function(data, shape) {
 #' @param shape Shape parameter \eqn{\alpha}.
 #' @param rate Rate parameter \eqn{\lambda}.
 #' @return Numeric information matrix.
-
 GammaInfo <- function(data, shape, rate) {
   n <- nrow(data)
   
@@ -264,7 +258,6 @@ GammaInfo <- function(data, shape, rate) {
 #' @param data Data.frame.
 #' @param eps Tolerance for Newton-Raphson iterations.
 #' @return Numeric vector containing the estimated shape and rate parameters.
-
 FitGammaComplete <- function(data, eps = 1e-6) {
 
   # Moment estimator for initialization.

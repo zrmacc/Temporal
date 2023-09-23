@@ -1,5 +1,5 @@
 # Purpose: Define class returned by the parametric fitting and contrast functions.
-# Updated: 2021-06-05
+# Updated: 2023-09-23
 
 # -----------------------------------------------------------------------------
 # Auxiliary functions.
@@ -58,8 +58,7 @@ setClass(
     Outcome = "data.frame",
     RMST = "data.frame",
     S = "function"
-    )
-  )
+  ))
 
 # -----------------------------------------------------------------------------
 
@@ -102,9 +101,9 @@ print.fit <- function(x, ...) {
 #' Show Method for Fitted Survival Distributions
 #'
 #' @param object An object of class \code{fit}.
-#' @name fit-method
+#' @aliases fit-method
+#' @docType methods
 #' @rdname fit-method
-
 setMethod(
   f = "show",
   signature = c(object = "fit"),
@@ -131,7 +130,6 @@ setMethod(
 #' @name contrast-class
 #' @rdname contrast-class
 #' @exportClass contrast
-
 setClass(
   Class = "contrast",
   representation = representation(
@@ -153,7 +151,6 @@ setClass(
 #' @param x A \code{contrast} object.
 #' @param ... Unused.
 #' @export
-
 print.contrast <- function(x, ...) {
   
   dist1 <- DistProperName(x@Dist1)
@@ -202,7 +199,6 @@ print.contrast <- function(x, ...) {
 #' @param object An object of class \code{contrast}.
 #' @rdname contrast-method
 #' @importFrom methods show
-
 setMethod(
   f = "show",
   signature = c(object = "contrast"),

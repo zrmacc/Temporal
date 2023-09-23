@@ -356,10 +356,7 @@ PermP <- function(df1, df0, fit0, fit1, eps, init1, init0, maxit, reps, tau) {
 #'   \item{Contrast}{Contrasts of means and medians.}
 #'   \item{RMST}{Contrasts of the RMSTs, if `tau` was specified.}
 #' }
-#'
-#' @importFrom dplyr "%>%"
 #' @export
-#' 
 #' @examples
 #' \donttest{
 #' set.seed(100)
@@ -382,7 +379,6 @@ PermP <- function(df1, df0, fit0, fit1, eps, init1, init0, maxit, reps, tau) {
 #' # Calculate permutation p-values (slow).
 #' comp <-  CompParaSurv(data, dist1 = "weibull", tau = 1, reps = 100)
 #' }
-
 CompParaSurv <- function(
   data,
   arm_name = "arm",

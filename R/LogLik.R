@@ -22,10 +22,7 @@
 #' @param status_name Status indicator, coded as 1 if an event was observed, 0 if censored.
 #' @param time_name Name of column containing the time to event.
 #' @return Scalar value of the log likelihood.
-#' 
-#' @importFrom dplyr "%>%"
 #' @export
-#' 
 #' @examples
 #' # Generate gamma event time data with 10% censoring.
 #' data <- GenData(n = 1e3, dist = "gamma", theta = c(2, 2), p = 0.1)
@@ -38,7 +35,6 @@
 #' 
 #' # Evaluate log likelihood.
 #' ll <- SurvLogLik(data, dist = "weibull", theta = c(2, 2))
-
 SurvLogLik <- function(
   data, 
   dist, 

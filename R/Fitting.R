@@ -32,10 +32,6 @@
 #'   \item{Outcome}{The fitted mean, median, and variance.}
 #'  \item{RMST}{The estimated RMSTs, if tau was specified.}
 #' }
-#' 
-#' @importFrom dplyr "%>%"
-#' @export
-#'
 #' @seealso
 #' \itemize{
 #'   \item{Between group comparison of survival experience \code{\link{CompParaSurv}}}
@@ -45,7 +41,7 @@
 #'   \item{Log-normal distribution \code{\link{FitLogNormal}}}
 #'   \item{Weibull distribution \code{\link{FitWeibull}}}
 #' }
-#'
+#' @export
 #' @examples
 #' # Generate Gamma data with 20% censoring.
 #' data <- GenData(n = 1e3, dist = "gamma", theta = c(2, 2), p = 0.2)
@@ -56,7 +52,6 @@
 #' data <- GenData(n = 1e3, dist = "weibull", theta = c(2, 2), p = 0.1)
 #' # Fit weibull distribution, calculate RMST at tau=0.5.
 #' fit <- FitParaSurv(data, dist = "weibull", tau = 0.5)
-
 FitParaSurv <- function(
   data,
   beta_lower = 0.1,

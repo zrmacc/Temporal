@@ -9,7 +9,6 @@
 #'
 #' @param dist String, distribution name.
 #' @return Numeric parameter ist.
-
 DefaultParam <- function(dist) {
   if (dist == "exp") {
     theta <- c(rate = 1)
@@ -34,7 +33,6 @@ DefaultParam <- function(dist) {
 #'
 #' @param arm 0/1, treatment arm.
 #' @return None.
-
 CheckArm <- function(arm) {
   arm_levels <- sort(unique(arm))
   if (!all.equal(arm_levels, c(0, 1))) {
@@ -52,7 +50,6 @@ CheckArm <- function(arm) {
 #'
 #' @param dist String, distribution name.
 #' @return None.
-
 CheckDist <- function(dist) {
   choices <- c("exp", "gamma", "gen-gamma", "log-normal", "weibull")
   if (!(dist %in% choices)) {
@@ -74,7 +71,6 @@ CheckDist <- function(dist) {
 #' @param dist String, distribution name.
 #' @param init List of named parameters.
 #' @return None.
-
 CheckInit <- function(dist, init) {
   
   # Only check initialization if not null.
@@ -155,7 +151,6 @@ CheckInit <- function(dist, init) {
 #'
 #' @param status 0/1 status indicator.
 #' @return None.
-
 CheckStatus <- function(status) {
   status_levels <- sort(unique(status))
   n_status_levels <- length(status_levels)
@@ -189,7 +184,6 @@ CheckStatus <- function(status) {
 #' @param dist String, distribution.
 #' @param theta Numeric, parameter vector.
 #' @return None.
-
 CheckTheta <- function(dist, theta) {
   len_theta <- length(theta)
   

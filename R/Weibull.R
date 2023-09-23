@@ -12,7 +12,6 @@
 #' @param data Data.frame.
 #' @param shape Shape parameter.
 #' @return Numeric rate.
-
 WeiRate <- function(data, shape) {
   
   # Unpack.
@@ -33,7 +32,6 @@ WeiRate <- function(data, shape) {
 #' @param data Data.frame.
 #' @param shape Shape parameter.
 #' @return Numeric score.
-
 WeiScore <- function(data, shape) {
   
   # Case of invalid shape. 
@@ -60,7 +58,6 @@ WeiScore <- function(data, shape) {
 #' @param data Data.frame.
 #' @param init Initialization list.
 #' @return Numeric initial value for shape.
-
 WeiInit <- function(data, init) {
   a0 <- init$shape
   if (!is.null(a0)) {
@@ -83,7 +80,6 @@ WeiInit <- function(data, init) {
 #' @param shape Shape parameter, alpha.
 #' @param rate Rate parameter, lambda.
 #' @return Numeric information matrix.
-
 WeiInfo <- function(
   data,
   shape,
@@ -146,14 +142,12 @@ WeiInfo <- function(
 #'  \item{Outcome}{The fitted mean, median, and variance.}
 #'  \item{RMST}{The estimated RMSTs, if tau was specified.}
 #' }
-#' @importFrom dplyr "%>%"
 #' @examples
 #' # Generate Weibull data with 20% censoring.
 #' data <- GenData(n = 1e3, dist = "weibull", theta = c(2, 2), p = 0.2)
 #' 
 #' # Estimate parameters.
 #' fit <- FitParaSurv(data, dist = "weibull")
-
 FitWeibull <- function(
   data, 
   init = list(),
@@ -279,4 +273,3 @@ FitWeibull <- function(
   # Output.
   return(out)
 }
-
