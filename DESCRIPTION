@@ -1,6 +1,7 @@
 Package: Temporal
 Title: Parametric Time to Event Analysis
-Version: 0.3.0.1
+Date: 2026-02-26
+Version: 0.3.0.2
 Author: Zachary McCaw [aut, cre] (ORCID: <https://orcid.org/0000-0002-2006-9828>)
 Maintainer: Zachary McCaw <zmccaw@alumni.harvard.edu>
 Authors@R: 

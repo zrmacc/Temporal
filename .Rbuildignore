@@ -3,6 +3,7 @@
 ^\.Rproj\.user$
 ^\.Rhistory$
 ^\.DS_Store$
+^\.github/
 
 # README build artifacts
 ^README\.Rmd$
