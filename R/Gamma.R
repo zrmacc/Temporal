@@ -107,11 +107,7 @@ FitGamma <- function(
 
   # Inverse information.
   inv_info <- solve(info)
-
-  # Check information matrix for positive definiteness.
-  if (any(diag(inv_info) < 0)) {
-    stop("Information matrix not positive definite. Try another initialization")
-  }
+  CheckInfoPD(inv_info)
 
   # Parameter frame.
   params <- data.frame(
@@ -151,23 +147,8 @@ FitGamma <- function(
     SE = c(se_mu, se_me, se_v),
     stringsAsFactors = FALSE
   )
-
-  # Confidence intervals.
-  Estimate <- NULL
-  SE <- NULL
-  z <- stats::qnorm(1 - sig / 2)
-  
-  params <- params %>%
-    dplyr::mutate(
-      L = Estimate - z * SE,
-      U = Estimate + z * SE
-    )
-  
-  outcome <- outcome %>%
-    dplyr::mutate(
-      L = Estimate - z * SE,
-      U = Estimate + z * SE
-    )
+  params <- AddCIs(params, sig)
+  outcome <- AddCIs(outcome, sig)
 
   # Fitted survival function.
   surv <- function(t) {return(expint::gammainc(shape, rate * t) / gamma(shape))}
@@ -186,8 +167,10 @@ FitGamma <- function(
   if (is.numeric(tau)) {
     rmst <- ParaRMST(fit = out, sig = sig, tau = tau)
     out@RMST <- rmst
+  } else {
+    out@RMST <- data.frame()
   }
-  
+
   # Output.
   return(out)
 }

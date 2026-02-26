@@ -12,7 +12,7 @@
 
 <meta name="author" content="Zachary McCaw" />
 
-<meta name="date" content="2023-09-23" />
+<meta name="date" content="2026-02-26" />
 
 <title>Parametric Survival Analysis</title>
 
@@ -50,6 +50,7 @@ overflow: visible;
 }
 </style>
 <style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
@@ -340,7 +341,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Parametric Survival Analysis</h1>
 <h4 class="author">Zachary McCaw</h4>
-<h4 class="date">2023-09-23</h4>
+<h4 class="date">2026-02-26</h4>
 
 
 
@@ -413,7 +414,7 @@ times <code>tau</code> are provided, the corresponding RMSTs are stored
 in <code>fit@RMST</code>. Functions are presented below for simulating
 from and estimating the exponential, gamma, generalized gamma,
 log-normal, and Weibull distributions. If an expected censoring
-proportion <code>p</code> is provided, then the event time are subject
+proportion <code>p</code> is provided, then the event times are subject
 to non-informative random right censoring.</p>
 </div>
 <div id="exponential" class="section level2">
@@ -435,14 +436,14 @@ proportion 20%. Generative parameters are recovered using
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">show</span>(fit)</span></code></pre></div>
 <pre><code>## Fitted Exponential Distribution. 
 ## Estimated Parameters:
-##   Aspect Estimate    SE     L     U
-## 1   Rate    2.106 0.074 1.961 2.251
+##   Aspect Estimate    SE    L     U
+## 1   Rate    1.911 0.067 1.78 2.042
 ## 
 ## Distribution Properties:
 ##     Aspect Estimate    SE     L     U
-## 1     Mean    0.475 0.017 0.442 0.508
-## 2   Median    0.329 0.012 0.306 0.352
-## 3 Variance    0.226 0.016 0.194 0.257</code></pre>
+## 1     Mean    0.523 0.018 0.487 0.559
+## 2   Median    0.363 0.013 0.338 0.387
+## 3 Variance    0.274 0.019 0.236 0.311</code></pre>
 </div>
 <div id="gamma" class="section level2">
 <h2>Gamma</h2>
@@ -464,18 +465,18 @@ proportion 25%. Generative parameters are recovered using
 <pre><code>## Fitted Gamma Distribution. 
 ## Estimated Parameters:
 ##   Aspect Estimate    SE     L     U
-## 1  Shape    1.894 0.086 1.726 2.062
-## 2   Rate    1.894 0.105 1.688 2.101
+## 1  Shape    2.037 0.093 1.855 2.220
+## 2   Rate    2.037 0.113 1.816 2.258
 ## 
 ## Distribution Properties:
 ##     Aspect Estimate    SE     L     U
-## 1     Mean    1.000 0.026 0.948 1.051
-## 2   Median    0.830 0.022 0.787 0.874
-## 3 Variance    0.528 0.039 0.451 0.605
+## 1     Mean    1.000 0.025 0.950 1.050
+## 2   Median    0.842 0.022 0.800 0.884
+## 3 Variance    0.491 0.036 0.421 0.561
 ## 
 ## Restricted Mean Survival Times:
 ##   Tau Estimate    SE     L     U
-## 1 0.5    0.445 0.003 0.438 0.451</code></pre>
+## 1 0.5    0.449 0.003 0.443 0.456</code></pre>
 </div>
 <div id="generalized-gamma" class="section level2">
 <h2>Generalized Gamma</h2>
@@ -506,7 +507,7 @@ sizes. Fitting progress is monitored by setting
 <pre><code>## Objective increment:  29.5 
 ## Objective increment:  0.103 
 ## Objective increment:  6.59e-06 
-## Objective increment:  2.18e-11 
+## Objective increment:  1.19e-10 
 ## 3 update(s) performed before tolerance limit.
 ## 
 ## Fitted Generalized Gamma Distribution. 
@@ -548,7 +549,7 @@ t-\mu)^2}{2\sigma^2}},\ t&gt;0
 log-normal event times are simulated, with location <span class="math inline">\(\mu=1\)</span>, scale <span class="math inline">\(\sigma=2\)</span>, and expected censoring
 proportion 15%. Generative parameters are recovered using
 <code>FitParaSurv</code> with <code>dist = &quot;log-normal&quot;</code>. RMSTs at
-<code>\tau = c(5,10,25)</code> are requested.</p>
+<code>tau = c(5, 10, 25)</code> are requested.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Generate log-normal event time data.</span></span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">GenData</span>(<span class="at">n =</span> <span class="fl">1e3</span>, <span class="at">dist =</span> <span class="st">&quot;log-normal&quot;</span>, <span class="at">theta =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">p =</span> <span class="fl">0.15</span>)</span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a></span>
@@ -565,7 +566,7 @@ proportion 15%. Generative parameters are recovered using
 ##     Aspect  Estimate        SE        L         U
 ## 1     Mean    24.627     3.242   18.274    30.981
 ## 2   Median     2.827     0.191    2.452     3.201
-## 3 Variance 45430.384 21041.346 4190.104 86670.665
+## 3 Variance 45430.385 21041.346 4190.104 86670.665
 ## 
 ## Restricted Mean Survival Times:
 ##   Tau Estimate    SE     L     U
@@ -616,13 +617,13 @@ for the target and reference groups are selected using
 the distribution for the reference group defaults to the distribution
 for the target group, and the distribution for the target group defaults
 to Weibull. The output is an object of class <code>contrast</code>. The
-slots <code>contrast@Model1</code> and <code>contrast@Model2</code>
+slots <code>contrast@Model1</code> and <code>contrast@Model0</code>
 contain the fitted models for the target and reference groups. See <a href="#fit">fit</a> for a description of class <code>fit</code> objects.
 The slot <code>contrast@Location</code> contains the location parameter
 contrasts, CIs, and p-values. If truncation times <code>tau</code> are
 specified, the slot <code>contrast@RMST</code> will contain these
 contrasts.</p>
-<p>By default, all CIs are p-values are asymptotic. If the
+<p>By default, all CIs and p-values are asymptotic. If the
 <code>reps</code> argument is supplied, then permutation p-values are
 calculated using that many reshuffles of the treatment assignments.</p>
 </div>
@@ -697,7 +698,7 @@ is <span class="math inline">\(1.0\)</span>.</p>
 <span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>d0<span class="sc">$</span>arm <span class="ot">&lt;-</span> <span class="dv">0</span></span>
 <span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a></span>
 <span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co"># Overall data set.</span></span>
-<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">rbind</span>(df1, df0)</span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">rbind</span>(df1, d0)</span>
 <span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a></span>
 <span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="co"># Compare fitted distributions.</span></span>
 <span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>comp <span class="ot">&lt;-</span> <span class="fu">CompParaSurv</span>(data, <span class="at">dist1 =</span> <span class="st">&quot;weibull&quot;</span>, <span class="at">dist0 =</span> <span class="st">&quot;weibull&quot;</span>)</span>
@@ -714,16 +715,16 @@ is <span class="math inline">\(1.0\)</span>.</p>
 ## 
 ## Fitted Characteristics for Group 0:
 ##     Aspect Estimate    SE     L     U
-## 1     Mean    1.018 0.023 0.973 1.063
-## 2   Median    0.889 0.022 0.845 0.933
-## 3 Variance    0.464 0.028 0.408 0.519
+## 1     Mean    0.434 0.007 0.420 0.448
+## 2   Median    0.408 0.008 0.393 0.423
+## 3 Variance    0.051 0.002 0.046 0.055
 ## 
 ## Location:
-##      Contrast  Point    SE      L      U P
-## 1 Mean1-Mean0 -0.590 0.025 -0.639 -0.541 0
-## 2 Mean1/Mean0  0.421 0.013  0.395  0.448 0
-## 3   Med1-Med0 -0.486 0.024 -0.533 -0.438 0
-## 4   Med1/Med0  0.453 0.015  0.425  0.484 0</code></pre>
+##      Contrast  Point    SE      L     U     P
+## 1 Mean1-Mean0 -0.006 0.012 -0.029 0.018 0.633
+## 2 Mean1/Mean0  0.987 0.027  0.935 1.042 0.634
+## 3   Med1-Med0 -0.005 0.012 -0.028 0.017 0.643
+## 4   Med1/Med0  0.987 0.028  0.933 1.044 0.643</code></pre>
 </div>
 <div id="log-normal-v.-weibull-different-means-same-medians" class="section level3">
 <h3>Log-Normal v. Weibull, Different Means, Same Medians</h3>
@@ -748,7 +749,7 @@ ratio is <span class="math inline">\(1.0\)</span>.</p>
 <span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a>d0<span class="sc">$</span>arm <span class="ot">&lt;-</span> <span class="dv">0</span></span>
 <span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a></span>
 <span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="co"># Overall data set.</span></span>
-<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">rbind</span>(df1, df0)</span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">rbind</span>(df1, d0)</span>
 <span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a></span>
 <span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="co"># Compare fitted distributions.</span></span>
 <span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a>comp <span class="ot">&lt;-</span> <span class="fu">CompParaSurv</span>(data, <span class="at">dist1 =</span> <span class="st">&quot;log-normal&quot;</span>, <span class="at">dist0 =</span> <span class="st">&quot;weibull&quot;</span>)</span>
@@ -765,29 +766,29 @@ ratio is <span class="math inline">\(1.0\)</span>.</p>
 ## 
 ## Fitted Characteristics for Group 0:
 ##     Aspect Estimate    SE     L     U
-## 1     Mean    1.018 0.023 0.973 1.063
-## 2   Median    0.889 0.022 0.845 0.933
-## 3 Variance    0.464 0.028 0.408 0.519
+## 1     Mean    1.063 0.018 1.028 1.098
+## 2   Median    1.007 0.018 0.971 1.043
+## 3 Variance    0.284 0.015 0.256 0.313
 ## 
 ## Location:
-##      Contrast Point    SE     L     U     P
-## 1 Mean1-Mean0 0.945 0.100 0.749 1.141 0.000
-## 2 Mean1/Mean0 1.928 0.105 1.733 2.145 0.000
-## 3   Med1-Med0 0.136 0.044 0.050 0.221 0.002
-## 4   Med1/Med0 1.152 0.051 1.056 1.258 0.001</code></pre>
+##      Contrast Point    SE      L     U     P
+## 1 Mean1-Mean0 0.900 0.099  0.706 1.094 0.000
+## 2 Mean1/Mean0 1.847 0.096  1.667 2.046 0.000
+## 3   Med1-Med0 0.017 0.042 -0.065 0.099 0.690
+## 4   Med1/Med0 1.017 0.042  0.938 1.102 0.689</code></pre>
 </div>
 <div id="gamma-v.-exponential-same-means-different-medians" class="section level3">
 <h3>Gamma v. Exponential, Same Means, Different Medians</h3>
 <p>The target group consists of <span class="math inline">\(10^{3}\)</span> observations from a gamma
 distribution with shape <span class="math inline">\(\alpha = 4\)</span>
-and scale <span class="math inline">\(\lambda = 4\)</span>. The
-reference group consists of <span class="math inline">\(10^{3}\)</span>
+and rate <span class="math inline">\(\lambda = 4\)</span>. The reference
+group consists of <span class="math inline">\(10^{3}\)</span>
 observations from an exponential distribution with rate <span class="math inline">\(\lambda = 1\)</span>. In each case the expected
 censoring proportion is 20%. The true difference of mean survival times
 is <span class="math inline">\(0.0\)</span>, and the true ratio is <span class="math inline">\(1.0\)</span>. The true difference of median
 survival times is <span class="math inline">\(0.22\)</span>, and the
 true ratio is <span class="math inline">\(1.32\)</span>. RMSTs at
-<code>\tau = c(0.5,1.0,1.5)</code> are requested.</p>
+<code>tau = c(0.5, 1.0, 1.5)</code> are requested.</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">106</span>)</span>
 <span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a></span>
 <span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="co"># Target group.</span></span>

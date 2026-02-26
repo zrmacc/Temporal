@@ -26,7 +26,7 @@ FitParaSurv(
 
 \item{beta_upper}{If dist="gen-gamma", upper limit on possible values for beta.}
 
-\item{dist}{String, distribution to fit, selected from among: exp, gamma, gen-gamma
+\item{dist}{String, distribution to fit, selected from among: exp, gamma, gen-gamma,
 log-normal, and weibull.}
 
 \item{eps}{Tolerance for Newton-Raphson iterations.}

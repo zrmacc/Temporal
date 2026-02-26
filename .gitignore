@@ -2,3 +2,9 @@
 .Rhistory
 .RData
 inst/doc
+
+# Vignette and knitr cache
+vignettes/*_cache/
+vignettes/*.html
+vignettes/*.pdf
+*.Rproj

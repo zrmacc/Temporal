@@ -89,24 +89,9 @@ FitExp <- function(
     SE = c(se_mu, se_me, se_v),
     stringsAsFactors = FALSE
   )
-  
-  # Confidence intervals.
-  Estimate <- NULL
-  SE <- NULL
-  z <- stats::qnorm(1 - sig / 2)
-  
-  params <- params %>%
-    dplyr::mutate(
-      L = Estimate - z * SE,
-      U = Estimate + z * SE
-    )
-  
-  outcome <- outcome %>%
-    dplyr::mutate(
-      L = Estimate - z * SE,
-      U = Estimate + z * SE
-    )
-  
+  params <- AddCIs(params, sig)
+  outcome <- AddCIs(outcome, sig)
+
   # Fitted survival function.
   surv <- function(t) {return(exp(-rate * t))}
 
@@ -126,6 +111,8 @@ FitExp <- function(
   if (is.numeric(tau)) {
     rmst <- ParaRMST(fit = out, sig = sig, tau = tau)
     out@RMST <- rmst
+  } else {
+    out@RMST <- data.frame()
   }
 
   # Output.

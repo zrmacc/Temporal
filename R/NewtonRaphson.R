@@ -74,7 +74,7 @@ NewtonRaphson <- function(
     if (new_state$delta > 0) {
       state <- new_state
       if (report) {
-        cat("Objective increment: ", signif(new_state$d, digits = 3), "\n")
+        cat("Objective increment: ", signif(new_state$delta, digits = 3), "\n")
       }
     }
     

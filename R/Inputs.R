@@ -8,20 +8,34 @@
 #' Function to select default parameter values for each distribution.
 #'
 #' @param dist String, distribution name.
-#' @return Numeric parameter ist.
+#' @return Numeric parameter list.
 DefaultParam <- function(dist) {
-  if (dist == "exp") {
-    theta <- c(rate = 1)
-  } else if (dist == "gamma") {
-    theta <- c(shape = 1, rate = 1)
-  } else if (dist == "gen-gamma") {
-    theta <- c(alpha = 1, beta = 1, lambda = 1)
-  } else if (dist == "log-normal") {
-    theta <- c(loc = 0, scale = 1)
-  } else if (dist == "weibull") {
-    theta <- c(shape = 1, rate = 1)
+  out <- switch(
+    dist,
+    exp = c(rate = 1),
+    gamma = c(shape = 1, rate = 1),
+    "gen-gamma" = c(alpha = 1, beta = 1, lambda = 1),
+    "log-normal" = c(loc = 0, scale = 1),
+    weibull = c(shape = 1, rate = 1),
+    stop("Unknown distribution: ", dist)
+  )
+  return(out)
+}
+
+
+#' Check Information Matrix Positive Definiteness
+#'
+#' Stops with an error if the inverse information matrix has any negative
+#' diagonal element (indicating the information matrix is not positive definite).
+#'
+#' @param inv_info Inverse of the observed information matrix.
+#' @return Invisible \code{TRUE} if check passes.
+#' @keywords internal
+CheckInfoPD <- function(inv_info) {
+  if (any(diag(inv_info) < 0)) {
+    stop("Information matrix not positive definite. Try another initialization")
   }
-  return(theta)
+  return(invisible(TRUE))
 }
 
 
@@ -35,7 +49,7 @@ DefaultParam <- function(dist) {
 #' @return None.
 CheckArm <- function(arm) {
   arm_levels <- sort(unique(arm))
-  if (!all.equal(arm_levels, c(0, 1))) {
+  if (!isTRUE(all.equal(arm_levels, c(0, 1)))) {
     stop("Arm should have 2 levels, coded 0 for reference, 1 for treatment.")
   }
   return(invisible(TRUE))
@@ -104,7 +118,7 @@ CheckInit <- function(dist, init) {
   # Generalized Gamma.
   if (dist == "gen-gamma") {
     if (length(init) != 3) {
-      stop("Generalized gamma initialization requires 2 parameters.")
+      stop("Generalized gamma initialization requires 3 parameters.")
     }
     if (!all.equal(params, c("alpha", "beta", "lambda"))) {
       stop("Generalized gamma initialization requires the following 

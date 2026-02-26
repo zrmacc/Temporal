@@ -5,6 +5,26 @@
 # Auxiliary functions.
 # -----------------------------------------------------------------------------
 
+#' Add Confidence Intervals to Estimate Frame
+#'
+#' Appends \code{L} and \code{U} columns to a data.frame that has \code{Estimate}
+#' and \code{SE}, using a symmetric normal interval.
+#'
+#' @param df Data.frame with columns \code{Estimate} and \code{SE}.
+#' @param sig Significance level (e.g. 0.05 for 95\% intervals).
+#' @return Data.frame with \code{L} and \code{U} added.
+#' @noRd 
+AddCIs <- function(df, sig) {
+  z <- stats::qnorm(1 - sig / 2)
+  Estimate <- SE <- NULL
+  out <- df %>%
+    dplyr::mutate(
+      L = Estimate - z * SE,
+      U = Estimate + z * SE
+    )
+  return(out)
+}
+
 #' Round Data Frames
 #' 
 #' @param df Data.frame.
@@ -13,7 +33,7 @@
 #' @importFrom dplyr "%>%"
 
 RoundDF <- function(df, digits = 3) {
-  out <- df %>% dplyr::mutate_if(is.numeric, ~ round(., digits = digits))
+  out <- df %>% dplyr::mutate(dplyr::across(dplyr::where(is.numeric), ~ round(., digits = digits)))
   return(out)
 }
 
@@ -75,7 +95,7 @@ print.fit <- function(x, ...) {
   dist <- DistProperName(x@Distribution)
   params <- RoundDF(x@Parameters)
   outcome <- RoundDF(x@Outcome)
-  if (length(x@RMST) > 0) {
+  if (nrow(x@RMST) > 0) {
     rmst <- RoundDF(x@RMST)
   }
 
@@ -88,7 +108,7 @@ print.fit <- function(x, ...) {
   print(outcome)
   cat("\n")
   
-  if (length(x@RMST) > 0) {
+  if (nrow(x@RMST) > 0) {
     cat("Restricted Mean Survival Times:\n")
     print(rmst)
     cat("\n")
@@ -162,7 +182,7 @@ print.contrast <- function(x, ...) {
   
   loc <- RoundDF(x@Location)
   
-  if (length(x@RMST > 0)) {
+  if (nrow(x@RMST) > 0) {
     rmst <- RoundDF(x@RMST)
   }
 
@@ -185,7 +205,7 @@ print.contrast <- function(x, ...) {
   print(loc)
   cat("\n")
   
-  if (length(x@RMST > 0)) {
+  if (nrow(x@RMST) > 0) {
     cat("RMST:\n")
     print(rmst)
     cat("\n")

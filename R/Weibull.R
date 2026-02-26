@@ -176,11 +176,7 @@ FitWeibull <- function(
   # Observed information.
   info <- WeiInfo(data, shape, rate)
   inv_info <- solve(info)
-  
-  # Check information matrix for positive definiteness.
-  if (any(diag(inv_info) < 0)) {
-    stop("Information matrix not positive definite. Try another initialization")
-  }
+  CheckInfoPD(inv_info)
 
   # Parameters.
   params <- data.frame(
@@ -196,10 +192,6 @@ FitWeibull <- function(
   grad <-  -(1 / rate) * gamma(1 + 1 / shape) * 
     c(digamma(1 + 1 / shape) / shape^2, 1 / rate)
   se_mu <- sqrt(QF(grad, inv_info))
-  
-  # Numerical verification.
-  # g <- function(x) {(1 / x[2]) * gamma(1 + 1 / x[1])}
-  # numDeriv::grad(g, x = c(shape, rate))
 
   # Outcome median.
   me <- (1 / rate) * (log(2))^(1 / shape)
@@ -208,10 +200,6 @@ FitWeibull <- function(
     (1 / rate)
   )
   se_me <- sqrt(QF(grad, inv_info))
-  
-  # Numerical verification.
-  # g <- function(x){(1 / x[2]) * (log(2))^(1 / x[1])}
-  # numDeriv::grad(g, x = c(shape, rate))
 
   # Outcome variance.
   v <- (1 / rate^2) * (gamma(1 + 2 / shape) - gamma(1 + 1 / shape)^2)
@@ -221,10 +209,6 @@ FitWeibull <- function(
     (1 / rate) * (gamma(1 + 2 / shape) - gamma(1 + 1 / shape)^2)
   )
   se_v <- sqrt(QF(grad, inv_info))
-  
-  # Numerical verification.
-  # g <- function(x){(1 / x[2]^2) * (gamma(1 + 2 / x[1]) - gamma(1 + 1 / x[1])^2)}
-  # numDeriv::grad(g,x = c(shape, rate))
 
   # Outcome characteristics.
   outcome <- data.frame(
@@ -233,23 +217,8 @@ FitWeibull <- function(
     SE = c(se_mu, se_me, se_v),
     stringsAsFactors = FALSE
   )
-
-  # Confidence intervals.
-  Estimate <- NULL
-  SE <- NULL
-  z <- stats::qnorm(1 - sig / 2)
-  
-  params <- params %>%
-    dplyr::mutate(
-      L = Estimate - z * SE,
-      U = Estimate + z * SE
-    )
-  
-  outcome <- outcome %>%
-    dplyr::mutate(
-      L = Estimate - z * SE,
-      U = Estimate + z * SE
-    )
+  params <- AddCIs(params, sig)
+  outcome <- AddCIs(outcome, sig)
 
   # Fitted survival function.
   surv <- function(t) {return(exp(-(rate * t)^shape))}
@@ -268,8 +237,10 @@ FitWeibull <- function(
   if (is.numeric(tau)) {
     rmst <- ParaRMST(fit = out, sig = sig, tau = tau)
     out@RMST <- rmst
+  } else {
+    out@RMST <- data.frame()
   }
-  
+
   # Output.
   return(out)
 }

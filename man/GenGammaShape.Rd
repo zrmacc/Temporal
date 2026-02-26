@@ -12,7 +12,7 @@ GenGammaShape(data, beta)
 \item{beta}{Second shape parameter.}
 }
 \value{
-Numeric MLE of the rate \eqn{\alpha}.
+Numeric MLE of the first shape parameter \eqn{\alpha}.
 }
 \description{
 Profile MLE of the first shape parameter \eqn{\alpha} of the generalized gamma

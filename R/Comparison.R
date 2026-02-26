@@ -479,6 +479,8 @@ CompParaSurv <- function(
   )
   if (!is.null(tau)) {
     out@RMST <- rmst_contrast
+  } else {
+    out@RMST <- data.frame()
   }
   return(out)
 }

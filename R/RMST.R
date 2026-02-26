@@ -40,15 +40,10 @@ ParaRMST <- function(fit, tau, sig = 0.05) {
     stop("Requires positive, numeric truncation times.")
   }
   
-  # Critical value.
-  z <- stats::qnorm(1 - sig / 2)
-  
   # Observed parameters.
   theta_obs <- fit@Parameters$Estimate
-  
-  # Inverse information
   inv_info <- solve(fit@Information)
-  
+
   # RMST function.
   rmst <- function(theta, upper) {
     surv_func <- SurvFunc(dist = fit@Distribution, theta = theta)
@@ -60,32 +55,17 @@ ParaRMST <- function(fit, tau, sig = 0.05) {
   aux <- function(tt) {
     est <- rmst(theta_obs, tt)
     delta <- numDeriv::grad(
-      func = function(theta) {return(rmst(theta, tt))}, 
+      func = function(theta) {
+        return(rmst(theta, tt))
+      },
       x = theta_obs
     )
     se <- sqrt(QF(delta, inv_info))
-    out <- data.frame(
-      Tau = tt,
-      Estimate = est,
-      SE = se
-    )
+    out <- data.frame(Tau = tt, Estimate = est, SE = se)
     return(out)
   }
 
-  # Loop over truncation times.
-  out <- lapply(tau, aux)
-  out <- do.call(rbind, out)
-  
-  # Add confidence interval.
-  Estimate <- NULL
-  SE <- NULL
-  
-  out <- out %>%
-    dplyr::mutate(
-      L = Estimate - z * SE,
-      U = Estimate + z * SE
-    )
-  
-  # Output.
+  out <- do.call(rbind, lapply(tau, aux))
+  out <- AddCIs(out, sig)
   return(out)
 }

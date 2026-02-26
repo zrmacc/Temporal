@@ -10,7 +10,7 @@ DefaultParam(dist)
 \item{dist}{String, distribution name.}
 }
 \value{
-Numeric parameter ist.
+Numeric parameter list.
 }
 \description{
 Function to select default parameter values for each distribution.

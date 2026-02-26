@@ -1,28 +1,32 @@
 Package: Temporal
 Title: Parametric Time to Event Analysis
 Version: 0.3.0.1
+Author: Zachary McCaw [aut, cre] (ORCID: <https://orcid.org/0000-0002-2006-9828>)
+Maintainer: Zachary McCaw <zmccaw@alumni.harvard.edu>
 Authors@R: 
     person(given = "Zachary",
            family = "McCaw",
            role = c("aut", "cre"),
            email = "zmccaw@alumni.harvard.edu",
            comment = c(ORCID = "0000-0002-2006-9828"))
-Description: Performs maximum likelihood based estimation and inference on time to event data, possibly subject to non-informative right censoring. FitParaSurv() provides maximum likelihood estimates of model parameters and distributional characteristics, including the mean, median, variance, and restricted mean. CompParaSurv() compares the mean, median, and restricted mean survival experiences of two treatment groups. Candidate distributions include the exponential, gamma, generalized gamma, log-normal, and Weibull. 
+Description: Performs maximum likelihood based estimation and inference on time to event data, possibly subject to non-informative right censoring. FitParaSurv() provides maximum likelihood estimates of model parameters and distributional characteristics, including the mean, median, variance, and restricted mean. CompParaSurv() compares the mean, median, and restricted mean survival experiences of two treatment groups. Candidate distributions include the exponential, gamma, generalized gamma, log-normal, and Weibull.
 Depends: R (>= 3.5.0)
+URL: https://github.com/zrmacc/Temporal
+BugReports: https://github.com/zrmacc/Temporal/issues
 License: GPL-3
 Encoding: UTF-8
 Imports:
-	dplyr,
-	expint,
-	methods,
-	numDeriv,
-	stats,
-	tidyr
-RoxygenNote: 7.2.3
-Suggests: 
-	testthat (>= 3.0.0),
-	knitr,
-	rmarkdown,
-	withr
+    dplyr,
+    expint,
+    methods,
+    numDeriv,
+    stats,
+    tidyr
+RoxygenNote: 7.3.3
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    withr
 VignetteBuilder: knitr
 Config/testthat/edition: 3

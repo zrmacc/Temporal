@@ -8,7 +8,7 @@
 #'  \item{Exponential}{Rate \eqn{\lambda}.}
 #'  \item{Gamma}{Shape \eqn{\alpha}, rate \eqn{\lambda}.}
 #'  \item{Generalized Gamma}{Shape 1 \eqn{\alpha}, shape 2 \eqn{\beta}, rate \eqn{\lambda}.}
-#'  \item{Log-Normal}{Locaion \eqn{\mu}, scale \eqn{\sigma}.}
+#'  \item{Log-Normal}{Location \eqn{\mu}, scale \eqn{\sigma}.}
 #'  \item{Weibull}{Shape \eqn{\alpha}, rate \eqn{\lambda}.}
 #' }
 #'

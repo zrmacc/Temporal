@@ -54,6 +54,22 @@ test_that("Check exponential.", {
   
   # Expect p-values for difference and ratio of means/medians are not significant.
   expect_true(all(comp@Location$P > 0.05))
-  
-  
+})
+
+test_that("CompParaSurv with tau returns RMST contrasts.", {
+  skip_on_cran()
+  withr::with_seed(
+    seed = 105,
+    {
+      df1 <- GenData(n = 500, dist = "weibull", theta = c(2, 2), p = 0.2)
+      df1$arm <- 1
+      df0 <- GenData(n = 500, dist = "weibull", theta = c(2, 2), p = 0.2)
+      df0$arm <- 0
+      data <- rbind(df1, df0)
+      comp <- CompParaSurv(data, dist1 = "weibull", dist0 = "weibull", tau = c(0.5, 1))
+    }
+  )
+  expect_true(nrow(comp@RMST) >= 1)
+  expect_true("Tau" %in% names(comp@RMST))
+  expect_true("Point" %in% names(comp@RMST))
 })

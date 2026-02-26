@@ -1,2 +1,15 @@
+# IDE and project
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.Rhistory$
+^\.DS_Store$
+
+# README build artifacts
+^README\.Rmd$
+^README\.cache$
+^README_cache$
+^README\.html$
+
+# License (optional, include in package if desired)
+^LICENSE\.md$
+^README\.md$

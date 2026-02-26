@@ -108,11 +108,7 @@ FitLogNormal <- function(
 
   # Inverse information.
   inv_info <- solve(info)
-  
-  # Check information matrix for positive definiteness.
-  if (any(diag(inv_info) < 0)) {
-    stop("Information matrix not positive definite. Try another initialization")
-  }
+  CheckInfoPD(inv_info)
 
   # Parameter frame.
   params <- data.frame(
@@ -152,23 +148,8 @@ FitLogNormal <- function(
     SE = c(se_mu, se_me, se_v),
     stringsAsFactors = FALSE
   )
-
-  # Confidence intervals.
-  Estimate <- NULL
-  SE <- NULL
-  z <- stats::qnorm(1 - sig / 2)
-  
-  params <- params %>%
-    dplyr::mutate(
-      L = Estimate - z * SE,
-      U = Estimate + z * SE
-    )
-  
-  outcome <- outcome %>%
-    dplyr::mutate(
-      L = Estimate - z * SE,
-      U = Estimate + z * SE
-    )
+  params <- AddCIs(params, sig)
+  outcome <- AddCIs(outcome, sig)
 
   # Fitted survival function
   surv <- function(t) {
@@ -189,8 +170,10 @@ FitLogNormal <- function(
   if (is.numeric(tau)) {
     rmst <- ParaRMST(fit = out, sig = sig, tau = tau)
     out@RMST <- rmst
+  } else {
+    out@RMST <- data.frame()
   }
-  
+
   # Output.
   return(out)
 }
@@ -212,7 +195,7 @@ LogNormScore <- function(data, loc, scale) {
   tobs <- data$time
   nobs <- length(tobs)
   zobs <- (log(tobs) - loc) / scale
-  score_loc <- (1 / scale) * sum(zobs)
+  score_loc <- -(1 / scale) * sum(zobs)
   score_scale <- -1 * (nobs / scale) + (1 / scale) * sum(zobs^2)
   out <- c(score_loc, score_scale)
   return(out)
@@ -239,8 +222,8 @@ LogNormInfo <- function(data, loc, scale, log_scale = FALSE) {
   # Information for scale.
   info_scale <- -n / (scale^2) + 3 / (scale^2) * sum(zobs^2)
   
-  # Cross info.
-  cross_info <- 2 / (scale^2) * sum(zobs)
+  # Cross info (observed information = negative Hessian).
+  cross_info <- -2 / (scale^2) * sum(zobs)
   
   # Observed info
   info <- matrix(c(info_loc, cross_info, cross_info, info_scale), nrow = 2)

@@ -14,7 +14,7 @@
 #' @param data Data.frame containing the time to event and status.
 #' @param beta_lower If dist="gen-gamma", lower limit on possible values for beta.
 #' @param beta_upper If dist="gen-gamma", upper limit on possible values for beta.
-#' @param dist String, distribution to fit, selected from among: exp, gamma, gen-gamma
+#' @param dist String, distribution to fit, selected from among: exp, gamma, gen-gamma,
 #'   log-normal, and weibull.
 #' @param eps Tolerance for Newton-Raphson iterations.
 #' @param init List of initial parameters. See individual distributions for the

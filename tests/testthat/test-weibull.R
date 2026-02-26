@@ -1,8 +1,7 @@
 library(Temporal)
 library(testthat)
 
-test_that("Check log normal.", {
-  
+test_that("Check Weibull.", {
   # Without censoring.
   withr::with_seed(
     seed = 104,

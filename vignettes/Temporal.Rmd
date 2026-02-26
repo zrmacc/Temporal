@@ -37,7 +37,7 @@ Suppose the data consist of pairs $(U_{i},\delta_{i})$, where the observation ti
 
 ## Overview {#fit}
 
-The function `FitParaSurv` requires a data.frame containing observation times `time` and status indicators `status` as input. `status` is coded as 1 if an event was observed, and as 0 if censored. The distribution of interest is specified using `dist`, which defaults to Weibull. The output is an object of class `fit`. The slot `fit@Parameters` contains the parameter estimates and CIs. The slot `fit@Information` contains the observed sample information matrix. The slot `fit@Outcome` contains characteristics of the fitted event time distribution. If truncation times `tau` are provided, the corresponding RMSTs are stored in `fit@RMST`. Functions are presented below for simulating from and estimating the exponential, gamma, generalized gamma, log-normal, and Weibull distributions. If an expected censoring proportion `p` is provided, then the event time are subject to non-informative random right censoring. 
+The function `FitParaSurv` requires a data.frame containing observation times `time` and status indicators `status` as input. `status` is coded as 1 if an event was observed, and as 0 if censored. The distribution of interest is specified using `dist`, which defaults to Weibull. The output is an object of class `fit`. The slot `fit@Parameters` contains the parameter estimates and CIs. The slot `fit@Information` contains the observed sample information matrix. The slot `fit@Outcome` contains characteristics of the fitted event time distribution. If truncation times `tau` are provided, the corresponding RMSTs are stored in `fit@RMST`. Functions are presented below for simulating from and estimating the exponential, gamma, generalized gamma, log-normal, and Weibull distributions. If an expected censoring proportion `p` is provided, then the event times are subject to non-informative random right censoring. 
 
 
 ## Exponential
@@ -120,7 +120,7 @@ $$
 f(t) = \frac{1}{t\sigma\sqrt{2\pi}}e^{-\frac{(\ln t-\mu)^2}{2\sigma^2}},\ t>0
 $$
 
-In the following, $n=10^{3}$ log-normal event times are simulated, with location $\mu=1$, scale $\sigma=2$, and expected censoring proportion 15%. Generative parameters are recovered using `FitParaSurv` with `dist = "log-normal"`. RMSTs at `\tau = c(5,10,25)` are requested.
+In the following, $n=10^{3}$ log-normal event times are simulated, with location $\mu=1$, scale $\sigma=2$, and expected censoring proportion 15%. Generative parameters are recovered using `FitParaSurv` with `dist = "log-normal"`. RMSTs at `tau = c(5, 10, 25)` are requested.
 
 ```{r}
 # Generate log-normal event time data.
@@ -154,9 +154,9 @@ show(fit)
 
 ## Overview
 
-The function `CompParaSurv` takes the observation times `time`, status indicators `status`, and the treatment arms `arm` as inputs. `arm` is coded as 1 for the target group, and 0 for the reference group. The distributions for the target and reference groups are selected using `dist1` and `dist0`, respectively. If unspecified, the distribution for the reference group defaults to the distribution for the target group, and the distribution for the target group defaults to Weibull. The output is an object of class `contrast`. The slots `contrast@Model1` and `contrast@Model2` contain the fitted models for the target and reference groups. See [fit](#fit) for a description of class `fit` objects. The slot `contrast@Location` contains the location parameter contrasts, CIs, and p-values. If truncation times `tau` are specified, the slot `contrast@RMST` will contain these contrasts. 
+The function `CompParaSurv` takes the observation times `time`, status indicators `status`, and the treatment arms `arm` as inputs. `arm` is coded as 1 for the target group, and 0 for the reference group. The distributions for the target and reference groups are selected using `dist1` and `dist0`, respectively. If unspecified, the distribution for the reference group defaults to the distribution for the target group, and the distribution for the target group defaults to Weibull. The output is an object of class `contrast`. The slots `contrast@Model1` and `contrast@Model0` contain the fitted models for the target and reference groups. See [fit](#fit) for a description of class `fit` objects. The slot `contrast@Location` contains the location parameter contrasts, CIs, and p-values. If truncation times `tau` are specified, the slot `contrast@RMST` will contain these contrasts. 
 
-By default, all CIs are p-values are asymptotic. If the `reps` argument is supplied, then permutation p-values are calculated using that many reshuffles of the treatment assignments. 
+By default, all CIs and p-values are asymptotic. If the `reps` argument is supplied, then permutation p-values are calculated using that many reshuffles of the treatment assignments. 
 
 ## Examples
 
@@ -198,7 +198,7 @@ d0 <- GenData(n = 1e3, dist = "weibull", theta = c(2, 2), p = 0.0)
 d0$arm <- 0
 
 # Overall data set.
-data <- rbind(df1, df0)
+data <- rbind(df1, d0)
 
 # Compare fitted distributions.
 comp <- CompParaSurv(data, dist1 = "weibull", dist0 = "weibull")
@@ -222,7 +222,7 @@ d0 <- GenData(n = 1e3, dist = "weibull", theta = c(2, sqrt(log(2))), p = 0.1)
 d0$arm <- 0
 
 # Overall data set.
-data <- rbind(df1, df0)
+data <- rbind(df1, d0)
 
 # Compare fitted distributions.
 comp <- CompParaSurv(data, dist1 = "log-normal", dist0 = "weibull")
@@ -232,7 +232,7 @@ show(comp)
 
 ### Gamma v. Exponential, Same Means, Different Medians
 
-The target group consists of $10^{3}$ observations from a gamma distribution with shape $\alpha = 4$ and scale $\lambda = 4$. The reference group consists of $10^{3}$ observations from an exponential distribution with rate $\lambda = 1$. In each case the expected censoring proportion is 20%. The true difference of mean survival times is $0.0$, and the true ratio is $1.0$. The true difference of median survival times is $0.22$, and the true ratio is $1.32$. RMSTs at `\tau = c(0.5,1.0,1.5)` are requested. 
+The target group consists of $10^{3}$ observations from a gamma distribution with shape $\alpha = 4$ and rate $\lambda = 4$. The reference group consists of $10^{3}$ observations from an exponential distribution with rate $\lambda = 1$. In each case the expected censoring proportion is 20%. The true difference of mean survival times is $0.0$, and the true ratio is $1.0$. The true difference of median survival times is $0.22$, and the true ratio is $1.32$. RMSTs at `tau = c(0.5, 1.0, 1.5)` are requested. 
 
 ```{r}
 set.seed(106)

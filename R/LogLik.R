@@ -89,7 +89,7 @@ SurvLogLik <- function(
       shape <- exp(shape)
       rate <- exp(rate)
     }
-    ll <- nobs * shape * log(rate) + shape * sum(log(tobs)) - 
+    ll <- nobs * shape * log(rate) + (shape - 1) * sum(log(tobs)) -
       rate * sum(tobs) - n * lgamma(shape)
     if (is_cens) {ll <- ll + sum(log(expint::gammainc(shape, rate * tcen)))}
     return(ll)

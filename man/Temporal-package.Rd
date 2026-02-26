@@ -2,11 +2,24 @@
 % Please edit documentation in R/Temporal-package.R
 \docType{package}
 \name{Temporal-package}
-\alias{Temporal}
 \alias{Temporal-package}
+\alias{Temporal}
+\alias{_PACKAGE}
 \title{Temporal: Parametric Time to Event Analysis}
 \description{
-Performs maximum likelihood based estimation and inference on time to event data, possibly subject to non-informative right censoring. FitParaSurv() provides maximum likelihood estimates of model parameters and distributional characteristics, including the mean, median, variance, and restricted mean. CompParaSurv() compares the mean, median, and restricted mean survival experiences of two treatment groups. Candidate distributions include the exponential, gamma, generalized gamma, log-normal, and Weibull.
+Maximum likelihood estimation and inference for parametric survival models
+with support for right-censored data. FitParaSurv fits exponential, gamma,
+generalized gamma, log-normal, and Weibull distributions. CompParaSurv
+compares two treatment arms with respect to the mean, median, and restricted
+mean survival time.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/zrmacc/Temporal}
+  \item Report bugs at \url{https://github.com/zrmacc/Temporal/issues}
+}
+
 }
 \author{
 \strong{Maintainer}: Zachary McCaw \email{zmccaw@alumni.harvard.edu} (\href{https://orcid.org/0000-0002-2006-9828}{ORCID})
