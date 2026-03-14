@@ -1,3 +1,12 @@
+---
+title: "README"
+author: "Zachary R. McCaw"
+date: "2026-03-14"
+output: 
+  html_document: 
+    keep_md: TRUE
+--- 
+
 # Temporal: Parametric Comparison of Time to Event Distributions
 
 [![R-CMD-check](https://github.com/zrmacc/Temporal/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/zrmacc/Temporal/actions/workflows/R-CMD-check.yaml)

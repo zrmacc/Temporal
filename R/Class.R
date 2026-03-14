@@ -134,6 +134,33 @@ setMethod(
 
 
 # -----------------------------------------------------------------------------
+
+#' Covariance Matrix of Estimated Parameters
+#'
+#' Returns the covariance matrix of the parameter estimates for a fitted
+#' parametric survival distribution. Under standard regularity conditions,
+#' the asymptotic covariance matrix of the maximum likelihood estimator is
+#' the inverse of the observed information matrix, which is what this method
+#' returns.
+#'
+#' @param object An object of class \code{fit}.
+#' @param ... Unused.
+#' @return A symmetric matrix with row and column names corresponding to the
+#'   fitted parameters. The diagonal elements are the estimated variances
+#'   (squared standard errors) of the parameter estimates.
+#' @export
+#' @seealso \code{\link[stats]{vcov}}
+vcov.fit <- function(object, ...) {
+  v <- solve(object@Information)
+  pnames <- object@Parameters$Aspect
+  if (!is.null(pnames) && length(pnames) == nrow(v)) {
+    dimnames(v) <- list(pnames, pnames)
+  }
+  return(v)
+}
+
+
+# -----------------------------------------------------------------------------
 # Model Contrast
 # -----------------------------------------------------------------------------
 

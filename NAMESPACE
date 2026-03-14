@@ -2,6 +2,7 @@
 
 S3method(print,contrast)
 S3method(print,fit)
+S3method(vcov,fit)
 export(CompParaSurv)
 export(FitParaSurv)
 export(GenData)
